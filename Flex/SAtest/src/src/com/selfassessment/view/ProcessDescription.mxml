@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:VBox styleName="Childpanelstyle"  horizontalAlign="center" verticalAlign="middle"   xmlns:mx="http://www.adobe.com/2006/mxml"  backgroundColor="white" dropShadowEnabled="false" dropShadowColor="black" shadowDirection="right" shadowDistance="-20" 
+	 borderStyle="none" height="100%" width="100%" horizontalScrollPolicy="off">
+<mx:Script>
+	<![CDATA[
+		
+
+	]]>
+</mx:Script>
+
+
+	<mx:HBox width="100%" height="100%" paddingLeft="10" borderStyle="none">
+		<mx:Label text="Process Description"/>
+	</mx:HBox>
+</mx:VBox>
+

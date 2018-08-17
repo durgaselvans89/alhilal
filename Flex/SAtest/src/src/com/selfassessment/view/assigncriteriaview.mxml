@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute"  xmlns:s="library://ns.adobe.com/flex/spark"
+	 borderAlpha="1" width="100%" height="100%">
+	 
+	<mx:Script>
+		<![CDATA[
+		
+			import flash.events.Event;
+ 			import flash.net.URLLoader;
+        	import flash.net.URLRequest;
+			
+			[Bindable]
+        	private var xmlLoader:URLLoader;
+			
+			[Bindable]
+        	private var myDataObject:Object;
+			
+			[Bindable]
+        	public var selectedNode:XML;
+			
+			private function initializeHandler():void {
+
+	 			xmlLoader = new URLLoader();
+	            xmlLoader.addEventListener(Event.COMPLETE, completeHandler);
+	                        
+	            var uri:URLRequest = new URLRequest("com/selfassessment/view/team.xml");
+				xmlLoader.load(uri);
+        	}
+        	
+        	private function completeHandler(event:Event):void {
+				trace( xmlLoader.data );
+        	}
+        	
+        	private function creationCompleteHandler(event:Event):void {
+    			myDataObject = XML(xmlLoader.data);
+    		}	
+
+		]]>
+	</mx:Script>
+	
+	<mx:VBox name="topvbox" width="100%" height="100%">
+       		
+		<mx:HBox width="100%" height="25%">
+       		
+			<mx:Panel name="searchcriteria" styleName="GeneralPanelStyle" width="100%" height="100%">
+       				
+				<mx:HBox width="100%" height="20%" >
+	       			<mx:Spacer width="2%"/>
+	   				<mx:Label text="@Resource(bundle='myResources', key='teamname')"/>
+					<s:TextInput id="textInputOne" restrict="0-9\\-"  width="20%"/>
+					<mx:Spacer width="2%"/>
+				</mx:HBox>
+					
+				<mx:HBox width="100%" height="1%">
+					<mx:Spacer width="100%" height="100%"/>
+				</mx:HBox>
+					
+				<mx:HBox width="100%" height="80%" >
+					<mx:Spacer width="2%"/>
+					<mx:RadioButton id="radio_criteria" label="Criteria" selected="true"/>
+					<mx:RadioButton id="radio_result" label="Result"/>
+				
+					<mx:Label text="@Resource(bundle='myResources', key='criteria')"/>
+						<mx:ComboBox width="24%" text="@Resource(bundle='myResources', key='criteriagroup')">
+							<mx:dataProvider>
+								<mx:Array>
+					            <mx:String> India </mx:String>
+					            <mx:String> Srilanka </mx:String>
+					            <mx:String> United States of America </mx:String>
+								</mx:Array>
+							</mx:dataProvider>
+						</mx:ComboBox>
+					<mx:Spacer width="10%"/>
+					<mx:Button name="btnsearch" label="Search" toolTip="Search" click=""/>
+				</mx:HBox>
+	       			
+			</mx:Panel>
+			
+		</mx:HBox>
+       		
+   		<mx:HBox  width="100%" height="70%" horizontalAlign="right">
+   			<mx:DataGrid id="myDataGrid" textAlign="left" dataProvider="{myDataObject}" width="100%" height="100%" allowMultipleSelection="true" draggableColumns="false">
+				<mx:columns>
+			        <mx:DataGridColumn headerText="@Resource(bundle='myResources', key='select')" dataField="select" width="6">
+			        </mx:DataGridColumn>
+			        <mx:DataGridColumn headerText="@Resource(bundle='myResources', key='id')" dataField="id" width="6">
+			        </mx:DataGridColumn>
+			        <mx:DataGridColumn headerText="@Resource(bundle='myResources', key='description')" dataField="description" width="88">
+			        </mx:DataGridColumn>
+				</mx:columns>
+		    </mx:DataGrid>
+  	    </mx:HBox>	
+   		
+		<mx:HBox name="hboxedit" width="100%" height="5%" horizontalAlign="right">
+			<mx:Button name="btnassign" label="Assign" toolTip="Edit" click=""/>
+		</mx:HBox>
+
+       </mx:VBox>
+
+</mx:Panel>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<criteria>
+
+    <product productId="1">
+        <name>Kumar</name>
+        <team>Shorthand</team>
+        <teamleader>Shorthand</teamleader>
+        <assigncriteria>1A,1B</assigncriteria>
+        <teammember>Satheesh</teammember>
+    </product>
+    
+</criteria>

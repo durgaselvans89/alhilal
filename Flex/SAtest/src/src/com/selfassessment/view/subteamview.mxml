@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:VBox styleName="Childpanelstyle" xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:s="library://ns.adobe.com/flex/spark"
+	width="100%" height="100%" verticalScrollPolicy="off" horizontalScrollPolicy="off" xmlns:com="src.com.selfassessment.view.*" creationComplete="init()">
+	
+	<mx:Style source="src/com/selfassessment/view/assets/Styles.css"/>	
+
+	<mx:Model id="imagesrc" source="src/catalog.xml"/>
+	
+	<mx:Script>
+        <![CDATA[
+        	import com.boyzoid.PagableArrayCollection.PagableArrayCollection;
+            import mx.collections.ArrayCollection;
+            
+            [Bindable]
+        	public var myPageableArrCol:PagableArrayCollection = new PagableArrayCollection();
+            public var RowCount:Number = 0;
+            
+			[Bindable]
+            private var products:ArrayCollection;
+            
+            private function init():void {
+            	
+                products = new ArrayCollection(imagesrc.product);
+                
+            }
+           
+        ]]>
+    </mx:Script>
+	 
+	<mx:Script>
+		<![CDATA[
+			import mx.controls.Alert;
+			import mx.managers.CursorManager;
+			import flash.events.Event;
+ 			import flash.net.URLLoader;
+        	import flash.net.URLRequest;
+			
+			[Bindable]
+        	private var xmlLoader:URLLoader;
+			
+			[Bindable]
+        	public var myDataObject:Object;
+			
+			[Bindable]
+        	public var selectedNode:XML;
+        	
+        
+			
+			private function initializeHandler():void {
+
+	 			xmlLoader = new URLLoader();
+	            xmlLoader.addEventListener(Event.COMPLETE, completeHandler);
+	                        
+	            var uri:URLRequest = new URLRequest("com/selfassessment/view/team.xml");
+				xmlLoader.load(uri);
+        	}
+        	
+        	private function completeHandler(event:Event):void {
+				trace( xmlLoader.data );
+        	}
+        	
+        	private function creationCompleteHandler(event:Event):void {
+    			myDataObject = XML(xmlLoader.data);
+    		}	
+    		public function subteamViewInit():void{
+    			
+    			if(tabNagivator.selectedIndex==0){
+    				teamView.init();
+    			}
+    			if(tabNagivator.selectedIndex==1){
+    				subTeamView.init();
+    			}
+    		}
+       	
+
+		]]>
+	</mx:Script>
+
+		<mx:TabNavigator borderStyle="solid" id="tabNagivator" change="subteamViewInit()" width="100%" height="100%" color="0x323232" styleName="ApplyFontSize">
+		
+		    <mx:VBox label="Team" width="100%" height="100%">
+		        <com:Teamview id="teamView" width="100%" height="100%"/>
+		    </mx:VBox>
+			
+			
+		
+			<mx:VBox label="Team Members" width="100%" height="100%">
+				<!--<com:Reportuserview width="100%" height="100%"/>-->
+				<com:subteammemberview id="subTeamView" width="100%" height="100%" />
+			</mx:VBox>
+		
+		</mx:TabNavigator>
+
+</mx:VBox>

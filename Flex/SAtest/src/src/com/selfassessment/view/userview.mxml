@@ -1,0 +1,555 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas styleName="Childpanelstyle" 
+	xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:s="library://ns.adobe.com/flex/spark" creationComplete="init()" 
+	xmlns:com="src.com.selfassessment.view.*" height="100%" width="100%" >
+	<mx:Script>
+		<![CDATA[
+			import mx.states.SetStyle;
+		]]>
+	</mx:Script>
+	<mx:Script>
+		<![CDATA[
+			import spark.layouts.HorizontalAlign;
+		]]>
+	</mx:Script>
+	<mx:Script>
+		<![CDATA[
+			import mx.states.SetStyle;
+		]]>
+	</mx:Script>
+	<mx:Script>
+		<![CDATA[
+			import mx.controls.Image;
+		]]>
+	</mx:Script>
+	 
+	<mx:Style source="src/com/selfassessment/view/assets/Styles.css"/>	
+
+	<mx:Metadata>
+		[Event("Createnew", type="com.selfassessment.events.UserEventConstants")]
+	</mx:Metadata>
+	 
+	<mx:Model id="imagesrc" source="src/catalog.xml"/> 
+	
+	<mx:Script>
+    <![CDATA[
+    	import src.com.selfassessment.controller.MeetingController;
+    	import mx.utils.ObjectUtil;
+    	import mx.utils.StringUtil;
+    	import mx.managers.PopUpManager;
+    	import mx.accessibility.AlertAccImpl;
+    	import mx.core.Application;
+    	import mx.events.CloseEvent;
+    	import com.boyzoid.PagableArrayCollection.PagableArrayCollection;
+    	import mx.events.ListEvent;
+        import mx.collections.ArrayCollection;
+        import mx.controls.*;
+        import src.com.selfassessment.view.*;
+		import src.com.selfassessment.events.UserEventConstants;
+		import flash.events.Event;
+ 		import flash.net.URLLoader;
+        import flash.net.URLRequest;
+        import flash.events.MouseEvent;
+		import flash.events.TextEvent;
+		import src.com.selfassessment.controller.Components;
+		import src.com.selfassessment.controller.Controller;
+		import src.com.selfassessment.controller.CustomerController;
+		import mx.managers.CursorManager;
+		
+		public var popUpAlert:ShowAlert;
+		[Bindable]
+        public var myPageableArrCol:PagableArrayCollection = new PagableArrayCollection();
+		
+		private var LoginService:Controller = new Controller(); 
+		
+		private var CustomerService:CustomerController = new CustomerController(); 
+			
+		[Bindable]
+        private var xmlLoader:URLLoader;
+			
+		[Bindable]
+        public var myDataObject:Object;
+        	
+        [Bindable]
+        private var roledata:Array;
+        	
+        [Bindable]
+        public var searchResults:ArrayCollection = new ArrayCollection();
+        
+        public var resultRoleName:Array=new Array();
+		public function init():void {
+			//Alert.show(Application.application.IsExecutiveMember.toString());
+			
+			
+			var newResultArray:Array=new Array();
+			var newResultDesigArray:Array=new Array();
+			if(Application.application.language=="en_US"){
+				myDataGrid.setStyle('textAlign','left');
+				
+			}
+			else{
+				myDataGrid.setStyle('textAlign','right');
+				//myDataGrid.styleName = 'gridStyle';
+			}
+			roledata = new Array();
+			LoginService=new Controller();
+			LoginService.GetRoleDetails(function(resultArray:Array): void {
+				resultRoleName=resultArray;
+				CursorManager.removeBusyCursor();
+				LoginService=new Controller();
+				LoginService.getDesignationList(function(resultDesigArray:Array):void{
+					CursorManager.removeBusyCursor();
+					newResultArray[0]="All";
+					newResultDesigArray[0]="All";
+					
+					for(var i:int=0;i<resultArray.length;i++){
+						newResultArray[i+1]=resultArray[i];
+					}
+					for(var j:int=0;j<resultDesigArray.length;j++){
+						newResultDesigArray[j+1]=resultDesigArray[j];
+					}
+					cmbrolename.dataProvider = newResultArray;
+					cmbDesignation.dataProvider=newResultDesigArray;
+					
+					searchuser();
+					chkPage();
+				});
+				
+			}); 
+			
+        }
+        
+      	public var RowCount:Number = 0;
+      	
+      	public function searchuser():void{
+      		RowCount =parseInt(((myDataGrid.height-25)/30).toString());
+           if (Application.application.IsExecutiveMember==1){
+				CustomerService = new CustomerController();
+				CursorManager.setBusyCursor();
+				if(cmbrolename.selectedLabel=="All"){
+					CustomerService.GetSrchResults(StringUtil.trim(txtname.text), cmbDesignation.selectedLabel, 0, function(srchResults:Array): void {
+						//Alert.show(ObjectUtil.toString(srchResults));
+						CursorManager.removeBusyCursor();
+						myPageableArrCol = new PagableArrayCollection(srchResults);
+						myPageableArrCol.itemsPerPage = RowCount;
+						myDataGrid.dataProvider = myPageableArrCol;
+						chkPage();
+						if(srchResults.length==0){
+							Alert.show(resourceManager.getString('myResources','recordsNotFound'));
+						} 
+						
+						
+					});
+				}
+				else{
+					CustomerService.GetSrchResults(txtname.text, cmbDesignation.selectedLabel, parseInt(cmbrolename.selectedItem.roleid), function(srchResults:Array): void {
+						CursorManager.removeBusyCursor();
+						CursorManager.removeBusyCursor();
+						myPageableArrCol = new PagableArrayCollection(srchResults);
+						myPageableArrCol.itemsPerPage = RowCount;
+						myDataGrid.dataProvider = myPageableArrCol;
+						chkPage();
+						if(srchResults.length==0){
+							Alert.show(resourceManager.getString('myResources','recordsNotFound'));
+						}
+						CursorManager.removeBusyCursor();
+					
+					});
+				} 
+        	}
+        	callLater(changeUserList);
+        }
+        private function changeUserList():void{
+        	var meetingcontroller:MeetingController = new MeetingController();
+	          	meetingcontroller.getUsersList(function(resultArr:Array):void{
+	          	Application.application.userArrayList=new Array();
+	           	Application.application.userArrayList = resultArr;
+          });
+        }
+		 public var dataProvider:*;
+		public function EditUser(event:ListEvent):void{
+			var txtStr:int = event.columnIndex
+			  
+			  if(txtStr == 0){
+			  	
+			    tabNagivator.visible = false;
+			    manageuserview.visible = true;
+			    Application.application.EditProfile=2;
+			   if(Application.application.EditProfile==1){
+         			manageuserview.rolename.visible=false;
+         			manageuserview.lblRoleName.visible=true;
+         			manageuserview.lblRoleName.text=Components.instance.session.rolename;
+         		}
+         		if(Application.application.EditProfile==2){
+         			manageuserview.rolename.visible=true;
+         			manageuserview.lblRoleName.visible=false;
+         		}
+         		//Alert.show(myDataGrid.selectedItem.location);
+         		LoginService=new Controller();
+    			CursorManager.setBusyCursor();
+    			LoginService.GetLocationDetails(function (resultLocArray:Array):void{
+    				manageuserview.cmbLocation.dataProvider =  resultLocArray;
+    				Application.application.LocationArray=resultLocArray;
+    				CursorManager.removeAllCursors();
+    				 dataProvider =  manageuserview.cmbLocation.dataProvider;
+		         	 var indexno:int = 0;
+		         	 //Alert.show(dataProvider.length+"\n"+myDataGrid.selectedItem.location);
+			          for(var k:int=0;k<dataProvider.length;k++){
+			           if(dataProvider[k]["Location"] == myDataGrid.selectedItem.location){
+			            indexno = k;
+			           }
+			          }
+			            manageuserview.cmbLocation.selectedIndex = indexno;
+    				
+    			});
+    			CursorManager.removeAllCursors();
+			    manageuserview.btncancel.addEventListener(MouseEvent.CLICK,CancelEdit);
+			    manageuserview.rolename.dataProvider = resultRoleName;
+			    dataProvider="";
+			    
+			    dataProvider= manageuserview.rolename.dataProvider;
+			    var roleIndexNo:int=0;
+			    for(var index:int=0;index<dataProvider.length;index++){
+			    	if(dataProvider[index]["rolename"]==myDataGrid.selectedItem.rolename){
+			    		
+			    		roleIndexNo=index;
+			    		//Alert.show(roleIndexNo.toString());
+			    	}
+			    }
+			    manageuserview.rolename.selectedIndex=roleIndexNo;
+			    manageuserview.txtdesignation.text = myDataGrid.selectedItem.designation;
+			    manageuserview.txtfname.text = myDataGrid.selectedItem.username;
+			    manageuserview.txtsurname.text = myDataGrid.selectedItem.surname;
+			    manageuserview.txttelphoneno.text = myDataGrid.selectedItem.telphoneno;
+			    manageuserview.txtemailid.text = myDataGrid.selectedItem.emailid;
+			    manageuserview.txtmobileno.text = myDataGrid.selectedItem.mobileno;
+			    manageuserview.txtloginname.text = myDataGrid.selectedItem.loginname;
+			    manageuserview.txtpassword.text = myDataGrid.selectedItem.password;
+			    manageuserview.txtreenterpasswd.text = myDataGrid.selectedItem.password;
+			    manageuserview.hiddenfld.text = myDataGrid.selectedItem.userid;
+			   	//manageuserview.cmbLocation.selectedItem.text = myDataGrid.selectedItem.Location;
+			   manageuserview.txtCityName.text=myDataGrid.selectedItem.cityName;
+		       manageuserview.txtemailid.setStyle('borderColor','#B7BABC');
+				manageuserview.txtsurname.setStyle('borderColor','#B7BABC');
+				manageuserview.txtloginname.setStyle('borderColor','#B7BABC');
+				manageuserview.txtpassword.setStyle('borderColor','#B7BABC');
+				manageuserview.txtreenterpasswd.setStyle('borderColor','#B7BABC');
+			  }
+			  
+			  else if(txtStr == 6){
+		  	  	
+			  		popUpAlert = ShowAlert(PopUpManager.createPopUp(this,ShowAlert,true));
+					var vbox:VBox=new VBox();
+					popUpAlert.mainBox.addChild(vbox);
+					var alert:Alert=new Alert();
+					vbox.layoutDirection="ltr";
+					if(Application.application.language=="en_US"){
+						alert.styleName='AlertEn';
+					}
+					else{
+						alert.styleName='AlertAr';
+					}
+					alert=Alert.show(resourceManager.getString('myResources','userDeleteConfirmation'),"",Alert.YES|Alert.NO,this,DeleteAddLister);
+					vbox.addChild(alert);
+					
+			  }
+			  
+				   
+		}  
+		
+		
+		public function DeleteAddLister(event:CloseEvent):void{
+			if (event.detail==Alert.YES){
+					CustomerService = new CustomerController();
+					CursorManager.setBusyCursor();
+					CustomerService.deleteUser(parseInt(myDataGrid.selectedItem.userid),parseInt(myDataGrid.selectedItem.roleid), function(srchResults:Number): void {
+					CursorManager.removeBusyCursor();
+					
+					if(srchResults == 1){
+						//Alert.show("User deleted successfully");
+						Alert.show(resourceManager.getString('myResources','userDelSucc'));
+						searchuser();	
+					}
+					else{
+						//Alert.show("Assigned user cannot be deleted");
+						Alert.show(resourceManager.getString('myResources','assignedUserCannotDel'));
+					}
+
+				});
+					
+			}
+			PopUpManager.removePopUp(popUpAlert);
+		}
+		
+		public function CancelEdit(event:MouseEvent):void{
+			 tabNagivator.visible = true;
+			 manageuserview.visible = false;
+			 init();
+			 //searchuser();
+			
+		}
+        
+        
+    	public function linkHandler(event:TextEvent):void {
+                navigateToURL(new URLRequest(event.text), '_blank')
+        }
+			
+        public function buttonclick(event:Event):void {
+        		dispatchEvent(new UserEventConstants(UserEventConstants.create_new));
+        }
+       private function JumptoPage():void{
+        	if(jumpPage.text != ""  && Number(jumpPage.text) != 0  && jumpPage.enabled){
+			 	if(Number(jumpPage.text)>myPageableArrCol.pages){
+			 		//Alert.show("No Records Available");
+			 		
+					Alert.show(resourceManager.getString('myResources','pageNotFound'));
+					jumpPage.text=myPageableArrCol.currentPage.toString();
+			 	}
+			 	else{
+	        		myPageableArrCol.currentPage = Number(jumpPage.text);
+	    		}
+    		}
+    		else{
+    			if(jumpPage.enabled)
+    				//Alert.show(resourceManager.getString('myResources','validNum'));
+    				if(jumpPage.enabled)
+    				Alert.show(resourceManager.getString('myResources','validNum'));
+    		}
+    		chkPage();
+        }
+        private function tabChange():void{
+        	
+        	if(tabNagivator.selectedIndex==1){
+        		createuserView.init();
+        	}
+        }
+        private function pageUP():void{
+		 	myPageableArrCol.pageUp();
+        	if(myPageableArrCol.currentPage==myPageableArrCol.pages){
+        		btnPageUp.enabled=false;
+        	}
+        	else{
+        		btnPageUp.enabled=true;
+        	}
+        	if(myPageableArrCol.currentPage>1){
+        		btnPageDown.enabled=true;
+        	}
+        	else{
+        		btnPageDown.enabled=false;
+        	}
+        }
+        private function pageDown():void{
+        	myPageableArrCol.pageDown();
+        	if(myPageableArrCol.currentPage==1){
+        		btnPageDown.enabled=false;
+        	}
+        	else{
+        		btnPageDown.enabled=true;
+        	}
+        	if(myPageableArrCol.currentPage==myPageableArrCol.pages){
+        		btnPageUp.enabled=false;
+        	}
+        	else{
+    			btnPageUp.enabled=true;
+        	}
+        }
+        public function chkPage():void{
+        	if(myPageableArrCol.currentPage==1){
+        		btnPageDown.enabled=false;
+        	}
+        	else{
+        		btnPageDown.enabled=true;
+        	}
+        	if(myPageableArrCol.currentPage==myPageableArrCol.pages){
+        		btnPageUp.enabled=false;
+        	}
+        	else{
+    			btnPageUp.enabled=true;
+        	}
+        	if(myPageableArrCol.currentPage==myPageableArrCol.pages){
+        		btnPageUp.enabled=false;
+        	}
+        	else{
+        		btnPageUp.enabled=true;
+        	}
+        	if(myPageableArrCol.currentPage>1){
+        		btnPageDown.enabled=true;
+        	}
+        	else{
+        		btnPageDown.enabled=false;
+        	}
+        	if(btnPageDown.enabled==false && btnPageUp.enabled==false){
+        		jumpPage.editable=false;
+        		jumpPage.enabled=false;
+        	}
+        	else{
+        		jumpPage.editable=true;
+        		jumpPage.enabled=true;
+        	}
+        	if(btnPageDown.enabled==false && btnPageUp.enabled==false){
+        		jumpPage.editable=false;
+        		jumpPage.enabled=false;
+        	}
+        	else{
+        		jumpPage.editable=true;
+        		jumpPage.enabled=true;
+        	}
+        }
+        private function clearSearch():void{
+        	txtname.text="";
+        	cmbDesignation.selectedIndex=0;
+        	cmbrolename.selectedIndex=0;
+        }
+        
+    ]]>
+    </mx:Script>
+    <mx:Style>
+    	.myAlert{
+    		direction:ltr;
+    		layout-direction:ltr;
+			color : #0f3177;
+			title-style-name : "alertTitle";
+			header-height:19;
+			border-thickness: 1;
+			drop-shadow-enabled: true;
+			drop-shadow-color :#d1ddf7;
+			background-color: #ffffff;
+			corner-radius :6;
+			border-style :solid;
+			header-colors : #90a4d1, #5970a0;
+			footer-colors : #9db6d9, #ffffff;
+			border-color : #5970a0;
+			text-align :left;
+		}
+		.alertTitle{
+			font-family :Verdana;
+			font-size :10;
+			font-weight :bold;
+			text-align :left;
+			color :#ffffff;
+		}
+    </mx:Style>
+	 
+	<mx:TabNavigator borderStyle="solid" id="tabNagivator" change="tabChange()" width="100%" height="100%" color="0x323232" styleName="ApplyFontSize" >
+				
+		<!-- Search TabNavigator Panel -->
+        <mx:VBox label="@Resource(bundle='myResources', key='search')" styleName="ApplyFontSize" horizontalAlign="center" verticalGap="3">
+            
+            <mx:HBox height="3%"></mx:HBox>
+            
+       		<mx:HBox name="titlehbox" width="100%" horizontalAlign="center">
+       			
+       			<mx:HBox width="85%">
+       				<mx:Label fontWeight="bold" name="lblname" text="@Resource(bundle='myResources', key='name')"/>
+		   			<s:TextInput id="txtname" width="20%" />
+	       			
+	       			<mx:Spacer width="1%"/>
+		   			<mx:Label fontWeight="bold" name="lbldesignation" text="@Resource(bundle='myResources', key='designation')"/>
+		   			<mx:Canvas id="canvasDesignation" width="20%" resize="cmbDesignation.width = canvasDesignation.width">
+						<mx:ComboBox id="cmbDesignation"   width="100%" labelField="designation" selectedIndex="0" dropdownWidth="175"/>
+					</mx:Canvas>
+					
+	    			<mx:Label fontWeight="bold" name="lblrolename" text="@Resource(bundle='myResources', key='role')"/>
+	    			<mx:Canvas id="canvasRoleName" width="20%" resize="cmbrolename.width = canvasRoleName.width">
+						<mx:ComboBox id="cmbrolename" labelField="rolename" data="roleid" selectedIndex="0" width="100%" dropdownWidth="175"/>
+					</mx:Canvas>
+		   			
+	    			
+	    			<mx:Spacer width="1%"/>
+					<mx:Button label="@Resource(bundle='myResources', key='search')" name="btnsearch" toolTip="Search" click="searchuser()"/>
+					<mx:Button label="@Resource(bundle='myResources', key='clear')" name="btnClear" toolTip="Clear Search" click="clearSearch()"/>
+       			</mx:HBox>
+	   			
+       		
+       		</mx:HBox>
+       		<mx:Spacer height="3%"/>
+       		<mx:HBox width="90%" height="75%" horizontalAlign="center">
+       			<mx:DataGrid id="myDataGrid" wordWrap="true" variableRowHeight="true" dataProvider="{searchResults}" width="100%" height="100%"  itemClick="EditUser(event)" allowMultipleSelection="true" draggableColumns="false">
+					<mx:columns>
+					
+			        	<mx:DataGridColumn id="username" headerText="@Resource(bundle='myResources', key='name')" dataField="name" width="120">
+							<mx:itemRenderer>
+                    		<mx:Component>
+                    		<mx:Text  useHandCursor="true" paddingLeft="5" buttonMode="true" mouseChildren="false" selectable="true" color="#2e3c84" fontSharpness="12" textDecoration="underline">
+                			</mx:Text>
+                    		</mx:Component> 
+                			</mx:itemRenderer> 
+			        	</mx:DataGridColumn>
+			        	
+				        <mx:DataGridColumn editable="true" id="role" wordWrap="true" headerText="@Resource(bundle='myResources', key='role')" dataField="rolename" width="140">
+				        	<mx:itemRenderer>
+	                    		<mx:Component>
+	                        		<mx:Text paddingLeft="5" text="{data.role}"/>
+	                    		</mx:Component>
+                			</mx:itemRenderer>  
+				        </mx:DataGridColumn>
+				        
+				        <mx:DataGridColumn id="team" headerText="@Resource(bundle='myResources', key='team')" dataField="teamid" width="100">
+				        	<mx:itemRenderer>
+	                    		<mx:Component>
+	                        		<mx:Text paddingLeft="5" text="{data.team}"/>
+	                    		</mx:Component>
+                			</mx:itemRenderer> 
+                	    </mx:DataGridColumn>
+                	    
+				        <mx:DataGridColumn id="designation" headerText="@Resource(bundle='myResources', key='designation')" dataField="designation" width="100">
+				        <mx:itemRenderer>
+	                    		<mx:Component>
+	                        		<mx:Text paddingLeft="5" text="{data.designation}"/>
+	                    		</mx:Component>
+                			</mx:itemRenderer> 
+				        </mx:DataGridColumn>
+						
+						<!--<mx:DataGridColumn headerText="@Resource(bundle='myResources', key='location')" dataField="location" width="70">
+							 <mx:itemRenderer>
+	                    		<mx:Component>
+	                        		<mx:Text paddingLeft="5" text="{data.location}"/>
+	                    		</mx:Component>
+                			</mx:itemRenderer> 
+						</mx:DataGridColumn>
+						-->
+						<mx:DataGridColumn headerText="@Resource(bundle='myResources', key='cityName')" dataField="cityName" width="70">
+							 <mx:itemRenderer>
+	                    		<mx:Component>
+	                        		<mx:Text paddingLeft="5" text="{data.cityName}"/>
+	                    		</mx:Component>
+                			</mx:itemRenderer> 
+						</mx:DataGridColumn>
+						<mx:DataGridColumn headerText="@Resource(bundle='myResources', key='loginname')" dataField="loginname" width="100">
+							<mx:itemRenderer>
+                    			<mx:Component>
+	                        		<mx:Text paddingLeft="5" text="{data.loginname}"/>
+    	                		</mx:Component>
+            				</mx:itemRenderer> 
+						</mx:DataGridColumn>
+						 
+						<mx:DataGridColumn headerText="@Resource(bundle='myResources', key='delete')" dataField="delete" width="45">
+							<mx:itemRenderer>
+	                    		<mx:Component>
+	                    			<mx:Image scaleContent="false" horizontalAlign="center" verticalAlign="middle" source="@Embed('assets/newdeleteicon.png')"/> 
+	                    		</mx:Component> 
+	                		</mx:itemRenderer> 
+						</mx:DataGridColumn>
+					</mx:columns>
+			    </mx:DataGrid>
+			</mx:HBox>	
+  		    <mx:Spacer height="1%"/>
+  		    <mx:HBox width="90%" horizontalAlign="right" verticalAlign="middle">
+       			<mx:Text x="532" y="28" text="Page {myPageableArrCol.currentPage} of {myPageableArrCol.pages}"/>
+       			<mx:Label text="@Resource(bundle='myResources', key='jmpToPage')"/>
+       			<mx:TextInput restrict="0-9" id="jumpPage" width="40" maxChars="2" />
+       			<mx:Button skin="@Embed('assets/go.png')" click="JumptoPage()" useHandCursor="true" buttonMode="true"/>
+				<mx:Button skin="@Embed('assets/left arrow.png')" useHandCursor="true" buttonMode="true" id="btnPageDown" click="pageDown()" disabledSkin="@Embed('assets/disabledRight.png')"/>
+				<mx:Button skin="@Embed('assets/right arrow.png')" useHandCursor="true" buttonMode="true" id="btnPageUp" click="pageUP()" disabledSkin="@Embed('assets/disabledLeft.png')"/>	
+
+			</mx:HBox>
+       		        
+		</mx:VBox>
+		
+	    <mx:VBox label="@Resource(bundle='myResources', key='createUser')" width="100%" height="100%">
+	        <com:createuserview id="createuserView" width="100%" height="100%"/>
+	    </mx:VBox>
+	
+	</mx:TabNavigator>
+  	<com:manageuserview id="manageuserview" visible="false" width="100%" height="100%"/>
+</mx:Canvas>

@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml"  styleName="userContentStyle"  
+	width="100%" height="100%" creationComplete="init()" xmlns:com="src.com.selfassessment.view.*" horizontalGap="0">
+ 
+	<mx:Style source="src/com/selfassessment/view/assets/Styles.css"/>	
+
+	<mx:Script>
+		<![CDATA[
+			import src.com.selfassessment.controller.Controller;
+			import mx.core.Application;
+			import mx.containers.Panel;
+			import src.com.selfassessment.view.*;
+			import mx.controls.Alert;
+			import src.com.selfassessment.events.EventCriteriaConstants;
+			import mx.effects.*;
+			private var LoginService:Controller=new Controller();
+			
+			public function init():void{
+				Application.application.CurrentSelection =  "Admin -> "+menuitems.myTree.selectedItem.@label;
+			}
+			public function ContentPageChange(event:Event):void {
+
+				var choosenChild:String = event.type;
+				
+				if(null != choosenChild){
+					//Alert.show("Calling");
+					Application.application.CurrentSelection = "Admin -> "+menuitems.myTree.selectedItem.@label;		
+					if(choosenChild == 'User'){
+						currentState = '';
+						userview.tabNagivator.visible = true;
+						userview.manageuserview.visible = false;
+						//userview.txtdesignation.text = "";
+						userview.txtname.text = "";
+						userview.tabNagivator.selectedIndex = 0;
+						userview.init();
+						
+		    		}
+					else if(choosenChild == 'SubTeam'){
+						currentState = 'subteamview';
+						subteamview.tabNagivator.selectedIndex = 0;
+						subteamview.teamView.cmbTeamLeaderSearch.selectedIndex=0;
+						subteamview.teamView.txtteamname.text = "";
+						subteamview.teamView.teamCreatebox.visible = false;
+						subteamview.teamView.init();
+					}
+					else if(choosenChild == 'ExecutiveTeam'){
+						currentState = 'executiveview';
+						executiveview.init();
+					}
+				} 
+			}
+			
+		]]>
+	</mx:Script>
+	<mx:Fade id="Add" duration="1000"/>
+	
+	<mx:states>
+		<mx:State name="subteamview">
+			<mx:RemoveChild	target="{userview}"/>
+    		<mx:AddChild relativeTo="{content}">
+            	 <com:subteamview id="subteamview" width="100%" height="100%"/>
+			</mx:AddChild>
+    	</mx:State>
+    	<mx:State name="executiveview">
+			<mx:RemoveChild	target="{userview}"/>
+    		<mx:AddChild relativeTo="{content}">
+            	 <com:executiveview id="executiveview" width="100%" height="100%"/>
+			</mx:AddChild>
+    	</mx:State>
+	</mx:states>
+	
+	<mx:transitions>
+       <mx:Transition 
+                toState="subteamview">
+            <mx:Fade target="{subteamview}" alphaFrom="0" alphaTo="1" duration="900"/>
+        </mx:Transition>
+        <mx:Transition 
+                toState="executiveview">
+            <mx:Fade target="{executiveview}" alphaFrom="0" alphaTo="1" duration="900"/>
+        </mx:Transition>
+        <mx:Transition 
+                toState="*">
+            <mx:Fade duration="900" alphaFrom="0" alphaTo="1" target="{userview}"/>
+        </mx:Transition>
+     </mx:transitions>
+	
+	   	<mx:Canvas id="menu" width="15%" height="100%"> 
+			<com:teammenutitle id="menuitems" width="100%" height="100%" User="ContentPageChange(event);" SubTeam="ContentPageChange(event)" ExecutiveTeam="ContentPageChange(event)"/>
+		</mx:Canvas>
+				
+		<mx:Canvas id="content" width="95%" height="100%"> 
+			<com:userview id="userview" width="100%" height="100%" addedEffect="Add"/>
+		</mx:Canvas>
+		
+</mx:HBox>

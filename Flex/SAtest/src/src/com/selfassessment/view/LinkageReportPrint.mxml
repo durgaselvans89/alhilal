@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:VBox  xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" horizontalAlign="center"> 
+			<!--<mx:Spacer/>
+			
+			<mx:HBox width="80%" id="enablerHbox">
+				<mx:Label text="Enabler"  fontSize="15" fontWeight="bold"/>
+				
+			</mx:HBox>
+			<mx:Spacer/>-->
+			<mx:PrintAdvancedDataGrid id="myDataGrid" height="100%" width="80%">
+				<mx:columns>
+					<mx:DataGridColumn headerText="@Resource(bundle='myResources', key='part')" dataField="criteriaID"/>
+					<mx:DataGridColumn wordWrap="true" headerText="@Resource(bundle='myResources', key='title')" dataField="approachTitle" />
+					<mx:DataGridColumn wordWrap="true"  headerText="@Resource(bundle='myResources', key='approach')" dataField="approachtolink"/>
+					<mx:DataGridColumn wordWrap="true" headerText="@Resource(bundle='myResources', key='otherparts')" dataField="otherapproachlinkto"/>
+				</mx:columns>
+			</mx:PrintAdvancedDataGrid>
+			<!--<mx:HBox width="80%">
+				<mx:Label text="Result"  fontSize="15" fontWeight="bold"/>
+				
+			</mx:HBox>
+			<mx:Spacer/>-->
+			<mx:PrintAdvancedDataGrid id="myDataGridResult" height="100%" width="80%">
+				<mx:columns>
+					<mx:DataGridColumn headerText="@Resource(bundle='myResources', key='part')" dataField="criteriaID"/>
+					<mx:DataGridColumn wordWrap="true" headerText="@Resource(bundle='myResources', key='titleofApproachResult')" dataField="result_name"/>
+					<mx:DataGridColumn wordWrap="true"  headerText="@Resource(bundle='myResources', key='approachlinkResult')" dataField="approachtolink"/>
+					<mx:DataGridColumn wordWrap="true" headerText="@Resource(bundle='myResources', key='otherApproachLinkResult')" dataField="otherapproachlinkto"/>
+				</mx:columns>
+			</mx:PrintAdvancedDataGrid>
+			
+		   <!-- <mx:Spacer/>
+		    <mx:Spacer/>-->
+		  
+</mx:VBox>
+	
+

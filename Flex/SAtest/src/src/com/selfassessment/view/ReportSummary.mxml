@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas styleName="Childpanelstyle"  xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" horizontalScrollPolicy="off">
+
+<mx:Style source="src/com/selfassessment/view/assets/Styles.css"/>	
+
+<mx:Script>
+	<![CDATA[
+		import mx.collections.ArrayCollection;
+		
+		import mx.controls.Alert;
+		import com.boyzoid.PagableArrayCollection.PagableArrayCollection;
+		import mx.core.ByteArrayAsset;
+		import com.as3xls.xls.ExcelFile;
+		import com.as3xls.xls.Sheet;
+		import com.as3xls.xls.Cell;
+		
+		[Bindable]
+        private var fields:Array = new Array(); 
+       	private var sheet:Sheet;
+		
+				
+		public var myPageableArrCol:PagableArrayCollection=new PagableArrayCollection();
+//		 private function JumptoPage():void{
+//        	if(jumpPage.text != ""  && Number(jumpPage.text) != 0){
+//			 	if(Number(jumpPage.text)>myPageableArrCol.pages){
+//			 		Alert.show("No Records Available");
+//			 	}
+//			 	else{
+//	        		myPageableArrCol.currentPage = Number(jumpPage.text);
+//	    		}
+//    		}
+		
+		public var enablerRowCount:int;
+		
+		private function exportToExcel():void{
+			
+			var index:int=0;
+			sheet = new Sheet();  
+          	fields = new Array();
+          	sheet.name="Enabler";
+          	var dataProviderEnablerCollection:ArrayCollection=new ArrayCollection(); 
+      		var dataProviderResultCollection:ArrayCollection=new ArrayCollection();   
+			
+			var columns:Array=new Array();  
+			
+			var fieldheading:String;
+			
+			dataProviderEnablerCollection=new ArrayCollection();
+          	dataProviderEnablerCollection = myDataGrid.dataProvider as ArrayCollection;  
+          	
+          	dataProviderResultCollection=new ArrayCollection();
+          	dataProviderResultCollection = myDataGridResult.dataProvider as ArrayCollection;  
+          	
+           	enablerRowCount= dataProviderEnablerCollection.length;  
+           	columns = myDataGrid.columns; 
+           	
+           	/* if(myDataGrid.columnCount>=myDataGridResult.columnCount){ 
+      	  		sheet.resize((dataProviderEnablerCollection.length + dataProviderResultCollection.length)+ 2,myDataGrid.columnCount);
+           	}
+           	else{
+           		sheet.resize((dataProviderEnablerCollection.length + dataProviderResultCollection.length)+5,myDataGridResult.columnCount);
+           	} */
+           	sheet.resize((dataProviderEnablerCollection.length + dataProviderResultCollection.length)+ 2,myDataGrid.columnCount);
+           	sheet.setCell(0, 0,"Enabler");
+           	
+           	var j:int = 1;  
+         	for(var i:int=0;i<columns.length;i++){
+         		if (columns[i]["dataField"].toString() != "prototype"){
+					fields.push(columns[i]["dataField"].toString());  
+               		sheet.setCell(1, j,columns[i]["headerText"].toString());
+               		
+				}	
+				j++;
+         	}
+         	
+        	for(var r:int=0; r < enablerRowCount; r++){  
+				var record:Object = dataProviderEnablerCollection.getItemAt(r);  
+                insertRecordInSheet(r+2,sheet,record);
+			}
+         
+          	
+          	//Next sheet
+          	columns=new Array();  
+            var resultRowCount:int;
+            resultRowCount=dataProviderResultCollection.length;
+			
+			columns = myDataGridResult.columns;  
+      	  	
+  		 	fields=new Array();
+  		 	sheet.setCell(enablerRowCount+2, 0,"Result");
+  		 	j=1;
+  		 	
+         	for(var i:int=0;i<columns.length;i++){
+         		if (columns[i]["dataField"].toString() != "prototype"){
+					fields.push(columns[i]["dataField"].toString());  
+               		sheet.setCell(enablerRowCount+3, j,columns[i]["headerText"].toString());
+				}	
+				j++;
+         	}
+        	
+         	var rCount:int=enablerRowCount+4;
+        	for(var r:int=0; r < resultRowCount; r++){  
+				var record:Object = dataProviderResultCollection.getItemAt(r);  
+                insertRecordInSheet(rCount+r,sheet,record);
+			}
+            
+          	var xls:ExcelFile = new ExcelFile(); 
+          	xls.sheets.addItem(sheet); 
+          
+ 		  	var bytes:ByteArray = xls.saveToByteArray();  
+          	var fr:FileReference=new FileReference();
+          	//Alert.show(resultsheet.getCell(0,1).toString())
+        	fr.save(bytes,"SummaryReport.xls"); 
+		}
+		
+		private function insertRecordInSheet(row:int,sheet:Sheet,record:Object):void{  
+         	var i:int = 1;  
+            for each(var field:String in fields){
+            	if (record[field] != null){
+            		sheet.setCell(row,i, record[field]);
+            	}
+            	i++;  
+            }
+            return;   
+		}
+
+	]]>
+</mx:Script>
+		
+		<mx:VBox styleName="ApplyFontSize"  width="100%" height="100%" horizontalAlign="center" horizontalScrollPolicy="off"> 
+			<mx:Spacer/>	
+			<mx:HBox width="95%">
+				<mx:Label text="@Resource(bundle='myResources', key='enablerComTitle')"  fontWeight="bold"/>
+				
+			</mx:HBox>
+			<mx:Spacer/>
+			<mx:AdvancedDataGrid sortableColumns="false" headerWordWrap="true" variableRowHeight="true"  styleName="ReportDataGridHeaderStyle" useRollOver="false" wordWrap="true" id="myDataGrid" textAlign="left" width="95%"  allowMultipleSelection="false" draggableColumns="false">
+				<mx:columns>
+			      <mx:AdvancedDataGridColumn width="60"  headerText="@Resource(bundle='myResources', key='gridPart')" dataField="criteriaID">
+					</mx:AdvancedDataGridColumn>	
+			        <mx:AdvancedDataGridColumn width="100" wordWrap="true" headerText="@Resource(bundle='myResources', key='titleEnabler')" dataField="approachTitle"/>
+							<!--<mx:itemRenderer>
+								<mx:Component>
+									<mx:Label text="{data.approachTitle}"/>
+								</mx:Component>
+							</mx:itemRenderer>	-->  		        
+
+					<mx:AdvancedDataGridColumn width="160" wordWrap="true" headerText="@Resource(bundle='myResources', key='deployment')" dataField="deployment"/>
+					<mx:AdvancedDataGridColumn width="160"  wordWrap="true" headerText="@Resource(bundle='myResources', key='assessmentAndReview')" dataField="assessmentandreview"/>
+					<mx:AdvancedDataGridColumn width="160"  wordWrap="true" headerText="@Resource(bundle='myResources', key='sourceOfInformation')" dataField="sourceofinformation"/>
+					<mx:AdvancedDataGridColumn width="100" wordWrap="true"  headerText="@Resource(bundle='myResources', key='linkages')" dataField="approachtolink"/>
+				</mx:columns>
+		    </mx:AdvancedDataGrid>
+		    
+		    <mx:HBox width="95%">
+				<mx:Label  text="@Resource(bundle='myResources', key='resultComTitle')"  fontWeight="bold"/>
+			</mx:HBox>
+			<mx:Spacer/>
+			<mx:AdvancedDataGrid sortableColumns="false" headerWordWrap="true" variableRowHeight="true" styleName="ReportDataGridHeaderStyle" useRollOver="false" wordWrap="true" id="myDataGridResult" textAlign="left" width="95%"  allowMultipleSelection="false" draggableColumns="false">
+				<mx:columns>
+				
+				<mx:AdvancedDataGridColumn width="60" headerText="@Resource(bundle='myResources', key='gridPart')" dataField="criteriaID"/>
+		        <mx:AdvancedDataGridColumn wordWrap="true" headerText="@Resource(bundle='myResources', key='gridResultTitle')" dataField="result_name"/>
+				<mx:AdvancedDataGridColumn wordWrap="true" headerText="@Resource(bundle='myResources', key='resultSegmentsCovered')" dataField="resultsegments"/>
+				</mx:columns>
+		    </mx:AdvancedDataGrid>
+			
+			<mx:Spacer/>
+		    <mx:HBox width="95%" horizontalAlign="right">
+				<mx:Button id="btnExportToExcel" label="Export to Excel" click="exportToExcel()"/>
+			</mx:HBox>
+		    <mx:Spacer/>
+		    
+		</mx:VBox>
+		
+</mx:Canvas>

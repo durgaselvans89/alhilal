@@ -1,0 +1,736 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas styleName="Childpanelstyle" 
+	xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:goldhold="goldhold.controls.*" 
+	xmlns:com="src.com.selfassessment.view.*" verticalScrollPolicy="off" horizontalScrollPolicy="off" height="100%" width="100%" creationComplete="init()">
+	 
+	<mx:Style source="src/com/selfassessment/view/assets/Styles.css"/>	
+	<mx:Script>
+    <![CDATA[
+    	import mx.utils.ObjectUtil;
+    	import com.as3xls.xls.Sheet;
+    	import com.as3xls.xls.ExcelFile;
+   		
+    	import mx.managers.PopUpManager;
+    	import src.com.selfassessment.model.ProjectDo;
+    	import src.com.selfassessment.controller.TeamController;
+    	import mx.core.Application;
+    	import mx.events.CloseEvent;
+    	import com.boyzoid.PagableArrayCollection.PagableArrayCollection;
+    	import mx.events.ListEvent;
+        import mx.collections.ArrayCollection;
+        import mx.controls.*;
+        import src.com.selfassessment.view.*;
+		import src.com.selfassessment.events.UserEventConstants;
+		import flash.events.Event;
+ 		import flash.net.URLLoader;
+        import flash.net.URLRequest;
+        import flash.events.MouseEvent;
+		import flash.events.TextEvent;
+		import src.com.selfassessment.controller.Components;
+		import src.com.selfassessment.controller.Controller;
+		import src.com.selfassessment.controller.CustomerController;
+		import mx.managers.CursorManager;
+		[Bindable]
+		public var myPageableArrCol:PagableArrayCollection=new PagableArrayCollection();
+		public var teamService:TeamController=new TeamController();
+		public var projectD0:ProjectDo=new ProjectDo();
+		public var popUpAlert:ShowAlert;
+		
+		private function JumptoPage():void{
+        	if(jumpPage.text != ""  && Number(jumpPage.text) != 0  && jumpPage.enabled){
+			 	if(Number(jumpPage.text)>myPageableArrCol.pages){
+			 		//Alert.show("No Records Available");
+			 		Alert.show(resourceManager.getString('myResources','pageNotFound'));
+					jumpPage.text=myPageableArrCol.currentPage.toString();
+			 	}
+			 	else{
+	        		myPageableArrCol.currentPage = Number(jumpPage.text);
+	    		}
+    		}
+    		else{
+    			if(jumpPage.enabled)
+    				Alert.show(resourceManager.getString('myResources','validNum'));
+    		}
+    		chkPage();
+        }
+        
+    	private function btnApproveProject():void{
+   			var projArray:Array=new Array();
+   			
+   			if(myDataGrid.selectedItems.length!=0){
+   				
+	   			for(var i:int=0;i<myDataGrid.selectedItems.length;i++){
+	   				projectD0=new ProjectDo();
+	   				projectD0.projectID=parseInt(myDataGrid.selectedItems[i].projectID.toString());
+	   				projectD0.status="Approved";
+	   				projArray.push(projectD0);
+	   			}
+	   			CursorManager.setBusyCursor();
+	   			teamService=new TeamController();
+	   			teamService.UpdateProjectStatus(projArray,function(resultNum:Number):void{
+	   				//Alert.show(resultNum.toString());
+	   				CursorManager.removeAllCursors();
+	   				if(resultNum>0){
+	   					searchProjectDetails();
+						//Alert.show("Selected projects approved successfully");
+	   					Alert.show(resourceManager.getString('myResources','selProjApprovedSucc'));
+	   					
+	   				}
+	   				else{
+	   					Alert.show("Selected projects has been already approved");
+	   				}
+	   				CursorManager.removeAllCursors();
+	   			});
+	   			
+   			}
+   			else{
+   				//Alert.show("Select atleast one project to approve");
+   				Alert.show(resourceManager.getString('myResources','selAtleastAProjToApp'));
+   			}
+   		}
+   		
+   		private function btnRejectProject():void{
+   			var projArray:Array=new Array();
+   			if(myDataGrid.selectedItems.length!=0){
+   				for(var i:int=0;i<myDataGrid.selectedItems.length;i++){
+	   				projectD0=new ProjectDo();
+	   				projectD0.projectID=parseInt(myDataGrid.selectedItems[i].projectID.toString());
+	   				projectD0.status="Rejected";
+	   				projArray.push(projectD0);
+	   			}
+	   			CursorManager.setBusyCursor();
+				teamService=new TeamController();
+	   			teamService.UpdateProjectStatus(projArray,function(resultNum:Number):void{
+	   				CursorManager.removeAllCursors();
+	   				if(resultNum!=0){
+	   					searchProjectDetails();
+						//Alert.show("Selected projects rejected successfully");
+	   					Alert.show(resourceManager.getString('myResources','selProjRejSucc'));
+	   					
+	   				}
+	   				else{
+	   					Alert.show("Selected projects has been rejected already");
+	   				}
+	   				
+	   			});
+   			}
+   			else{
+   				//Alert.show("Select atleast one project to reject");
+   				Alert.show(resourceManager.getString('myResources','selAtleastAPRojToRej'));
+   			}
+   		}
+   		
+   		
+   		public function init():void{
+   			//Alert.show("Function init called");
+   			
+   		/*	teamService=new TeamController();
+   			var teamNameArray:Array=new Array;
+   			teamService.selectProjectTeamNameList(function(resultTeamListArr:Array):void{
+   				teamNameArray[0]="All";
+   				for(var i:int=0;i<resultTeamListArr.length;i++){
+   					teamNameArray[i+1]=resultTeamListArr[i];
+   				}
+   				cmbTeamName.dataProvider=teamNameArray;
+   				cmbTeamName.selectedIndex=0;
+   				
+   			});*/
+   			if(Application.application.IsExecutiveMember==1){
+				btnApprove.visible=true;
+				btnReject.visible=true;
+			}
+			else{
+				btnApprove.visible=false;
+				btnReject.visible=false;
+			}
+   			searchProjectDetails();
+   			if(Application.application.language=="en_US"){
+   				displayProjects.styleName='ApplyFontSizeEn';
+   				myDataGrid.setStyle('textAlign','left');
+   			}
+   			else{
+   				displayProjects.styleName='ApplyFontSizeAr';
+   				myDataGrid.setStyle('textAlign','right');
+   			}
+   			if(Application.application.IsExecutiveMember==1){
+   				
+   			}
+   			
+   		}
+   		private function searchProjectDetails():void{
+   			teamService=new TeamController();
+   			teamService.SearchProjects(txtProjectName.text, txtPriority.text,function(resultArr:Array):void{
+   				myPageableArrCol=new PagableArrayCollection(resultArr);
+	        	myPageableArrCol.itemsPerPage = parseInt(((myDataGrid.height-25)/30).toString());
+	        	myDataGrid.dataProvider=myPageableArrCol;
+	        	chkPage();
+	        	//myExpDataGrid.dataProvider=myDataGrid.dataProvider;
+	        	if(resultArr.length==0){
+	        		Alert.show(resourceManager.getString('myResources','recordsNotFound'));
+	        	}
+   			});
+   		}
+   		
+   		public var dataProvider:*;
+        private function gridSelect(event:ListEvent):void{
+        	var index:Number;
+        	var rowIndex:int=event.columnIndex;
+        	var hBoxHeight:int;
+        	if(event.columnIndex==2){
+        		//if(Components.instance.session.userid==myDataGrid.selectedItem.responsibility || Application.application.IsExecutiveMember==1){
+	        			currentState='editProject';
+		        		teamService=new TeamController();
+		        		editProject.responsibility=myDataGrid.selectedItem.responsibility;
+			        	teamService.SelectResponsibilityPersons(function(responsibilityArr:Array):void{
+			        		if(responsibilityArr.length!=0){
+			        			editProject.rolename.dataProvider=responsibilityArr;
+			        		}
+			        		for(var i:int=0;i<responsibilityArr.length;i++){
+			        			if(responsibilityArr[i]["userName"]==myDataGrid.selectedItem.name){
+			        				index=i;
+			        			}
+			        		}
+			        		editProject.rolename.selectedIndex=index;
+			        	});
+			        	if(myDataGrid.selectedItem.teamName!="Not assigned"){
+			        		editProject.teamName=myDataGrid.selectedItem.teamName;
+			        	}
+			        	if(Components.instance.session.userid==myDataGrid.selectedItem.responsibility){
+			        		editProject.txtprojecttitle.enabled = true;
+				        	editProject.dtfStartDate.enabled = true;
+			        		editProject.dtfEndDate.enabled = true;
+			        		editProject.txtDesc.enabled = true;
+			        		editProject.rolename.enabled = true;
+			        		editProject.txtExpectedBenefits.enabled = true; 
+			        		editProject.txtRequiredResources.enabled = true;
+			        		editProject.txtProgressReport.enabled = true;
+			        		editProject.hsldrOrgStrategy.enabled = true;
+			        		editProject.hsldrCritrionPart.enabled = true;
+			        		editProject.hsldrEase.enabled = true;
+			        		editProject.btnUpdate.enabled = true;
+			        	}
+			        	else{
+			        		editProject.txtprojecttitle.enabled = false;
+				        	editProject.dtfStartDate.enabled = false;
+			        		editProject.dtfEndDate.enabled = false;
+			        		editProject.txtDesc.enabled = false;
+			        		editProject.rolename.enabled = false;
+			        		editProject.txtExpectedBenefits.enabled = false; 
+			        		editProject.txtRequiredResources.enabled = false;
+			        		editProject.txtProgressReport.enabled = false;
+			        		editProject.hsldrOrgStrategy.enabled = false;
+			        		editProject.hsldrCritrionPart.enabled = false;
+			        		editProject.hsldrEase.enabled = false;
+			        		editProject.btnUpdate.enabled = false;
+			        	}
+		        		
+			        	editProject.lblProjectID.text=myDataGrid.selectedItem.projectID;
+		        		editProject.txtprojecttitle.text=myDataGrid.selectedItem.projectTitle;
+		        		editProject.dtfStartDate.text=myDataGrid.selectedItem.startDate;
+		        		editProject.dtfEndDate.text=myDataGrid.selectedItem.endDate;
+		        		editProject.txtDesc.text=myDataGrid.selectedItem.description;
+		        		editProject.txtExpectedBenefits.text = myDataGrid.selectedItem.expectedBenefits; 
+		        		editProject.txtRequiredResources.text = myDataGrid.selectedItem.requiredResources;
+		        		editProject.txtProgressReport.text = "";
+		        		editProject.hsldrOrgStrategy.value=myDataGrid.selectedItem.orgStrategy;
+		        		editProject.hsldrCritrionPart.value=myDataGrid.selectedItem.criterionPart;
+		        		editProject.hsldrEase.value=myDataGrid.selectedItem.implementation;
+		        		editProject.btnUpdate.addEventListener(MouseEvent.CLICK,UpdateProjectDetails);
+		        		editProject.btnCancel.addEventListener(MouseEvent.CLICK,CancelEdit);
+		        		editProject.lblShowProgressReport.addEventListener(MouseEvent.CLICK,showProgressReportDetails);
+		        		editProject.lblAttach.addEventListener(MouseEvent.CLICK,AttachFile);
+		        		editProject.hBoxReport.visible=true;
+		        		loadStrengthAndAFI();
+		        		editProject.init();
+        		/* }
+        		else{
+        		//	Alert.show("You don't have permission to modify this project");
+        			Alert.show(resourceManager.getString('myResources','permissionErrMsg'));
+        		} */
+        	}else if(event.columnIndex==8){
+					popUpAlert = ShowAlert(PopUpManager.createPopUp(this,ShowAlert,true));
+					var vbox:VBox=new VBox();
+					popUpAlert.mainBox.addChild(vbox);
+					var alert:Alert=new Alert();
+					vbox.layoutDirection="ltr";
+					if(Application.application.language=="en_US"){
+						alert.styleName='AlertEn';
+					}
+					else{
+						alert.styleName='AlertAr';
+					}
+					alert=Alert.show((resourceManager.getString('myResources','deleteProjConfirm')),"",Alert.YES|Alert.NO,this,DeleteAddLister);
+					vbox.addChild(alert);
+			}
+		}
+		private function loadStrengthAndAFI():void{
+			teamService=new TeamController();
+			teamService.getProjectApproachDetails(parseInt(myDataGrid.selectedItem.projectID.toString()),function(resultArr:Array):void{
+				//Alert.show(ObjectUtil.toString(resultArr));
+				var strArr:Array=new Array();
+				var afiArr:Array=new Array();
+				for(var i:int=0;i<resultArr.length;i++){
+					if(resultArr[i]["type"]=='Strength'){
+						strArr.push(resultArr[i]);
+					}
+					else{
+						afiArr.push(resultArr[i]);
+					}
+				}
+				CursorManager.removeAllCursors();
+				editProject.myDataGrid.dataProvider=strArr;
+				editProject.myDataGrid1.dataProvider=afiArr;
+			});
+		}
+		 public function DeleteAddLister(event:CloseEvent):void{
+			if (event.detail==Alert.YES){
+				teamService= new TeamController();
+				CursorManager.setBusyCursor();
+				teamService.deleteProjectDetails(parseInt(myDataGrid.selectedItem.projectID),function(resultDel:Number):void{
+					if(resultDel!=0){
+						//Alert.show("Deleted successfully");
+						Alert.show(resourceManager.getString('myResources','projDelSucc'));
+						searchProjectDetails();
+					}
+					CursorManager.removeAllCursors();
+				});
+					
+			}
+			PopUpManager.removePopUp(popUpAlert);
+		}
+        
+        
+        public var popUpProgressReport:showProgressReport=new showProgressReport();
+        private function showProgressReportDetails(event:MouseEvent):void{
+        	popUpProgressReport=showProgressReport(PopUpManager.createPopUp(this,showProgressReport,true));
+        	CursorManager.setBusyCursor();
+        	teamService=new TeamController();
+        	teamService.SelectProjectProgressDetails(parseInt(myDataGrid.selectedItem.projectID),function(projectArr:Array):void{
+        		if(projectArr.length==0){
+        			Alert.show("No records found");
+        		}
+        		popUpProgressReport.myDataGrid.dataProvider=projectArr;
+        		CursorManager.removeAllCursors();
+        	});
+        }
+        
+        private function UpdateProjectDetails(event:MouseEvent):void{
+        	//if(editProject.txtprojecttitle.text!="" && editProject.dtfStartDate.text!="" &&
+	    		//editProject.dtfEndDate.text!="" && editProject.txtDesc.text!=""){
+	    			var calculation:int=editProject.hsldrOrgStrategy.value+editProject.hsldrCritrionPart.value+editProject.hsldrEase.value;
+	    				
+	    				//editProject.hsldrOrgStrategy.value*editProject.hsldrCritrionPart.value*editProject.hsldrEase.value
+	    				
+	    				//if(editProject.dtfEndDate.selectedDate>=editProject.dtfStartDate.selectedDate){
+	    					projectD0=new ProjectDo();
+				        	projectD0.projectTitle=editProject.txtprojecttitle.text;
+				    		projectD0.responsibility=parseInt(editProject.rolename.selectedItem.userID);
+				    		projectD0.startDate=editProject.dtfStartDate.text;
+				    		projectD0.endDate=editProject.dtfEndDate.text;
+				    		projectD0.description=editProject.txtDesc.text;
+				    		projectD0.expectedBenefits=editProject.txtExpectedBenefits.text;
+				    		projectD0.requiredResources=editProject.txtRequiredResources.text;
+				    		
+				    		projectD0.orgStrategy=editProject.hsldrOrgStrategy.value;
+				    		projectD0.criterionPart=editProject.hsldrCritrionPart.value;
+				    		projectD0.implementation=editProject.hsldrEase.value;
+				    		projectD0.score=(editProject.hsldrOrgStrategy.value*editProject.hsldrCritrionPart.value*editProject.hsldrEase.value);
+				    		projectD0.projectID=parseInt(myDataGrid.selectedItem.projectID);
+				    		projectD0.progressReport=editProject.txtProgressReport.text;
+				    		projectD0.userID=parseInt(Components.instance.session.userid);
+				    		projectD0.createdAt=new Date().getFullYear()+"-"+(new Date().getMonth()+1)+"-"+new Date().getDate();
+				    		
+				    		teamService=new TeamController();
+				    		//CursorManager.setBusyCursor();
+				    		teamService.UpdateProjectDetails(projectD0,function(result:Number):void{
+				    			if(result>=0){
+				    				//Alert.show("Project details updated successfully");
+				    				Alert.show(resourceManager.getString('myResources','projUpdatedSucc'));
+				    				searchProjectDetails();
+        							currentState='';
+        							this.parent.parent.parent.parent.parent.height=477;
+        							//CursorManager.removeAllCursors();
+				    			}
+				    			else if(result==-2){
+				    				//Alert.show("Selected user already assigned for some other project");
+				    				Alert.show(resourceManager.getString('myResources','selectedUserAlreadyAssigned'));
+				    			}
+				    			else{
+				    				//Alert.show("Project title already exists");
+				    				Alert.show(resourceManager.getString('myResources','projTitleAlreadyExists'));
+				    			}
+				    			CursorManager.removeAllCursors();
+				    		});
+	    		
+        }
+        
+        private function CancelEdit(event:MouseEvent):void{
+        	clear();
+        	searchProjectDetails();
+        	currentState='';
+        	this.parent.parent.parent.parent.parent.height=477;
+        }
+        private function clear():void{
+        	editProject.txtprojecttitle.text="";
+        	editProject.rolename.selectedIndex=0;
+    		editProject.dtfStartDate.text="";
+    		editProject.dtfEndDate.text="";
+    		editProject.txtDesc.text="";
+    		editProject.txtProgressReport.text="";
+   		}
+   		
+   		private var CSVStr:String ="";
+		public var fileRef:FileReference = new FileReference();
+   		private function generateXcel(event:MouseEvent):void{
+		 	exportToExcel();
+		}
+		
+		public var enablerRowCount:int;
+		private var fields:Array = new Array(); 
+        private var sheet:Sheet;
+		
+		private function exportToExcel():void{
+				
+          		var index:int=0;
+          		var columns:Array=new Array();  
+				var fieldheading:String;
+	          	var dataProviderEnablerCollection:ArrayCollection=new ArrayCollection(); 
+				var xls:ExcelFile = new ExcelFile(); 
+	          	var fr:FileReference=new FileReference();
+	            
+          		dataProviderEnablerCollection=new ArrayCollection();
+				sheet = new Sheet();
+	          	fields = new Array();
+				
+	          	dataProviderEnablerCollection = myDataGrid.dataProvider as ArrayCollection;  
+	          	enablerRowCount= dataProviderEnablerCollection.length;  
+	           	columns = myDataGrid.columns; 
+	           	
+	           	sheet.resize(dataProviderEnablerCollection.length+ 2,myDataGrid.columnCount);
+	           	
+	           	var j:int = 0;  
+	         	
+	         	for(var i:int=0;i<columns.length;i++){
+	         		//Alert.show(columns[i]["dataField"].toString());
+	         		if (columns[i]["dataField"].toString() != "prototype" && columns[i]["dataField"].toString() != "delete"){
+						fields.push(columns[i]["dataField"].toString());  
+	               		sheet.setCell(0, j,columns[i]["headerText"].toString());
+	               		j++;
+	               	}	
+				}
+	         	
+	         	for(var r:int=0; r < enablerRowCount; r++){  
+					var record:Object = dataProviderEnablerCollection.getItemAt(r);  
+	                insertRecordInSheet(r+1,sheet,record);
+				}
+	         
+	         	
+	         	//xls.toLocaleString()
+	          	xls.sheets.addItem(sheet); 
+	          	var bytes:ByteArray = xls.saveToByteArray()
+	          	fr.save(bytes,"Projects.xls"); 
+				
+		}
+		
+		
+		
+		  
+		private function insertRecordInSheet(row:int,sheet:Sheet,record:Object):void{  
+         	var i:int = 0;  
+            
+            for each(var field:String in fields){
+            	if (record[field] != null){
+            		sheet.setCell(row,i, record[field]);
+            	}
+            	i++;  
+            }
+            return;   
+		}
+		private function generateProj(event:MouseEvent):void{
+			 if(myDataGrid.dataProvider.length == 0){
+		 		//Alert.show("No Records Found");
+		 		Alert.show(resourceManager.getString('myResources','recordsNotFound'));
+		 	}
+		 	else{
+		 		CSVStr = DataGridUtil.exportDGToClipboard(myDataGrid,false,false);
+				fileRef = new FileReference();
+				fileRef.save(CSVStr,"Projects.mpp");
+				
+		 	} 
+		}
+		
+		 private function pageUP():void{
+		 	myPageableArrCol.pageUp();
+        	if(myPageableArrCol.currentPage==myPageableArrCol.pages){
+        		btnPageUp.enabled=false;
+        	}
+        	else{
+        		btnPageUp.enabled=true;
+        	}
+        	if(myPageableArrCol.currentPage>1){
+        		btnPageDown.enabled=true;
+        	}
+        	else{
+        		btnPageDown.enabled=false;
+        	}
+        }
+        private function pageDown():void{
+        	myPageableArrCol.pageDown();
+        	if(myPageableArrCol.currentPage==1){
+        		btnPageDown.enabled=false;
+        	}
+        	else{
+        		btnPageDown.enabled=true;
+        	}
+        	if(myPageableArrCol.currentPage==myPageableArrCol.pages){
+        		btnPageUp.enabled=false;
+        	}
+        	else{
+    			btnPageUp.enabled=true;
+        	}
+        }
+        public function chkPage():void{
+        	if(myPageableArrCol.currentPage==1){
+        		btnPageDown.enabled=false;
+        	}
+        	else{
+        		btnPageDown.enabled=true;
+        	}
+        	if(myPageableArrCol.currentPage==myPageableArrCol.pages){
+        		btnPageUp.enabled=false;
+        	}
+        	else{
+    			btnPageUp.enabled=true;
+        	}
+        	if(myPageableArrCol.currentPage==myPageableArrCol.pages){
+        		btnPageUp.enabled=false;
+        	}
+        	else{
+        		btnPageUp.enabled=true;
+        	}
+        	if(myPageableArrCol.currentPage>1){
+        		btnPageDown.enabled=true;
+        	}
+        	else{
+        		btnPageDown.enabled=false;
+        	}
+        	if(btnPageDown.enabled==false && btnPageUp.enabled==false){
+        		jumpPage.editable=false;
+        		jumpPage.enabled=false;
+        	}
+        	else{
+        		jumpPage.editable=true;
+        		jumpPage.enabled=true;
+        	}
+        }
+        
+        public var popupAttach:AttachmentView;
+		public function AttachFile(event:MouseEvent):void{
+			
+			popupAttach = AttachmentView(PopUpManager.createPopUp(this,AttachmentView,true));
+			popupAttach.lblEnableResult.text = "Project";
+			popupAttach.lblId.text = myDataGrid.selectedItem.projectID;
+			
+			popupAttach.txtFileName.enabled=false;
+			popupAttach.txtFiledesc.enabled=false;
+			popupAttach.btnBrowse.enabled=false;
+			popupAttach.btnSave.enabled=false;
+			popupAttach.delCol.visible=false;
+			if(Components.instance.session.userid==myDataGrid.selectedItem.responsibility){
+				popupAttach.txtFileName.enabled=true;
+				popupAttach.txtFiledesc.enabled=true;
+				popupAttach.btnBrowse.enabled=true;
+				popupAttach.btnSave.enabled=true;
+				popupAttach.delCol.visible=true;
+			}
+			teamService = new TeamController();
+			var vbox:VBox = new VBox();
+			vbox = this.parent as VBox;
+			teamService = new TeamController();
+			teamService.getProjectDocuments(myDataGrid.selectedItem.projectID,function(result:Array):void{
+				//CursorManager.removeAllCursors();
+				//Alert.show(result[0].projectdocument);
+				popupAttach.doc.dataField = "resultdocument";
+				popupAttach.desc.dataField = "resultdocumentdesc";
+				//popupAttach.myDataGrid.dataProvider = 1;
+				popupAttach.myDataGrid.dataProvider = result;
+				
+			}); 	
+			
+			//popupAttach.lblId.text = tabnavigator.selectedChild.label;
+			
+		}
+    ]]>
+    </mx:Script>
+   
+	  <mx:states>
+		<mx:State name="editProject">
+			<mx:RemoveChild	target="{displayProjects}"/>
+    		<mx:AddChild relativeTo="{maintainProjects}">
+            	 <com:setPriority id="editProject" width="100%" />
+			</mx:AddChild>
+    	</mx:State>
+    	<!--<mx:State name="">
+			<mx:RemoveChild	target="{displayProjects}"/>
+    		<mx:AddChild relativeTo="{maintainProjects}">
+            	 <com:ActionPlanProjects id="actionPlanProjects" width="100%" />
+			</mx:AddChild>
+    	</mx:State>-->
+	</mx:states>
+	
+	<mx:transitions>
+      <mx:Transition 
+                toState="editProject">
+            <mx:Fade target="{editProject}" alphaFrom="0" alphaTo="1" duration="900"/>
+        </mx:Transition>
+        <mx:Transition 
+                toState="*">
+            <mx:Fade duration="900" alphaFrom="0" alphaTo="1" target="{displayProjects}"/>
+        </mx:Transition>
+     </mx:transitions>
+	<mx:Canvas  width="100%" id="maintainProjects" verticalScrollPolicy="off" height="100%" horizontalScrollPolicy="off">
+	 <mx:VBox id="displayProjects" height="100%"  width="100%" horizontalAlign="center" verticalAlign="middle" verticalGap="3">
+	 	<mx:Spacer height="5%"/>
+	 	 <mx:HBox name="titlehbox" width="100%" horizontalAlign="center">
+       			
+       			<mx:HBox width="85%">
+       				<!--<mx:Spacer width="10%"/>
+       				<mx:Label fontWeight="bold" name="lblname" visible="false" text="@Resource(bundle='myResources', key='teamname')"/>
+       				<mx:Canvas id="canvasTeamName" visible="false" width="20%" resize="{cmbTeamName.width=canvasTeamName.width}">
+       					<mx:ComboBox id="cmbTeamName" dropdownWidth="175" labelField="teamName" width="100%"/>
+       				</mx:Canvas>-->
+       				
+       				<mx:Spacer width="10%"/>
+	       			<mx:Label fontWeight="bold" name="lblProjectName" text="@Resource(bundle='myResources', key='projName')"/>
+		   			<mx:TextInput id="txtProjectName" width="20%"/>
+	    			
+	       			<mx:Spacer width="2%"/>
+	       			<mx:Label fontWeight="bold" name="lblrolename" text="@Resource(bundle='myResources', key='priority')"/>
+		   			<mx:TextInput id="txtPriority" width="20%" restrict="0-9"/>
+	    			
+	    			<mx:Spacer width="2%"/>
+					<mx:Button label="@Resource(bundle='myResources', key='search')" name="btnsearch" toolTip="Search" click="searchProjectDetails()"/>
+       			</mx:HBox>
+	   			
+       		
+       		</mx:HBox>
+       		<mx:Spacer height="3%"/>
+	 	<mx:HBox width="95%" height="75%" horizontalAlign="center" verticalAlign="middle">
+       		<goldhold:CheckboxDataGrid id="myDataGrid" variableRowHeight="true"  itemClick="gridSelect(event)" wordWrap="true" rowCount="10" width="100%" height="100%"  allowMultipleSelection="true" draggableColumns="false">
+					<goldhold:columns>
+       					 <mx:DataGridColumn id="projectID" headerText="@Resource(bundle='myResources', key='projNo')" dataField="projectID" width="80">
+				        <mx:itemRenderer>
+	                    		<mx:Component>
+	                        		<mx:Text paddingLeft="5" text="{data.projectID}"/>
+	                    		</mx:Component>
+                			</mx:itemRenderer> 
+				        </mx:DataGridColumn>
+						<mx:DataGridColumn id="username" headerText="@Resource(bundle='myResources', key='projName')" dataField="projectTitle" width="150">
+							<mx:itemRenderer>
+                    		<mx:Component>
+                    		<mx:Text useHandCursor="true" text="{data.projectTitle}" paddingLeft="5" buttonMode="true" mouseChildren="false" selectable="true" color="#2e3c84" fontSharpness="12" textDecoration="underline">
+                			</mx:Text>
+                    		</mx:Component> 
+                			</mx:itemRenderer> 
+			        	</mx:DataGridColumn>
+			        	
+				        <mx:DataGridColumn id="role" headerText="@Resource(bundle='myResources', key='responsibility')" dataField="name" width="170">
+				        	<mx:itemRenderer>
+	                    		<mx:Component>
+	                        		<mx:Text paddingLeft="5" text="{data.name}"/>
+	                    		</mx:Component>
+                			</mx:itemRenderer>  
+				        </mx:DataGridColumn>
+				        
+				        <mx:DataGridColumn id="startDate" headerText="@Resource(bundle='myResources', key='startDate')" dataField="startDate" width="120">
+				        	<mx:itemRenderer>
+	                    		<mx:Component>
+	                        		<mx:Text paddingLeft="5" text="{data.startDate}"/>
+	                    		</mx:Component>
+                			</mx:itemRenderer> 
+                	    </mx:DataGridColumn>
+                	    
+				        <mx:DataGridColumn id="endDate" headerText="@Resource(bundle='myResources', key='endDate')" dataField="endDate" width="120">
+				        <mx:itemRenderer>
+	                    		<mx:Component>
+	                        		<mx:Text paddingLeft="5" text="{data.endDate}"/>
+	                    		</mx:Component>
+                			</mx:itemRenderer> 
+				        </mx:DataGridColumn>
+				         <mx:DataGridColumn id="teamname" visible="false" headerText="@Resource(bundle='myResources', key='teamNameHead')" dataField="teamName" width="130">
+				        <mx:itemRenderer>
+	                    		<mx:Component>
+	                        		<mx:Text paddingLeft="5" text="{data.teamName}"/>
+	                    		</mx:Component>
+                			</mx:itemRenderer> 
+				        </mx:DataGridColumn>
+				        <mx:DataGridColumn id="priority" headerText="@Resource(bundle='myResources', key='priority')" dataField="priority" width="80">
+				        <mx:itemRenderer>
+	                    		<mx:Component>
+	                        		<mx:Text paddingLeft="5" text="{data.priority}"/>
+	                    		</mx:Component>
+                			</mx:itemRenderer> 
+				        </mx:DataGridColumn>
+						
+						<mx:DataGridColumn id="status" headerText="@Resource(bundle='myResources', key='status')" dataField="status" width="110">
+				        <mx:itemRenderer>
+	                    		<mx:Component>
+	                        		<mx:Text paddingLeft="5" text="{data.status}"/>
+	                    		</mx:Component>
+                			</mx:itemRenderer> 
+				        </mx:DataGridColumn>
+				        <!-- <mx:DataGridColumn id="priority" headerText="@Resource(bundle='myResources', key='priority')" dataField="priority" width="90">
+				        <mx:itemRenderer>
+	                    		<mx:Component>
+	                        		<mx:Text paddingLeft="5" text="{data.priority}"/>
+	                    		</mx:Component>
+                			</mx:itemRenderer> 
+				        </mx:DataGridColumn>-->
+						<mx:DataGridColumn id="colDel" headerText="@Resource(bundle='myResources', key='delete')" dataField="delete" width="60">
+							<mx:itemRenderer>
+	                    		<mx:Component> 
+			                        <mx:Image scaleContent="false" horizontalAlign="center" source="@Embed('assets/newdeleteicon.png')" /> 
+	                    		</mx:Component> 
+	                		</mx:itemRenderer> 
+						</mx:DataGridColumn>
+						
+						
+						<!--<mx:DataGridColumn headerText="@Resource(bundle='myResources', key='delete')" dataField="delete" width="42">
+							<mx:itemRenderer>
+	                    		<mx:Component> 
+			                        <mx:Image scaleContent="false" horizontalAlign="center" source="@Embed('assets/newdeleteicon.png')" /> 
+	                    		</mx:Component> 
+	                		</mx:itemRenderer> 
+						</mx:DataGridColumn>-->
+						
+					</goldhold:columns>
+			</goldhold:CheckboxDataGrid>
+						
+			</mx:HBox>	
+  		    <mx:Spacer height="1%"/>
+  		
+		    <mx:HBox width="95%" horizontalAlign="center">
+				<mx:HBox width="50%" horizontalAlign="left">
+					<mx:Button useHandCursor="true" buttonMode="true" id="btnExcel" label="@Resource(bundle='myResources', key='exportToXcel')" click="generateXcel(event)"/>
+					<mx:Button useHandCursor="true"  buttonMode="true" id="btnMSProjects" label="@Resource(bundle='myResources', key='exportToProj')" click="generateProj(event)"/>
+					<mx:Button useHandCursor="true" buttonMode="true" id="btnApprove" label="@Resource(bundle='myResources', key='approve')" click="btnApproveProject()"/>
+					<mx:Button useHandCursor="true" buttonMode="true" id="btnReject" label="@Resource(bundle='myResources', key='reject')" click="btnRejectProject()"/>
+			
+				</mx:HBox>
+				
+				<mx:HBox width="50%" horizontalAlign="right">
+					<mx:Text x="532" y="28" text="Page {myPageableArrCol.currentPage} of {myPageableArrCol.pages}"/>
+			   		<mx:Label text="@Resource(bundle='myResources',key='jumpToPage')"/>
+			   		<mx:TextInput restrict="0-9" id="jumpPage" width="40" maxChars="2" />
+			   		<mx:Button skin="@Embed('assets/go.png')" click="JumptoPage()" useHandCursor="true" buttonMode="true"/>
+					<mx:Button skin="@Embed('assets/left arrow.png')" useHandCursor="true" buttonMode="true" id="btnPageDown" click="pageDown()" disabledSkin="@Embed('assets/disabledRight.png')"/>
+					<mx:Button skin="@Embed('assets/right arrow.png')" useHandCursor="true" buttonMode="true" id="btnPageUp" click="pageUP()" disabledSkin="@Embed('assets/disabledLeft.png')"/>	
+
+				</mx:HBox>
+		
+			</mx:HBox>
+			<mx:Spacer height="1%"/>
+	 </mx:VBox>
+		
+     </mx:Canvas>  		        
+</mx:Canvas>

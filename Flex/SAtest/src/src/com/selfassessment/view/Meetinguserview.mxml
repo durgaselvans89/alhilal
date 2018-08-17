@@ -1,0 +1,444 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas styleName="Childpanelstyle" 
+	xmlns:mx="http://www.adobe.com/2006/mxml"  xmlns:georg="src.com.georg.*"
+	xmlns:s="library://ns.adobe.com/flex/spark" creationComplete="init()" 
+	xmlns:com="src.com.selfassessment.view.*" height="100%" width="100%">
+	
+	<mx:Script>
+	    <![CDATA[
+	    	import mx.utils.StringUtil;
+	    	import src.com.selfassessment.controller.Components;
+	    	import flashx.textLayout.operations.SplitParagraphOperation;
+	    	import src.com.selfassessment.model.MeetingDO;
+	    	import com.boyzoid.PagableArrayCollection.PagableArrayCollection;
+	    	import src.com.selfassessment.controller.MeetingController;
+	    	import src.com.selfassessment.events.MeetingView;
+	    	import mx.managers.PopUpManager;
+	    	import mx.controls.Alert;
+	    	import mx.collections.ArrayCollection;
+	    	import mx.events.ListEvent;
+	    	import mx.core.Application;
+	    	import mx.events.CloseEvent;
+    
+	    	
+	    	[Bindable]
+			public var myPageableArrCol:PagableArrayCollection = new PagableArrayCollection();
+			
+	    	[Bindable]
+	    	public var cmbData:Array = new Array();
+	    	
+	    	[Bindable]
+	    	public var popupwindow:MeetingHints = new MeetingHints();
+	    	
+	    	[Bindable]
+	    	public var agendaArr:ArrayCollection = new ArrayCollection();
+	    	
+	    	public var meetingController:MeetingController=new MeetingController();
+	    	public function init():void {
+	    		if(Application.application.language=="en_US"){
+					mainVBox.styleName="ApplyFontSizeEn";
+				}
+				else{
+					mainVBox.styleName="ApplyFontSizeAr";
+				}
+	    		
+	    		if(Application.application.IsExecutiveMember==1){
+	    			btnSave.enabled=true;
+	    			myDataGrid.editable=true;
+	    		}
+	    		else{
+	    			btnSave.enabled=false;
+	    			myDataGrid.editable=false;
+	    		}
+	    		var searchDate:Date = new Date();
+	    		
+	    		dtfWoorderFrom.selectedDate = new Date(searchDate.getFullYear(), (searchDate.getMonth()-1),searchDate.getDate());
+	    		dtfWoorderTo.selectedDate = new Date(searchDate.getFullYear(), 11,31);
+	    		searchMeetingDetails();
+	    		currentState='';
+	    	}
+	    
+	    	private function searchMeetingDetails():void{
+	    		
+	    		var fromDate:String=dtfWoorderFrom.selectedDate.getFullYear()+"-"+(dtfWoorderFrom.selectedDate.getMonth()+1)+"-"+dtfWoorderFrom.selectedDate.getDate();
+	    		var toDate:String=dtfWoorderTo.selectedDate.getFullYear()+"-"+(dtfWoorderTo.selectedDate.getMonth()+1)+"-"+dtfWoorderTo.selectedDate.getDate();
+	    		
+	    		var frmdate:Date  = new Date();
+	    		frmdate = dtfWoorderFrom.selectedDate;
+	    		var frmdatenumber:Number = frmdate.getTime();
+	    		 
+	    		var tDate:Date = new Date();
+	    		tDate = dtfWoorderTo.selectedDate;
+	    		var tDatenumber:Number = tDate.getTime();
+	    		
+	    		if(frmdatenumber <= tDatenumber){
+		    		
+		    		var chkStatus:String;
+		    		
+		    		if(chkHistory.selected==true){
+		    			chkStatus="true";
+		    		}
+		    		else{
+		    			chkStatus="false";
+		    		}
+		    		
+		    		meetingController=new MeetingController();
+		    		meetingController.searchMeetingDtls(fromDate,toDate,chkStatus,function(resultArr:Array):void{
+		    			var meetingResultArr:Array=new Array();
+		    			if(resultArr.length==0){
+		    				Alert.show("No records found");
+		    			}
+		    			if(Application.application.IsExecutiveMember){
+		    				meetingResultArr=resultArr;
+		    			}
+		    			else{
+		    				for(var i:int=0;i<resultArr.length;i++){
+		    					if(StringUtil.trim(resultArr[i]["participants"]).length>0){
+		    						if(resultArr[i]["participants"].toString().indexOf(Components.instance.session.username+' '+Components.instance.session.surname)>-1){
+			    						meetingResultArr.push(resultArr[i]);
+			    					}
+		    					}
+		    					
+		    				}
+		    			}
+		    			myPageableArrCol=new PagableArrayCollection(meetingResultArr);
+		    			myPageableArrCol.itemsPerPage=parseInt(((myDataGrid.height-25)/30).toString());
+		    			myDataGrid.dataProvider=null;
+		    			myDataGrid.dataProvider=myPageableArrCol;
+		    			chkPage();
+		    		});
+	    		}
+	    		else{
+	    			Alert.show("From date should be less than to date");
+	    		}
+	    		
+	    	}
+	    	
+	    	private function pageDown():void{
+	        	 myPageableArrCol.pageDown();
+	        	if(myPageableArrCol.currentPage==1){
+	        		btnPageDown.enabled=false;
+	        	}
+	        	else{
+	        		btnPageDown.enabled=true;
+	        	}
+	        	if(myPageableArrCol.currentPage==myPageableArrCol.pages){
+	        		btnPageUp.enabled=false;
+	        	}
+	        	else{
+	    			btnPageUp.enabled=true;
+	        	} 
+	        }
+	        
+	        private function pageUP():void{
+			 	myPageableArrCol.pageUp();
+	        	if(myPageableArrCol.currentPage==myPageableArrCol.pages){
+	        		btnPageUp.enabled=false;
+	        	}
+	        	else{
+	        		btnPageUp.enabled=true;
+	        	}
+	        	if(myPageableArrCol.currentPage>1){
+	        		btnPageDown.enabled=true;
+	        	}
+	        	else{
+	        		btnPageDown.enabled=false;
+	        	}
+	        }
+	        private function JumptoPage():void{
+	        	 if(jumpPage.text != ""  && Number(jumpPage.text) != 0  && jumpPage.enabled){
+				 	if(Number(jumpPage.text)>myPageableArrCol.pages){
+				 		//Alert.show("No Records Available");
+				 		
+						Alert.show(resourceManager.getString('myResources','pageNotFound'));
+						jumpPage.text=myPageableArrCol.currentPage.toString();
+				 	}
+				 	else{
+		        		myPageableArrCol.currentPage = Number(jumpPage.text);
+		    		}
+	    		}
+	    		else{
+	    			//Alert.show(resourceManager.getString('myResources','validNum'));
+	    			if(jumpPage.enabled)
+    				Alert.show(resourceManager.getString('myResources','validNum'));
+	    		}
+	    		chkPage(); 
+			}
+		
+		public function chkPage():void{
+        	if(myPageableArrCol.currentPage==1){
+        		btnPageDown.enabled=false;
+        	}
+        	else{
+        		btnPageDown.enabled=true;
+        	}
+        	if(myPageableArrCol.currentPage==myPageableArrCol.pages){
+        		btnPageUp.enabled=false;
+        	}
+        	else{
+    			btnPageUp.enabled=true;
+        	}
+        	if(myPageableArrCol.currentPage==myPageableArrCol.pages){
+        		btnPageUp.enabled=false;
+        	}
+        	else{
+        		btnPageUp.enabled=true;
+        	}
+        	if(myPageableArrCol.currentPage>1){
+        		btnPageDown.enabled=true;
+        	}
+        	else{
+        		btnPageDown.enabled=false;
+        	}
+        	if(btnPageDown.enabled==false && btnPageUp.enabled==false){
+        		jumpPage.editable=false;
+        		jumpPage.enabled=false;
+        	}
+        	else{
+        		jumpPage.editable=true;
+        		jumpPage.enabled=true;
+        	}
+        }
+        
+        public function gridClickEvent(event:ListEvent):void{
+        	if(event.columnIndex==0 || event.columnIndex==1 || event.columnIndex==2 || event.columnIndex==3 || event.columnIndex==4){
+        		currentState = "MeetingAgenda";
+        		meetingAgendaView.txtMeetingOrganiser.text=myDataGrid.selectedItem.organiser;
+        		meetingAgendaView.txtVenue.text=myDataGrid.selectedItem.meetingvenue;
+        		var meetingDate:String=myDataGrid.selectedItem.meetingdatetime.toString().split(' ')[0];
+        		Application.application.meetingDate=DateField.stringToDate(meetingDate,"DD-MM-YYYY");
+        		meetingAgendaView.txtDateTime.text=myDataGrid.selectedItem.meetingdatetime;
+        		meetingAgendaView.myDatagrid.dataProvider=null;
+        		meetingAgendaView.pointsDataGrid.dataProvider = null;
+						
+        		meetingController = new MeetingController();
+        		meetingController.searchAgendaDtls(parseInt(myDataGrid.selectedItem.meetingid),function(resultArr:Array):void{
+        			
+        			//Alert.show( myDataGrid.selectedItem.meetingid + "Meetingid");
+        			//meetingAgendaView.changeUserList();
+        			meetingAgendaView.myDatagrid.dataProvider=resultArr;
+        			
+        			if(resultArr.length!=0){
+	    					meetingAgendaView.mainagendaArr=new ArrayCollection(resultArr);
+	    					meetingAgendaView.mainagendaArr.addItem({sno:"",meetingid:myDataGrid.selectedItem.meetingid,discussionPoints:"",duration:"",percentage:"Add New"});
+					}
+	    			else{
+	    					meetingAgendaView.mainagendaArr=new ArrayCollection();
+							meetingAgendaView.mainagendaArr.addItem({sno:"1",meetingid:myDataGrid.selectedItem.meetingid,discussionPoints:"",duration:"",percentage:""});
+							meetingAgendaView.mainagendaArr.addItem({sno:"",meetingid:myDataGrid.selectedItem.meetingid,discussionPoints:"",duration:"",percentage:"Add New"});
+					}
+        			
+        			meetingAgendaView.btnBack.addEventListener(MouseEvent.CLICK,backScreen);
+        			
+        			meetingController=new MeetingController();
+	    			
+        			//Alert.show( myDataGrid.selectedItem.meetingid + "Meetingid" + "agenda" + resultArr[0]["agendaid"] );
+        			
+	    			meetingController.selectPoints(parseInt(myDataGrid.selectedItem.meetingid),parseInt(resultArr[0]["agendaid"]),function(resultPointsArr:Array):void{
+	    				meetingAgendaView.gridCompletion();
+	    				if(resultPointsArr.length!=0){
+	    					meetingAgendaView.pointArr=new ArrayCollection(resultPointsArr);
+	    					meetingAgendaView.pointArr.addItem({sno:"",deliverables:"",responsibility:"",expiredate:"",completiondate:"",responsename:"",status:"Add New"});
+	    				}
+	    				else{
+	    					//Alert.show(resultPointsArr.length.toString());
+	    					meetingAgendaView.pointArr=new ArrayCollection();
+							meetingAgendaView.pointArr.addItem({sno:"1",meetingid:"",agendaid:"",pointsid:"",deliverables:"",responsibility:"",expiredate:"",completiondate:"",responsename:"",status:""});
+							meetingAgendaView.pointArr.addItem({sno:"",meetingid:"",agendaid:"",pointsid:"",deliverables:"",responsibility:"",expiredate:"",completiondate:"",responsename:"",status:"Add New"});
+						}
+	    				Application.application.meetingID=parseInt(myDataGrid.selectedItem.meetingid);
+	    				meetingAgendaView.meetingID=parseInt(myDataGrid.selectedItem.meetingid);
+    					Application.application.agendaID=parseInt(resultArr[0]["agendaid"]);
+    					//Alert.show(Application.application.meetingID+" - "+Application.application.agendaID);
+    					meetingAgendaView.pointsDataGrid.dataProvider = meetingAgendaView.pointArr;
+						meetingAgendaView.pointsDataGrid.rowCount = meetingAgendaView.pointArr.length-1;
+			    		meetingAgendaView.lblDiscussionPts.text = "Deliverables per Agenda item - " + resultArr[0]["discussionPoints"];
+	    			    
+	    			});
+	    		});
+        	}
+        }
+        
+        
+        private function backScreen(event:MouseEvent):void{
+        	if(Application.application.IsExecutiveMember==1){
+        		Alert.show("Do you want to save the meeting points?","",Alert.YES|Alert.NO,this,backScreenconfirm);
+        	}
+        	else{
+        		currentState="";
+        		searchMeetingDetails();
+        	}
+        }
+        
+        private function backScreenconfirm(event:CloseEvent):void{
+        	
+        	if(event.detail==Alert.YES){
+        		meetingAgendaView.savePointsDetails();
+        	}
+        	currentState="";
+        	searchMeetingDetails();
+        	
+        }
+        
+			
+        
+        private function saveStatus():void{
+        	var meetingDO:MeetingDO=new MeetingDO();
+        	var meetingArr:Array=new Array();
+        	for(var i:int=0;i<myPageableArrCol.length;i++){
+        		meetingDO=new MeetingDO();
+        		meetingDO.meetingid=myPageableArrCol[i]["meetingid"];
+        		meetingDO.meetingstatus=myPageableArrCol[i]["meetingstatus"];
+        		//Alert.show(meetingDO.meetingstatus);
+        		meetingArr.push(meetingDO);
+        	}
+        	meetingController=new MeetingController();
+        	meetingController.updateMeetingStatus(meetingArr,function(resultNum:Number):void{
+        		if(resultNum>=0){
+        			Alert.show("Status updated successfully");
+        		}
+        	});
+        }
+	    ]]>
+    </mx:Script>
+    <mx:states>
+    	<mx:State name="MeetingAgenda">
+    		<mx:RemoveChild target="{mainVBox}"/>
+    		<mx:AddChild relativeTo="{mainView}">
+    			<com:MeetingAgendaView id="meetingAgendaView" width="100%" height="100%"/>
+    		</mx:AddChild>
+    	</mx:State>
+    </mx:states>
+    <mx:transitions>
+      <mx:Transition 
+                toState="MeetingAgenda">
+            <mx:Fade target="{meetingAgendaView}" alphaFrom="0" alphaTo="1" duration="900"/>
+        </mx:Transition>
+        <mx:Transition 
+                toState="*">
+            <mx:Fade duration="900" alphaFrom="0" alphaTo="1" target="{mainVBox}"/>
+        </mx:Transition>
+     </mx:transitions>
+    <mx:Style>
+    	.myAlert{
+    		direction:ltr;
+    		layout-direction:ltr;
+			color : #0f3177;
+			title-style-name : "alertTitle";
+			header-height:19;
+			border-thickness: 1;
+			drop-shadow-enabled: true;
+			drop-shadow-color :#d1ddf7;
+			background-color: #ffffff;
+			corner-radius :6;
+			border-style :solid;
+			header-colors : #90a4d1, #5970a0;
+			footer-colors : #9db6d9, #ffffff;
+			border-color : #5970a0;
+			text-align :left;
+		}
+		.alertTitle{
+			font-family :Verdana;
+			font-size :10;
+			font-weight :bold;
+			text-align :left;
+			color :#ffffff;
+		}
+    </mx:Style>
+	 
+	<mx:Canvas width="100%" verticalScrollPolicy="off" id="mainView" height="100%" horizontalScrollPolicy="off">
+		<mx:VBox id="mainVBox" styleName="ApplyFontSize" horizontalAlign="center" verticalGap="3" width="100%" height="100%">
+            
+            <mx:Spacer height="5%"/>
+			<mx:HBox width="85%" horizontalAlign="center" verticalAlign="middle">
+       			<mx:Spacer width="10%"/>
+       			<mx:Label fontWeight="bold" name="lblFromdate" text="@Resource(bundle='myResources', key='fromdate')"/>
+				<mx:DateField yearNavigationEnabled="true" id="dtfWoorderFrom" width="13%" formatString="DD-MM-YYYY"/>
+
+    			<mx:Label fontWeight="bold" name="lblTodate" text="@Resource(bundle='myResources', key='todate')"/>
+    			<mx:DateField yearNavigationEnabled="true" id="dtfWoorderTo" width="13%" formatString="DD-MM-YYYY" styleName="bgcolor"/>
+    			
+    			<mx:CheckBox id="chkHistory" label="History" selected="false"/>
+    			<mx:Button label="@Resource(bundle='myResources', key='search')" name="btnsearch" toolTip="Search" click="searchMeetingDetails()"/>
+			</mx:HBox>
+       			
+       		<mx:Spacer height="3%"/>
+			
+       		<mx:HBox width="90%" height="75%" horizontalAlign="center">
+       			<mx:DataGrid itemClick="gridClickEvent(event)" id="myDataGrid" editable="true" wordWrap="true" variableRowHeight="true" width="100%" height="100%" allowMultipleSelection="true" draggableColumns="false">
+					<mx:columns>
+			        	<mx:DataGridColumn editable="false" id="sno" headerText="S.No" dataField="sno" width="35">
+			        		<mx:itemRenderer>
+			        			<mx:Component>
+			        				<mx:Text paddingLeft="5" text="{data.sno}" buttonMode="true" mouseChildren="false" selectable="true" fontSharpness="12"/>
+			        			</mx:Component>
+			        		</mx:itemRenderer>
+			        	</mx:DataGridColumn>
+			        	<mx:DataGridColumn editable="false" wordWrap="true" id="datetime" headerText="Meeting Date" dataField="meetingdatetime" width="80">
+							<mx:itemRenderer>
+			        			<mx:Component>
+			        				<mx:Text paddingLeft="5" text="{data.meetingdatetime}" buttonMode="true" mouseChildren="false" selectable="true" fontSharpness="12"/>
+			        			</mx:Component>
+			        		</mx:itemRenderer>			        		
+			        	</mx:DataGridColumn>
+				        <mx:DataGridColumn editable="false" id="meetingsubject" wordWrap="true" headerText="@Resource(bundle='myResources', key='meetingsubject')" dataField="meetingname" width="245">
+				        	<mx:itemRenderer>
+			        			<mx:Component>
+			        				<mx:Text paddingLeft="5" text="{data.meetingname}" buttonMode="true" mouseChildren="false" selectable="true" fontSharpness="12"/>
+			        			</mx:Component>
+			        		</mx:itemRenderer>	
+				        </mx:DataGridColumn>
+				        <mx:DataGridColumn editable="false" wordWrap="true" id="venue" headerText="@Resource(bundle='myResources', key='venue')" dataField="meetingvenue" width="50">
+				        	<mx:itemRenderer>
+			        			<mx:Component>
+			        				<mx:Text paddingLeft="5" text="{data.meetingvenue}" buttonMode="true" mouseChildren="false" selectable="true" fontSharpness="12"/>
+			        			</mx:Component>
+			        		</mx:itemRenderer>	
+				        </mx:DataGridColumn>
+                	    <mx:DataGridColumn editable="false" wordWrap="true" id="meetingduration" headerText="@Resource(bundle='myResources', key='meetingduration')" dataField="meetingduration" width="50">
+                	    	<mx:itemRenderer>
+			        			<mx:Component>
+			        				<mx:Text paddingLeft="5" text="{data.meetingduration}" buttonMode="true" mouseChildren="false" selectable="true" fontSharpness="12"/>
+			        			</mx:Component>
+			        		</mx:itemRenderer>	
+                	    </mx:DataGridColumn>
+                	    <mx:DataGridColumn  wordWrap="true" id="status" headerText="Status" dataField="meetingstatus" editable="true" width="40">
+                	    	<mx:itemRenderer>
+                	    		<mx:Component>
+                	    			<mx:Text paddingLeft="5" text="{data.meetingstatus}"/>
+                	    		</mx:Component>
+                	    	</mx:itemRenderer>
+                	    	<mx:itemEditor>
+			        			<mx:Component>
+			        				<mx:ComboBox  editable="true" selectedItem="{data.meetingstatus}">
+	                                   		<mx:dataProvider>
+	                                            <mx:String>Open</mx:String>
+	                                            <mx:String>Closed</mx:String>
+                                       		 </mx:dataProvider>
+                               			 </mx:ComboBox>
+			        			</mx:Component>
+			        		</mx:itemEditor>
+                	    </mx:DataGridColumn>
+					</mx:columns>
+			    </mx:DataGrid>
+			</mx:HBox>
+				
+			<mx:Spacer height="1%"/>
+  		    <mx:HBox width="90%" height="5%" horizontalAlign="right" verticalAlign="middle">
+       			<mx:Text x="532" y="28" text="Page {myPageableArrCol.currentPage} of {myPageableArrCol.pages}"/>
+       			<mx:Label text="@Resource(bundle='myResources', key='jmpToPage')"/>
+       			<mx:TextInput restrict="0-9" id="jumpPage" width="40" maxChars="2" />
+       			<mx:Button skin="@Embed('assets/go.png')" click="JumptoPage()" useHandCursor="true" buttonMode="true"/>
+				<mx:Button skin="@Embed('assets/left arrow.png')" useHandCursor="true" buttonMode="true" id="btnPageDown" click="pageDown()" disabledSkin="@Embed('assets/disabledRight.png')"/>
+				<mx:Button skin="@Embed('assets/right arrow.png')" useHandCursor="true" buttonMode="true" id="btnPageUp" click="pageUP()" disabledSkin="@Embed('assets/disabledLeft.png')"/>
+				<mx:Button id="btnSave" label="Save" click="saveStatus()"/>	
+			</mx:HBox>
+  		    
+  		    <mx:Spacer height="1%"/>
+		</mx:VBox>
+	</mx:Canvas>
+	
+        
+		
+</mx:Canvas>
+

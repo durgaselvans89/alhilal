@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+	
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%">
+
+
+ <mx:Script>
+        <![CDATA[
+        
+            [Bindable]
+            public var selectedNode:XML;
+
+            // Event handler for the Tree control change event.
+            public function treeChanged(event:Event):void {
+                selectedNode=Tree(event.target).selectedItem as XML;
+            }
+        ]]>
+    </mx:Script>
+
+    <mx:XMLList id="treeData">
+        <node label="Mail Box">
+            <node label="Project Description"/>
+            <node label="Criteria"/>
+            <node label="Project Team"/>
+            <node label="Project Plan"/>
+            <node label="Project Charter"/>
+            <node label="Sub-Team assessment"/>
+            <node label="Executive team review"/>
+            <node label="Action plan"/>
+            <node label="Score report"/>
+            <node label="Linkage report"/>
+            <node label="Summary report"/>
+            <node label="Admin"/>
+            <node label="Help"/>
+            <node label="About self assessment"/>
+            <node label="Close"/>
+        </node>    
+    </mx:XMLList>
+    
+	<mx:Panel layout="vertical" color="0x323232" borderAlpha="0.15" width="100%" height="100%"
+         paddingTop="10" paddingRight="10" paddingBottom="10" paddingLeft="10" horizontalAlign="center">
+ 
+        <mx:HDividedBox width="100%" height="100%" color="0x323232">
+            <mx:Tree id="myTree" width="100%" height="100%" labelField="@label"
+                showRoot="false" dataProvider="{treeData}" change="treeChanged(event)"/>
+        </mx:HDividedBox>
+        
+    </mx:Panel>
+    
+ </mx:Canvas>
+
+    

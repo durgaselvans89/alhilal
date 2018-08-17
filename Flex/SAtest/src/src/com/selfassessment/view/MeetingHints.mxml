@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" y="{(Application.application.height/2)-(this.height/2)}" 
+	x="{(Application.application.width/2)-(this.width/2)}" xmlns:georg="src.com.georg.*" width="500" height="400" creationComplete="init()">
+
+	<mx:Script>
+		<![CDATA[
+			import mx.controls.CheckBox;
+			import mx.core.Application;
+			import mx.states.SetStyle;
+			
+			public function init():void{
+				/* var cmbArray:Array = new Array();
+				cmbArray.push("Dr Lway");
+				cmbArray.push("Dr Lway"); */
+				var arr:Array=new Array();
+				arr.push("Dr Lway","John","Michael Wiltson","Nausheen","Marwan Al Hashimi");
+				/* arr.push("John");
+				arr.push("Michael Wiltson");
+			 	arr.push("Nausheen");
+				arr.push("Al Hashimi");
+				arr.push("Marwan Hashimi"); */
+				/* cmbResponsibility.dataProvider = arr; */
+				
+				for(var i:int=0;i<arr.length;i++){
+					var chk:CheckBox = new CheckBox();
+					chk.label = arr[i];
+					mainBox.addChild(chk);
+				}
+				
+				var searchDate:Date = new Date();
+				dtfclosingdate.selectedDate = new Date(searchDate.getFullYear(), (searchDate.getMonth()),searchDate.getDate());
+			}
+			
+		]]>
+	</mx:Script>
+	
+	<mx:VBox borderStyle="solid" height="100%" verticalGap="0" borderThickness="3" shadowDistance="8" shadowDirection="right" dropShadowEnabled="true" dropShadowColor="#000000" borderColor="#636e83" width="100%" horizontalAlign="center" verticalAlign="top" styleName="ApplyFontSize" backgroundColor="white">
+		<mx:Canvas width="100%" useHandCursor="true" buttonMode="true" mouseDown="{this.startDrag()}" mouseUp="{this.stopDrag()}" height="25" styleName="panel1filled"  borderSides="left,right,top" cornerRadius="3" borderStyle="none">
+			<mx:Label left="10" fontWeight="bold"  id="lblTitle" text="@Resource(bundle='myResources', key='hints')" color="#FFFFFF" fontSize="14"/>
+			<mx:Image toolTip="Close" right="2" top="2" source="@Embed('assets/close.png')" useHandCursor="true" buttonMode="true" id="btnClose"/>
+		</mx:Canvas>
+		
+	<mx:VBox width="100%" height="100%">
+		
+		<mx:Spacer height="3%"/>
+		<mx:HBox width="90%" height="30%">
+		<mx:Spacer width="1%"/>
+		<mx:Text fontWeight="bold" id="lbl1" text="@Resource(bundle='myResources', key='docdiscussion')" width="35%"/>
+		<mx:TextInput id="txt1" width="80%" height="90%"/>
+		</mx:HBox>
+		
+		<mx:Spacer width="3%"/>
+		<mx:HBox width="90%" height="30%">
+		<mx:Spacer width="1%"/>		
+		<mx:Text fontWeight="bold" id="lbl2" text="@Resource(bundle='myResources', key='deliverables')" width="35%"/>
+		<mx:TextInput id="txt2" width="80%" height="90%"/>
+		</mx:HBox>
+		
+		<!--<mx:Spacer width="3%"/>
+		<mx:HBox width="90%" height="30%">
+		<mx:Spacer width="1%"/>		
+		<mx:Text fontWeight="bold" id="lbl3" text="@Resource(bundle='myResources', key='agreedaction')" width="35%"/>
+		<mx:TextInput id="txt3" width="80%" height="90%"/>
+		</mx:HBox>-->
+		
+		<mx:Spacer width="3%"/>
+		<mx:HBox width="90%" height="30%">
+		<mx:Spacer width="1%"/>
+		<mx:Text fontWeight="bold" id="lbl4" text="Responsibility" width="35%"/>
+		<mx:Box id="mainBox" height="80%" borderStyle="solid" width="80%"/>
+		</mx:HBox>
+		
+		<mx:Spacer width="3%"/>
+		<mx:HBox width="90%" height="30%">
+		<mx:Spacer width="1%"/>		
+		<mx:Text fontWeight="bold" id="lbl5" text="@Resource(bundle='myResources', key='hintsdate')" width="35%"/>
+		<mx:Canvas id="canvasToDate" width="40%" resize="dtfclosingdate.width = canvasToDate.width">
+			<georg:DateTimeField yearNavigationEnabled="true" width="100%" id="dtfclosingdate" formatString="DD-MM-YYYY" styleName="bgcolor"/>
+		</mx:Canvas>
+		</mx:HBox>
+				
+		<mx:HBox width="100%" height="5%">
+			<mx:Spacer width="70%"/>
+			<mx:Button id="btnsave" width="7%" label="Save" useHandCursor="true" buttonMode="true"/>	
+		</mx:HBox>
+		
+		<mx:Spacer height="2%"/>
+		
+    </mx:VBox>
+   </mx:VBox>
+</mx:Canvas>

@@ -1,0 +1,984 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Panel styleName="Childpanelstyle" xmlns:flexlib="http://code.google.com/p/flexlib/" xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute"
+	 width="100%" xmlns:com="src.com.selfassessment.view.*" creationComplete="init()" height="100%">
+	 
+	<mx:Style source="src/com/selfassessment/view/assets/Styles.css"/>	
+
+	<mx:Script>
+        <![CDATA[
+        	import flexlib.controls.tabBarClasses.SuperTab;
+            import mx.collections.ArrayCollection;
+            import src.com.selfassessment.model.LoginDO;
+            
+            
+            [Bindable]
+            private var products:ArrayCollection;
+                
+        ]]>
+    </mx:Script>
+	 
+	<mx:Script>
+		<![CDATA[
+			import mx.containers.TabNavigator;
+			import flashx.textLayout.factory.TruncationOptions;
+			import src.com.selfassessment.model.TeamAssessmentDO;
+			import mx.events.CloseEvent;
+			import src.com.selfassessment.model.ResultAssessmentDO;
+			import com.boyzoid.PagableArrayCollection.PagableArrayCollection;
+			import mx.core.Application;
+			import mx.managers.PopUpManager;
+			import mx.events.ListEvent;
+			import src.com.selfassessment.model.EnablerAssessmentDO;
+			import src.com.selfassessment.view.*;
+			import src.com.selfassessment.events.UserEventConstants;
+			import flash.events.Event;
+ 			import flash.net.URLLoader;
+        	import flash.net.URLRequest;
+        	import flash.events.MouseEvent;
+        	import src.com.selfassessment.view.criteria1a;
+        	import mx.controls.Alert;
+        	import src.com.selfassessment.events.CriteriaEvent
+			
+			[Bindable]
+        	private var xmlLoader:URLLoader;
+			
+			[Bindable]
+        	public var myDataObject:Object;
+			
+        	public function buttonclick(event:Event):void {
+        		dispatchEvent(new UserEventConstants(UserEventConstants.create_new));
+        	}
+        	
+        	private function creationCompleteHandler(event:Event):void {
+    			myDataObject = XML(xmlLoader.data);
+    		}
+    		
+    		public function ContentPage(event:Event):void {
+//    			Alert.show("Hello");
+    			var choosenChild:String = event.type;
+				
+				if(null != choosenChild) {
+					var childIndex:int = 0;
+					
+					vertical.removeChildAt(childIndex);
+					vertical.activeEffects;
+    				
+	    			var newChildView:executiveview = new executiveview();
+	    			vertical.addChildAt(newChildView,0);
+	   			}
+    		}
+    		
+    		
+			import src.com.selfassessment.controller.TeamController;
+	        import flash.events.TextEvent;
+	        import mx.controls.Alert;
+	        import src.com.selfassessment.events.GuideLinesEvent;
+	        import src.com.selfassessment.events.CriteriaEvent;
+	        
+	        import mx.collections.ArrayCollection;
+	        import mx.controls.*;
+	        import src.com.selfassessment.view.*;
+			import src.com.selfassessment.events.UserEventConstants;
+			import flash.events.Event;
+	 		import flash.net.URLLoader;
+	        import flash.net.URLRequest;
+	        import flash.events.MouseEvent;
+			import flash.events.TextEvent;
+			import src.com.selfassessment.controller.Components;
+			import src.com.selfassessment.controller.Controller;
+			import src.com.selfassessment.controller.CustomerController;
+	        
+	        import mx.managers.CursorManager;
+	        
+	        [Bindable]
+	        public var CriteriaService:TeamController = new TeamController();
+			public var criteriadesc:String;
+	    	public var selectedNode:XML;
+	    	public var criteriadata:Array;
+	    	private var numChild:Number = 5; 
+	    	
+			
+			private function initializeHandler():void {
+	
+	 			xmlLoader = new URLLoader();
+	            xmlLoader.addEventListener(Event.COMPLETE, completeHandler);
+	                        
+	            var uri:URLRequest = new URLRequest("com/selfassessment/view/team.xml");
+				xmlLoader.load(uri);
+	    	}
+	    	
+	    	private function completeHandler(event:Event):void {
+				trace( xmlLoader.data );
+	    	}
+	    	
+	
+	
+	        public function linkHandler(event:TextEvent):void {
+	        	
+	        	var str:String = event.text;
+	  			
+	  			if(str == 'Guidance'){
+	  				dispatchEvent(new GuideLinesEvent(GuideLinesEvent.guide_select));
+	  			}
+	        }
+	        
+	        public function clickEvent(evt:Event):void {
+	        	dispatchEvent(new CriteriaEvent(CriteriaEvent.criteriaevent_select));
+	        }
+	        public var InitStatus:Boolean = false;
+			public function init():void {
+				InitStatus = true;
+				//if(Components.instance.session.roleid < "5"){
+					CursorManager.setBusyCursor();
+					CriteriaService.GetcriteriaList(function(criteriaArray:Array):void{
+						
+						CursorManager.removeBusyCursor();
+						criteriadata = new Array();
+						
+						criteriadata = criteriaArray;
+						
+						addTab();
+						
+					});
+				//}
+				
+				
+	         }
+	        public var criteriapartArr:Array = new Array();
+			public var crit:executiveteamCriteria = new executiveteamCriteria();
+			public function addTab():void {
+					
+				var myArray:Array = new Array();
+				
+				var criteriaDesc:Array = new Array();
+				
+				var criteriaid:Array = new Array();
+				criteriapartArr = new Array();
+				criteriapartArr = new Array();
+				var vbox:VBox = new VBox();
+				vbox = this.parent as VBox;
+				var ParentBox:executiveteamassessmentview = new executiveteamassessmentview();
+				ParentBox = this.parent.parent.parent.parent as executiveteamassessmentview;
+				CriteriaService.getCriteriaList(parseInt(Components.instance.session.userid),parseInt(Components.instance.session.roleid),function(criteriaList:String):void{
+					criteriapartArr=criteriaList.split(',');
+					var flag:Boolean = false;
+					var TryFlag:Boolean = false;
+					
+					 for(var i:int = 0; i < criteriadata.length; i++){
+						if(vbox.id.toString() == "boxResults"){
+							if(criteriadata[i].criteriashortpartid.toString().toLowerCase() != "6a"){
+								if(TryFlag==false)
+									flag = true;
+							} 
+							else if(criteriadata[i].criteriashortpartid.toString().toLowerCase() == "6a"){
+								TryFlag= true;
+								flag=false;
+							}
+							
+						}
+						if(flag==false){
+							criteriaid.push(criteriadata[i].criterionid);
+							myArray.push(criteriadata[i].criteriashortpartid);
+							criteriaDesc.push(criteriadata[i].criteriadesc);
+						}
+						
+						if(vbox.id.toString() == "boxEnabler"){
+							 if(criteriadata[i].criteriashortpartid.toString().toLowerCase() == "5e"){
+								flag = true;
+								
+							} 
+						}
+							
+					}
+					tabnavigator.removeAllChildren();
+					//Alert.show(myArray.length.toString());
+					for(var j:int = 0; j < myArray.length; j++){
+						 
+						var newVBox:executiveteamCriteria = new executiveteamCriteria();
+						numChild = tabnavigator.numChildren + 1;
+						
+						newVBox.label = myArray[j];
+						//newVBox.criteriadesc = criteriaDesc[j];
+						newVBox.criteriadesc = myArray[j]+" : "+ resourceManager.getString('myResources','definition') +" - "+ criteriaDesc[j];
+						newVBox.alerttext = criteriaid[j];
+						newVBox.Tablebel = "("+myArray[j]+")";
+						if(vbox.id.toString() == "boxEnabler"){
+						 	newVBox.strEnterApproach = resourceManager.getString('myResources','enterApproachEnabler');
+						 	newVBox.strApproach = resourceManager.getString('myResources','approachStringEnabler');
+						 	newVBox.strTitle = resourceManager.getString('myResources','titleofApproachEnabler');
+						 	newVBox.strDgcTitle = resourceManager.getString('myResources','titleEnabler');
+						 	newVBox.relevancecritical = resourceManager.getString('myResources','relevanceCriticalEnabler');
+						 	newVBox.approachtolink =resourceManager.getString('myResources','approachlinkEnabler');
+						 	newVBox.other = resourceManager.getString('myResources','otherApproachLinkEnabler');
+						 }
+						 else{
+						 	newVBox.strEnterApproach = resourceManager.getString('myResources','enterApproachResult');
+						 	newVBox.strApproach = "";
+							newVBox.strTitle = resourceManager.getString('myResources','titleofApproachResult');
+						 	newVBox.strDgcTitle = resourceManager.getString('myResources','titleResult');
+						 	
+						 	newVBox.relevancecritical = resourceManager.getString('myResources','relevanceCriticalResult');
+						 	newVBox.approachtolink = resourceManager.getString('myResources','approachlinkResult');
+						 	newVBox.other = resourceManager.getString('myResources','otherApproachLinkResult');
+						 }
+						tabnavigator.addChild(newVBox);
+						newVBox.lblCritID.text=criteriaid[j];
+
+					
+						
+					}
+					
+					
+					tabnavigator.selectedIndex = 0;
+					
+					CursorManager.removeAllCursors();
+					crit = tabnavigator.selectedChild as executiveteamCriteria;
+					//crit.myDataGrid.addEventListener(ListEvent.ITEM_CLICK,EnablerResultDetail);
+					CriteriaService = new TeamController();
+					CursorManager.setBusyCursor();
+					if(Application.application.IsExecutiveMember==1){
+						crit.exeCommCol.visible=true;
+						crit.exeCommCol.width=80;
+					}
+					else{
+						crit.exeCommCol.visible=false;
+						crit.exeCommCol.width=0;
+					}
+					CriteriaService=new TeamController();
+					CriteriaService.getGuidance(crit.alerttext,function(guidanceArray:Array):void{
+						crit.criteriaArray=guidanceArray;
+					});
+					if(vbox.id.toString() == "boxResults"){
+						CriteriaService.selectResultAssessment(Application.application.selectedLocation,crit.lblCritID.text,function(criteriaArray:Array):void{
+							crit.myPageableArrCol = new PagableArrayCollection(criteriaArray);
+							for(var i:int=0;i<crit.myPageableArrCol.length;i++){
+								if(crit.myPageableArrCol[i]["approachtolink"].toString()=="Link"){
+									crit.myPageableArrCol[i]["approachtolink"]=="Not assigned";
+								}
+							}
+							crit.myPageableArrCol.itemsPerPage =10;
+							crit.myDataGrid.dataProvider = crit.myPageableArrCol;
+							//crit.chkPage();
+							CursorManager.removeBusyCursor();
+							/* if(Application.application.IsExecutiveMember==1){
+								crit.myDataGrid.addEventListener(ListEvent.ITEM_CLICK,EnablerResultDetail);
+							}
+							else{
+								for(var cri:int=0;cri<criteriapartArr.length;cri++){
+									
+								 	if(criteriapartArr[cri]== "6a"){
+								 		crit.myDataGrid.addEventListener(ListEvent.ITEM_CLICK,EnablerResultDetail);
+								 	}
+								 }
+							} */
+							//crit.myDataGrid.addEventListener(ListEvent.ITEM_CLICK,EnablerResultDetail);
+//							
+						});
+					}
+					else{
+						CriteriaService.selectSubAssessment(Application.application.selectedLocation,crit.lblCritID.text,function(criteriaArray:Array):void{
+							crit.myPageableArrCol = new PagableArrayCollection(criteriaArray);
+							for(var i:int=0;i<crit.myPageableArrCol.length;i++){
+								if(crit.myPageableArrCol[i]["approachtolink"].toString()=="Link"){
+									crit.myPageableArrCol[i]["approachtolink"]=="Not assigned";
+								}
+							}
+							crit.myPageableArrCol.itemsPerPage =10;
+							crit.myDataGrid.dataProvider = crit.myPageableArrCol;
+							//crit.chkPage();
+							CursorManager.removeBusyCursor();
+							
+//							
+						});
+					}
+					if(Application.application.IsExecutiveMember==1){
+						crit.myDataGrid.addEventListener(ListEvent.ITEM_CLICK,EnablerResultDetail);
+						crit.lblShowComments.visible=true;
+						crit.lblShowComments.addEventListener(MouseEvent.CLICK,showOverAllComments);
+					}
+					else{
+						crit.lblShowComments.visible=false;
+						for(var cri:int=0;cri<criteriapartArr.length;cri++){
+							//Alert.show(criteriapartArr[cri].toString())
+						 	if(((criteriapartArr[cri]== "1a") || (vbox.id.toString() == "boxResults" && criteriapartArr[cri]== "6a")) && tabnavigator.selectedIndex==0){
+						 		crit.myDataGrid.addEventListener(ListEvent.ITEM_CLICK,EnablerResultDetail);
+						 	}
+						 }
+					}
+					if(tabnavigator.selectedChild.label == "1a" || tabnavigator.selectedChild.label == "1b" || tabnavigator.selectedChild.label == "1c"
+					|| tabnavigator.selectedChild.label == "1d" || tabnavigator.selectedChild.label == "1e"){
+						ParentBox.SelectedCriteria = resourceManager.getString('myResources','leadership');
+					}
+					else if(tabnavigator.selectedChild.label == "2a" || tabnavigator.selectedChild.label == "2b" || tabnavigator.selectedChild.label == "2c"
+					|| tabnavigator.selectedChild.label == "2d" ){
+						ParentBox.SelectedCriteria = resourceManager.getString('myResources','policyAndStrategy');
+					}
+					else if(tabnavigator.selectedChild.label == "3a" || tabnavigator.selectedChild.label == "3b" || tabnavigator.selectedChild.label == "3c"
+					|| tabnavigator.selectedChild.label == "3d" || tabnavigator.selectedChild.label == "3e"){
+						ParentBox.SelectedCriteria = resourceManager.getString('myResources','people');
+					}
+					else if(tabnavigator.selectedChild.label == "4a" || tabnavigator.selectedChild.label == "4b" || tabnavigator.selectedChild.label == "4c"
+					|| tabnavigator.selectedChild.label == "4d" || tabnavigator.selectedChild.label == "4e"){
+						ParentBox.SelectedCriteria = resourceManager.getString('myResources','patnership');
+					}
+					
+					else if(tabnavigator.selectedChild.label == "5a" || tabnavigator.selectedChild.label == "5b" || tabnavigator.selectedChild.label == "5c"
+					|| tabnavigator.selectedChild.label == "5d" || tabnavigator.selectedChild.label == "5e"){
+						ParentBox.SelectedCriteria = resourceManager.getString('myResources','processes');
+					}
+					
+					else if(tabnavigator.selectedChild.label == "6a" || tabnavigator.selectedChild.label == "6b"){
+						ParentBox.SelectedCriteria = resourceManager.getString('myResources','customerResults');
+					}
+					else if(tabnavigator.selectedChild.label == "7a" || tabnavigator.selectedChild.label == "7b"){
+						ParentBox.SelectedCriteria = resourceManager.getString('myResources','peopleResults');
+					}
+					else if(tabnavigator.selectedChild.label == "8a" || tabnavigator.selectedChild.label == "8b"){
+						ParentBox.SelectedCriteria = resourceManager.getString('myResources','societyResults');
+					}
+					else if(tabnavigator.selectedChild.label == "9a" || tabnavigator.selectedChild.label == "9b"){
+						ParentBox.SelectedCriteria = resourceManager.getString('myResources','keyPerformance');
+					}
+					
+				});
+				
+				
+				
+			}
+			
+			public var popupwindow:SubteamEnablerDetails;
+			public var popupResult:SubteamResultDetail;
+			public var popupLinkage:LinkageCriteria;
+			public var popupComments:executiveTeamComments;
+			public var popUpViewComments:viewExeCommentsDetails;
+			public var popupAttach:AttachmentView;
+			public function EnablerResultDetail(event:ListEvent):void{
+				//Alert.show("Function Calling");
+			    var criteriaLinkTo:Array=new Array();
+				var tab:TabNavigator = new TabNavigator();
+				tab = this.parent.parent as TabNavigator;
+				
+				
+				if(event.columnIndex == 1){
+					if(tab.selectedChild.label == "Enabler"){ 
+						
+						popupwindow = SubteamEnablerDetails(PopUpManager.createPopUp(this,SubteamEnablerDetails,true));
+						popupwindow.width=screen.width - 150;
+						popupwindow.height=screen.height - 75;
+						popupwindow.vboxFooter.visible=false;
+						popupwindow.critId.enabled = false;
+						popupwindow.enablerId.enabled = false;
+						popupwindow.txtAreaTitleappro.enabled = false;
+						popupwindow.Criterionpart.enabled = false;
+						popupwindow.OtherCriterionpart.enabled = false;
+						popupwindow.Titleofapproach.enabled = false;
+						popupwindow.Missrad1.enabled = false;
+						popupwindow.Missrad2.enabled = false;
+						popupwindow.txtEvidence.enabled = false;
+						popupwindow.txtEvidenceAppro.enabled = false;
+						popupwindow.txtEvidenceAppro2.enabled = false;
+						popupwindow.txtsourceInfo.enabled = false; 
+						//popupwindow.txtbest.enabled = false; 
+						//popupwindow.txtAreas.enabled = false; 
+						popupwindow.txtScore.enabled = false; 
+						popupwindow.Soundrational.enabled = false; 
+						popupwindow.Implemented.enabled = false; 
+						popupwindow.Integrated.enabled = false; 
+						popupwindow.Systematic.enabled = false; 
+						popupwindow.Measurement.enabled = false; 
+						popupwindow.Learning.enabled = false; 
+						popupwindow.Improvement.enabled = false; 
+						popupwindow.cmbRelevence.enabled =  false;
+						popupwindow.cmbRelevencedeli.enabled = false;
+						popupwindow.rgp.enabled=false;
+						popupwindow.rgp2.enabled=false;
+						popupwindow.rgp3.enabled=false;
+						popupwindow.rgp4.enabled=false;
+						popupwindow.rgp5.enabled=false;
+						popupwindow.rgp6.enabled=false;
+						popupwindow.rgp7.enabled=false;
+						popupwindow.rgp8.enabled=false;
+						 popupwindow.critId.text = tabnavigator.selectedChild.label.toString();
+						popupwindow.enablerId.text = crit.myDataGrid.selectedItem.enablerID.toString();
+						popupwindow.txtAreaTitleappro.text = crit.myDataGrid.selectedItem.approachTitle.toString();
+						popupwindow.Criterionpart.text = crit.lblcriteriadesc.text;
+						popupwindow.OtherCriterionpart.text = resourceManager.getString('myResources','otherCriterionPartLinkTo')+tabnavigator.selectedChild.label+")";
+						popupwindow.Titleofapproach.text = resourceManager.getString('myResources','titleOfApproachPart')+tabnavigator.selectedChild.label+")";
+						
+						if(crit.myDataGrid.selectedItem.missing.toString() == "Yes"){
+							popupwindow.Missrad1.selected= true;
+							popupwindow.Missrad2.selected= false;
+						}
+						else{
+							popupwindow.Missrad2.selected= true;
+							popupwindow.Missrad1.selected= false;
+						}
+						
+						popupwindow.txtEvidence.text = crit.myDataGrid.selectedItem.approachdesc.toString();
+						popupwindow.txtEvidenceAppro.text = crit.myDataGrid.selectedItem.deployment.toString();
+						popupwindow.txtEvidenceAppro2.text = crit.myDataGrid.selectedItem.assessmentandreview.toString();
+						popupwindow.txtsourceInfo.text = crit.myDataGrid.selectedItem.sourceofinformation.toString();
+						
+						Application.application.RelivanceSelected1 = crit.myDataGrid.selectedItem.relevancetothiscriterionpart.toString();
+						Application.application.RelivanceSelected2 = crit.myDataGrid.selectedItem.directrelavancetodelivering.toString();
+						
+						Application.application.RGPSelected1 = crit.myDataGrid.selectedItem.soundrational.toString();
+						Application.application.RGPSelected2 = crit.myDataGrid.selectedItem.integrated.toString();
+						Application.application.RGPSelected3 = crit.myDataGrid.selectedItem.implemented.toString();
+						Application.application.RGPSelected4 = crit.myDataGrid.selectedItem.systematic.toString();
+						Application.application.RGPSelected5 = crit.myDataGrid.selectedItem.measurement.toString();
+						Application.application.RGPSelected6 = crit.myDataGrid.selectedItem.improvement.toString();
+						Application.application.RGPSelected7 = crit.myDataGrid.selectedItem.learning.toString();
+						
+						//popupwindow.txtbest.text = crit.myDataGrid.selectedItem.strength.toString();
+						//popupwindow.txtAreas.text = crit.myDataGrid.selectedItem.areaforimprovement.toString();
+						popupwindow.txtScore.text = crit.myDataGrid.selectedItem.score;
+						
+						popupwindow.btnSave.addEventListener(MouseEvent.CLICK,UpdateEnabler);
+						
+						
+						popupwindow.txtAreaTitleappro.setStyle('fontWeight','bold');
+						popupwindow.txtEvidence.setStyle('fontWeight','bold');
+						popupwindow.txtEvidenceAppro.setStyle('fontWeight','bold');
+						popupwindow.txtEvidenceAppro2.setStyle('fontWeight','bold');
+						popupwindow.txtsourceInfo.setStyle('fontWeight','bold');
+						//popupwindow.txtbest.setStyle('fontWeight','bold');
+						//popupwindow.txtAreas.setStyle('fontWeight','bold');
+						popupwindow.otherCriteria.text=crit.myDataGrid.selectedItem.otherapproachlinkto;
+						popupwindow.imgClose.addEventListener(MouseEvent.CLICK,closePopupWindow);
+						
+					}
+					else if(tab.selectedChild.label == "Results"){
+						popupResult = SubteamResultDetail(PopUpManager.createPopUp(this,SubteamResultDetail,true));
+						popupResult.width=screen.width - 150;
+						popupResult.height=screen.height - 75;
+						popupResult.critId.enabled = false; 
+						popupResult.resultId.enabled = false; 
+						popupResult.btnSave.visible = false; 
+						popupResult.txtMainresult.enabled = false; 
+						
+						popupResult.Missrad1.enabled = false; 
+						popupResult.Missrad2.enabled = false; 
+						popupResult.Relevence.enabled =false;
+						popupResult.Segmentation.enabled = false;
+						popupResult.Integrity.enabled = false;
+						popupResult.Trends.enabled = false;
+						popupResult.Target.enabled = false;
+						popupResult.Comparisons.enabled = false;
+						popupResult.Causes.enabled = false;
+						popupResult.cmbRelevence.enabled = false; 
+						popupResult.cmbRelevencedeli.enabled = false; 
+						popupResult.lblSysGenScore.enabled = false; 
+						popupResult.txtScore.enabled = false; 
+						popupResult.Missrad2.enabled = false; 
+						popupResult.Missrad1.enabled = false; 
+						popupResult.txtScore.enabled = false; 
+						popupResult.myDataGridStrength.enabled = false; 
+						popupResult.myDataGridAFI.enabled = false; 
+						popupResult.txtScore.enabled = false; 
+						popupResult.rgp.enabled=false;
+						popupResult.rgp2.enabled=false;
+						popupResult.rgp3.enabled=false;
+						popupResult.rgp4.enabled=false;
+						popupResult.rgp5.enabled=false;
+						popupResult.rgp6.enabled=false;
+						popupResult.rgp7.enabled=false;
+						popupResult.rgp8.enabled=false;
+						popupResult.txtAreaTitleappro.enabled = false;
+						
+						popupResult.critId.text = tabnavigator.selectedChild.label.toString();
+						popupResult.resultId.text = crit.myDataGrid.selectedItem.resultassessmentid;
+						//popupResult.btnSave.addEventListener(MouseEvent.CLICK,saveResultData);
+						popupResult.txtMainresult.text = crit.myDataGrid.selectedItem.approachTitle;
+						//Alert.show(crit.myDataGrid.selectedItem.resultsegments.toString());
+						popupResult.txtAreaTitleappro.text = crit.myDataGrid.selectedItem.resultsegments;
+						if(crit.myDataGrid.selectedItem.missing == "Yes"){
+							popupResult.Missrad1.selected= true;
+							popupResult.Missrad2.selected= false;
+						}
+						else{
+							popupResult.Missrad2.selected= true;
+							popupResult.Missrad1.selected= false;
+						}
+						Application.application.RelivanceSelected1 = crit.myDataGrid.selectedItem.relevancetothiscriterionpart;
+						Application.application.RelivanceSelected2 = crit.myDataGrid.selectedItem.directrelavancetodelivering;
+						Application.application.RGPSelected1 = crit.myDataGrid.selectedItem.scope;
+						Application.application.RGPSelected2 = crit.myDataGrid.selectedItem.segmentation;
+						Application.application.RGPSelected3 = crit.myDataGrid.selectedItem.trends;
+						Application.application.RGPSelected4 = crit.myDataGrid.selectedItem.targets;
+						Application.application.RGPSelected5 = crit.myDataGrid.selectedItem.comparisons;
+						Application.application.RGPSelected6 = crit.myDataGrid.selectedItem.causes;
+						
+					//	popupResult.txtbest.text = crit.myDataGrid.selectedItem.strength.toString();
+						//popupResult.txtAreas.text = crit.myDataGrid.selectedItem.areasforimprovement.toString();
+						popupResult.txtScore.text = crit.myDataGrid.selectedItem.score;
+						//popupResult.txtAreas.setStyle('fontWeight','bold');
+						popupResult.txtMainresult.setStyle('fontWeight','bold');
+						popupResult.txtScore.setStyle('fontWeight','bold');
+						//popupResult.txtbest.setStyle('fontWeight','bold');
+						popupResult.txtAreaTitleappro.setStyle('fontWeight','bold');
+						
+						popupResult.txtMainresult.setStyle('color','black');
+						popupResult.txtScore.setStyle('color','black');
+						popupResult.txtAreaTitleappro.setStyle('color','black');
+						
+						popupResult.imgClose.addEventListener(MouseEvent.CLICK,closePopupResult);
+						//popupResult.txtbest.setStyle('color','black');
+						//popupResult.txtAreas.setStyle('color','black');
+					}
+				}
+				else if(event.columnIndex == 5){
+					popUpViewComments = viewExeCommentsDetails(PopUpManager.createPopUp(this,viewExeCommentsDetails,true));
+					CriteriaService = new TeamController();
+					CriteriaService.viewExeComments(crit.myDataGrid.selectedItem.criteriaID.toString(),function(commentsResArr:Array):void{
+						if(commentsResArr.length!=0){
+							popUpViewComments.myDataGrid.dataProvider=commentsResArr;
+						}
+						else{
+							//Alert.show("No records found");
+							Alert.show(resourceManager.getString('myResources','recordsNotFound'));
+						}
+					});
+				}
+				else if(event.columnIndex == 6){
+					popupComments = executiveTeamComments(PopUpManager.createPopUp(this,executiveTeamComments,true));
+					CriteriaService=new TeamController();
+					popupComments.lblApproachTitle.text=crit.myDataGrid.selectedItem.approachTitle.toString();
+					popupComments.btnAdd.addEventListener(MouseEvent.CLICK,insertComments);
+					
+					if (LoginDO.getInstance().roleid < "5" ){
+						popupComments.txtSubComments.visible = false;
+						popupComments.lblSubComments.visible = false;
+						popupComments.txtSubComments.height = 0;
+						popupComments.txtComments.height = 120;
+					    	
+					}
+					else if  (LoginDO.getInstance().roleid == "5" ){
+						popupComments.lblComments.visible = false;
+					    popupComments.txtComments.visible = false;
+					    popupComments.txtSubComments.height = 120;
+					    popupComments.txtComments.height = 0;
+					    
+						
+					}else  {
+						popupComments.txtSubComments.visible = false;
+						popupComments.lblSubComments.visible = false;
+						popupComments.lblComments.visible = false;
+					    popupComments.txtComments.visible = false;
+						popupComments.txtSubComments.height = 0;
+						popupComments.txtComments.height = 0;
+					    
+					}
+				}
+				
+			}
+			private var popupOverAllComments:ViewOverAllComments;
+			private function showOverAllComments(event:MouseEvent):void{
+				popupOverAllComments=ViewOverAllComments(PopUpManager.createPopUp(this,ViewOverAllComments,true));
+				CriteriaService=new TeamController();
+				CriteriaService.viewOverAllComments(parseInt(crit.lblCritID.text),function(commentsArr:Array):void{
+					popupOverAllComments.myDataGrid.dataProvider=commentsArr;
+				});
+			}
+			private function closePopupWindow(event:MouseEvent):void{
+				PopUpManager.removePopUp(popupwindow);
+			}
+			private function closePopupResult(event:MouseEvent):void{
+				PopUpManager.removePopUp(popupResult);
+			}
+			private function insertComments(event:MouseEvent):void{
+				var tab:TabNavigator = new TabNavigator();
+				tab = this.parent.parent as TabNavigator;
+				var approachID:int;
+				var criteriaID:int;
+				var approachTitle:String;
+				
+				var enablerCom:EnablerAssessmentDO = new EnablerAssessmentDO();
+				if(popupComments.txtComments.text!=""){
+					criteriaID=parseInt(crit.lblCritID.text);
+					approachTitle=crit.myDataGrid.selectedItem.criteriaID.toString();
+					if(tab.selectedChild.label == "Enabler"){
+						approachID=parseInt(crit.myDataGrid.selectedItem.enablerID.toString());
+					}
+					else{
+						approachID=parseInt(crit.myDataGrid.selectedItem.resultassessmentid.toString());
+					}
+					CriteriaService = new TeamController();
+					CriteriaService.AddComments(approachID,criteriaID,parseInt(Components.instance.session.userid.toString()),parseInt(Components.instance.session.roleid.toString()),popupComments.txtComments.text,approachTitle,popupComments.txtSubComments.text,function(status:Number):void{
+						cursorManager.setBusyCursor();
+						//Alert.show("status - "+status.toString());
+						if(status==1){
+							Alert.show(resourceManager.getString('myResources','commentsUpdatedSucc'));
+							cursorManager.removeBusyCursor();
+							PopUpManager.removePopUp(popupComments);
+						}
+						
+					});
+				}
+				else{
+					Alert.show(resourceManager.getString('myResources','enterAllDet'));
+				}
+				
+		}
+		
+		
+		
+		public function AttachFile(event:MouseEvent):void{
+			popupAttach = AttachmentView(PopUpManager.createPopUp(this,AttachmentView,true));
+			CriteriaService = new TeamController();
+			var vbox:VBox = new VBox();
+			vbox = this.parent as VBox;
+			if(vbox.id.toString() == "boxResults"){
+				popupAttach.lblEnableResult.text = resourceManager.getString('myResources','resultComTitle');
+				CursorManager.setBusyCursor();
+				popupAttach.doc.dataField = "resultdocument";
+				popupAttach.desc.dataField = "resultdocumentdesc";
+				CriteriaService.selectResultDocument(tabnavigator.selectedChild.label,function(criteriaArray:Array):void{
+					CursorManager.removeAllCursors();
+					popupAttach.myDataGrid.dataProvider = criteriaArray;
+				});
+			}
+			else{
+				popupAttach.lblEnableResult.text = resourceManager.getString('myResources','enablerComTitle');
+				popupAttach.doc.dataField = "enablerdocument";
+				popupAttach.desc.dataField = "enablerdocumentdesc";
+				CursorManager.setBusyCursor();
+				CriteriaService.selectEnablerDocument(tabnavigator.selectedChild.label,function(criteriaArray:Array):void{
+					CursorManager.removeAllCursors();
+					popupAttach.myDataGrid.dataProvider = criteriaArray;
+				});
+			}
+			popupAttach.lblId.text = tabnavigator.selectedChild.label;
+			
+		} 
+		
+		
+		public var averageStr:Number = 0;
+		public function Changefn():void{
+			//Alert.show(tabnavigator.cursorManager.currentCursorXOffset.toString())
+			var vbox:VBox = new VBox();
+			vbox = this.parent as VBox;
+			//crit = tabnavigator.selectedChild as criteria1a;
+			crit = tabnavigator.selectedChild as executiveteamCriteria;
+			//crit.lblAdd.addEventListener(MouseEvent.CLICK,CreateSubteam);
+			
+			//crit = tabnavigator.selectedChild as criteria1a;
+			crit = tabnavigator.selectedChild as executiveteamCriteria;
+			CriteriaService=new TeamController();
+			CriteriaService.getGuidance(crit.alerttext,function(guidanceArray:Array):void{
+				crit.criteriaArray=guidanceArray;
+			});
+			CriteriaService = new TeamController();
+			//crit.btnCritSave.addEventListener(MouseEvent.CLICK,updateCriteriaPartScore);
+			CursorManager.setBusyCursor();
+			if(vbox.id.toString() == "boxResults"){
+				CriteriaService.selectResultAssessment(Application.application.selectedLocation,crit.lblCritID.text,function(criteriaArray:Array):void{
+					crit.myPageableArrCol = new PagableArrayCollection(criteriaArray);
+					for(var i:int=0;i<crit.myPageableArrCol.length;i++){
+								if(crit.myPageableArrCol[i]["approachtolink"].toString()=="Link"){
+									crit.myPageableArrCol[i]["approachtolink"]=="Not assigned";
+								}
+					}
+					crit.myPageableArrCol.itemsPerPage =10;
+					crit.myDataGrid.dataProvider = crit.myPageableArrCol;
+					//crit.chkPage();
+					CursorManager.removeBusyCursor();
+					//crit.lblAdd.addEventListener(MouseEvent.CLICK,CreateSubteam);
+					//crit.lblAttach.addEventListener(MouseEvent.CLICK,AttachFile);
+					if(Application.application.IsExecutiveMember==1){
+						crit.myDataGrid.addEventListener(ListEvent.ITEM_CLICK,EnablerResultDetail);
+					}
+					else{
+						for(var cri:int=0;cri<criteriapartArr.length;cri++){
+							//Alert.show(criteriapartArr[cri]+"\n"+tabnavigator.selectedChild.label);
+						 	if(criteriapartArr[cri]== tabnavigator.selectedChild.label){
+						 		crit.myDataGrid.addEventListener(ListEvent.ITEM_CLICK,EnablerResultDetail);
+						 	}
+						 }
+					}
+					// crit.myDataGrid.addEventListener(ListEvent.ITEM_CLICK,EnablerResultDetail);
+//					averageStr = parseInt(criteriaArray[criteriaArray.length-1]["average"].toString());
+//					crit.txtAverage.text = numberFormatter.format((averageStr/criteriaArray.length)).toString();
+				});
+			}
+			else{
+				CriteriaService.selectSubAssessment(Application.application.selectedLocation,crit.lblCritID.text,function(criteriaArray:Array):void{
+					crit.myPageableArrCol = new PagableArrayCollection(criteriaArray);
+					for(var i:int=0;i<crit.myPageableArrCol.length;i++){
+								if(crit.myPageableArrCol[i]["approachtolink"].toString()=="Link"){
+									crit.myPageableArrCol[i]["approachtolink"]=="Not assigned";
+								}
+					}
+					crit.myPageableArrCol.itemsPerPage =10;
+					crit.myDataGrid.dataProvider = crit.myPageableArrCol;
+					//crit.chkPage();
+					CursorManager.removeBusyCursor();
+					//crit.lblAdd.addEventListener(MouseEvent.CLICK,CreateSubteam);
+					//crit.lblAttach.addEventListener(MouseEvent.CLICK,AttachFile);
+					if(Application.application.IsExecutiveMember==1){
+						crit.myDataGrid.addEventListener(ListEvent.ITEM_CLICK,EnablerResultDetail);
+					}
+					else{
+						for(var cri:int=0;cri<criteriapartArr.length;cri++){
+							//Alert.show(criteriapartArr[cri]+"\n"+tabnavigator.selectedChild.label);
+						 	if(criteriapartArr[cri]== tabnavigator.selectedChild.label){
+						 		crit.myDataGrid.addEventListener(ListEvent.ITEM_CLICK,EnablerResultDetail);
+						 	}
+						 }
+					}
+//					averageStr = parseInt(criteriaArray[criteriaArray.length-1]["average"].toString());
+//					crit.txtAverage.text = numberFormatter.format((averageStr/criteriaArray.length)).toString();
+				});
+			}
+			
+			var ParentBox:executiveteamassessmentview = new executiveteamassessmentview();
+				ParentBox = this.parent.parent.parent.parent as executiveteamassessmentview;
+				if(tabnavigator.selectedChild.label == "1a" || tabnavigator.selectedChild.label == "1b" || tabnavigator.selectedChild.label == "1c"
+				|| tabnavigator.selectedChild.label == "1d" || tabnavigator.selectedChild.label == "1e"){
+					ParentBox.SelectedCriteria = resourceManager.getString('myResources','leadership');
+				}
+				else if(tabnavigator.selectedChild.label == "2a" || tabnavigator.selectedChild.label == "2b" || tabnavigator.selectedChild.label == "2c"
+				|| tabnavigator.selectedChild.label == "2d" ){
+					ParentBox.SelectedCriteria = resourceManager.getString('myResources','policyAndStrategy');
+				}
+				else if(tabnavigator.selectedChild.label == "3a" || tabnavigator.selectedChild.label == "3b" || tabnavigator.selectedChild.label == "3c"
+				|| tabnavigator.selectedChild.label == "3d" || tabnavigator.selectedChild.label == "3e"){
+					ParentBox.SelectedCriteria = resourceManager.getString('myResources','people');
+				}
+				else if(tabnavigator.selectedChild.label == "4a" || tabnavigator.selectedChild.label == "4b" || tabnavigator.selectedChild.label == "4c"
+				|| tabnavigator.selectedChild.label == "4d" || tabnavigator.selectedChild.label == "4e"){
+					ParentBox.SelectedCriteria = resourceManager.getString('myResources','patnership');
+				}
+				
+				else if(tabnavigator.selectedChild.label == "5a" || tabnavigator.selectedChild.label == "5b" || tabnavigator.selectedChild.label == "5c"
+				|| tabnavigator.selectedChild.label == "5d" || tabnavigator.selectedChild.label == "5e"){
+					ParentBox.SelectedCriteria = resourceManager.getString('myResources','processes');
+				}
+				
+				else if(tabnavigator.selectedChild.label == "6a" || tabnavigator.selectedChild.label == "6b"){
+					ParentBox.SelectedCriteria = resourceManager.getString('myResources','customerResults');
+				}
+				else if(tabnavigator.selectedChild.label == "7a" || tabnavigator.selectedChild.label == "7b"){
+					ParentBox.SelectedCriteria = resourceManager.getString('myResources','peopleResults');
+				}
+				else if(tabnavigator.selectedChild.label == "8a" || tabnavigator.selectedChild.label == "8b"){
+					ParentBox.SelectedCriteria = resourceManager.getString('myResources','societyResults');
+				}
+				else if(tabnavigator.selectedChild.label == "9a" || tabnavigator.selectedChild.label == "9b"){
+					ParentBox.SelectedCriteria = resourceManager.getString('myResources','keyPerformance');
+				}
+		}
+		
+		
+		
+		public function UpdateEnabler(event:MouseEvent):void{
+			popupwindow.ScoreFn();
+			if(popupwindow.txtScore.text != ""){
+					var customerService:TeamController = new TeamController();
+					CriteriaService = new TeamController();
+					CursorManager.setBusyCursor();
+					var enableAss:EnablerAssessmentDO = new EnablerAssessmentDO();
+					
+					enableAss.criteriaID = crit.label.toString();
+				//enableAss.enablerID = 1;
+				enableAss.approachTitle  = popupwindow.txtAreaTitleappro.text;
+				if(popupwindow.Missrad1.selected)
+					enableAss.missing = "1";
+				else
+					enableAss.missing = "0";
+					enableAss.enablerID = parseInt(popupwindow.enablerId.text);
+					enableAss.approachdesc=popupwindow.txtEvidence.text;
+					enableAss.exampleofapproach="";
+					enableAss.deployment=popupwindow.txtEvidenceAppro.text;
+					enableAss.examplesofdeployment="";
+					enableAss.assessmentandreview= popupwindow.txtEvidenceAppro2.text;
+					enableAss.examplesofassessmentreview="";
+					enableAss.sourceofinformation= popupwindow.txtsourceInfo.text;
+					enableAss.soundrational= popupwindow.rgp2.selectedValue.toString();
+					enableAss.integrated= popupwindow.rgp3.selectedValue.toString();;
+					enableAss.implemented= popupwindow.rgp4.selectedValue.toString();
+					enableAss.systematic= popupwindow.rgp5.selectedValue.toString();
+					enableAss.measurement= popupwindow.rgp6.selectedValue.toString();
+					enableAss.learning= popupwindow.rgp8.selectedValue.toString();
+					enableAss.improvement= popupwindow.rgp7.selectedValue.toString();
+					enableAss.strength= "";
+					enableAss.areaforimprovement= "";
+					enableAss.teamtype="";
+					enableAss.score= parseFloat(popupwindow.txtScore.text);
+					enableAss.systemgeneratedscore="";
+					enableAss.presented="";
+					enableAss.directrelavancetodelivering=popupwindow.cmbRelevencedeli.selectedLabel;
+					enableAss.relevancetothiscriterionpart=popupwindow.cmbRelevence.selectedLabel;
+					enableAss.approachtolink="";
+					enableAss.status="";
+					enableAss.enablerdocument="";
+				//	Alert.show(enableAss.criteriaID.toString());
+					customerService.updateEnablerAssessment(enableAss, function(resStatus:Number):void{
+							CursorManager.removeAllCursors();
+							if(resStatus == 1){
+								//Alert.show("Enabler Information Updated Successfully");
+								Alert.show(resourceManager.getString('myResources','enablerUpdatedSucc'));
+								
+								CriteriaService.selectSubAssessment(Application.application.selectedLocation,crit.lblCritID.text,function(criteriaArray:Array):void{
+									crit.myPageableArrCol = new PagableArrayCollection(criteriaArray);
+									for(var i:int=0;i<crit.myPageableArrCol.length;i++){
+										if(crit.myPageableArrCol[i]["approachtolink"].toString()=="Link"){
+											crit.myPageableArrCol[i]["approachtolink"]=="Not assigned";
+										}
+									}
+									crit.myPageableArrCol.itemsPerPage =10;
+									crit.myDataGrid.dataProvider = crit.myPageableArrCol;
+									//crit.chkPage();
+									CursorManager.removeBusyCursor();
+									//crit.lblAdd.addEventListener(MouseEvent.CLICK,CreateSubteam);
+									//crit.lblAttach.addEventListener(MouseEvent.CLICK,AttachFile);
+									/* for(var cri:int=0;cri<criteriapartArr.length;cri++){
+									 	if(criteriapartArr[cri]== tabnavigator.selectedChild.label){
+									 		crit.myDataGrid.addEventListener(ListEvent.ITEM_CLICK,EnablerResultDetail);
+									 	}
+									 } */
+									PopUpManager.removePopUp(popupwindow);
+								});
+								
+							}
+							else{
+								//Alert.show("Enabler Information Updated Successfully");
+								Alert.show(resourceManager.getString('myResources','enablerUpdatedSucc'));
+								CriteriaService.selectSubAssessment(Application.application.selectedLocation,crit.lblCritID.text,function(criteriaArray:Array):void{
+									crit.myPageableArrCol = new PagableArrayCollection(criteriaArray);
+									for(var i:int=0;i<crit.myPageableArrCol.length;i++){
+										if(crit.myPageableArrCol[i]["approachtolink"].toString()=="Link"){
+											crit.myPageableArrCol[i]["approachtolink"]=="Not assigned";
+										}
+									}
+									crit.myPageableArrCol.itemsPerPage =10;
+									crit.myDataGrid.dataProvider = crit.myPageableArrCol;
+									//crit.chkPage();
+									CursorManager.removeBusyCursor();
+									//crit.lblAdd.addEventListener(MouseEvent.CLICK,CreateSubteam);
+									//crit.lblAttach.addEventListener(MouseEvent.CLICK,AttachFile);
+									/* for(var cri:int=0;cri<criteriapartArr.length;cri++){
+									 	if(criteriapartArr[cri]== tabnavigator.selectedChild.label){
+									 		crit.myDataGrid.addEventListener(ListEvent.ITEM_CLICK,EnablerResultDetail);
+									 	}
+									 } */
+									PopUpManager.removePopUp(popupwindow);
+								});
+							}
+							if(Application.application.IsExecutiveMember==1){
+								crit.myDataGrid.addEventListener(ListEvent.ITEM_CLICK,EnablerResultDetail);
+							}
+							else{
+								for(var cri:int=0;cri<criteriapartArr.length;cri++){
+									//Alert.show(criteriapartArr[cri]+"\n"+tabnavigator.selectedChild.label);
+								 	if(criteriapartArr[cri]== tabnavigator.selectedChild.label){
+								 		crit.myDataGrid.addEventListener(ListEvent.ITEM_CLICK,EnablerResultDetail);
+								 	}
+								 }
+							}
+							
+						});	
+//						crit.btnCritSave.addEventListener(MouseEvent.CLICK,updateCriteriaPartScore);
+				}
+			}
+			
+			public function saveResultData(event:MouseEvent):void{
+				popupResult.ScoreFn();
+				if(popupResult.txtScore.text != ""){
+				var customerService:TeamController = new TeamController();
+				CursorManager.setBusyCursor();
+				var resultAss:ResultAssessmentDO = new ResultAssessmentDO();
+				
+				resultAss.criteriaID = crit.label.toString();
+			//enableAss.enablerID = 1;
+			resultAss.result_name  = popupResult.txtMainresult.text;
+			
+			if(popupResult.Missrad1.selected)
+				resultAss.presented = "1";
+			else
+				resultAss.presented = "0";
+			
+			resultAss.resultsegments = 	popupResult.txtAreaTitleappro.text;
+			resultAss.relevancetothiscriterionpart = popupResult.cmbRelevence.selectedLabel;
+			resultAss.directrelavancetodelivering = popupResult.cmbRelevencedeli.selectedLabel;
+			resultAss.scope = popupResult.rgp2.selectedValue.toString();
+			resultAss.segmentation = popupResult.rgp3.selectedValue.toString();
+			resultAss.trends = popupResult.rgp4.selectedValue.toString();
+			resultAss.targets = popupResult.rgp5.selectedValue.toString();
+			resultAss.comparisons = popupResult.rgp6.selectedValue.toString();
+			resultAss.causes = popupResult.rgp7.selectedValue.toString();
+			resultAss.strength = "";
+			resultAss.areasforimprovement = "";
+			resultAss.systemgeneratedscore = popupResult.strAvgScore;
+			resultAss.score = parseFloat(popupResult.txtScore.text);
+			resultAss.resultassessmentid = parseInt(popupResult.resultId.text);
+			
+			resultAss.teamtype = "";
+			resultAss.sourceofinformation = "";
+			//	Alert.show(enableAss.criteriaID.toString());
+			CriteriaService = new TeamController();
+				customerService.updateResultAssessment(resultAss, function(resStatus:Number):void{
+					
+					if(resStatus == 1){
+						//Alert.show("Result Information Updated Successfully");
+						Alert.show(resourceManager.getString('myResources','resultUpdatedSucc'));
+						CriteriaService.selectResultAssessment(Application.application.selectedLocation,crit.lblCritID.text,function(criteriaArray:Array):void{
+							crit.myPageableArrCol = new PagableArrayCollection(criteriaArray);
+							crit.myPageableArrCol.itemsPerPage =10;
+							crit.myDataGrid.dataProvider = crit.myPageableArrCol;
+							//crit.chkPage();
+							//crit.textArea.text = "";
+							CursorManager.removeBusyCursor();
+							/* for(var cri:int=0;cri<criteriapartArr.length;cri++){
+							 	if(criteriapartArr[cri]== tabnavigator.selectedChild.label){
+							 		crit.myDataGrid.addEventListener(ListEvent.ITEM_CLICK,EnablerResultDetail);
+							 	}
+							 } */
+							 if(Application.application.IsExecutiveMember==1){
+								crit.myDataGrid.addEventListener(ListEvent.ITEM_CLICK,EnablerResultDetail);
+							}
+							else{
+								for(var cri:int=0;cri<criteriapartArr.length;cri++){
+									//Alert.show(criteriapartArr[cri]+"\n"+tabnavigator.selectedChild.label);
+								 	if(criteriapartArr[cri]== tabnavigator.selectedChild.label){
+								 		crit.myDataGrid.addEventListener(ListEvent.ITEM_CLICK,EnablerResultDetail);
+								 	}
+								 }
+							}
+							PopUpManager.removePopUp(popupResult);
+						});
+						
+					}
+					else{
+						//Alert.show("Please try Again");
+						Alert.show(resourceManager.getString('myResources','plsTryAgain'));
+					}
+					CursorManager.removeAllCursors();
+					
+				});	
+				}
+				//crit.btnCritSave.addEventListener(MouseEvent.CLICK,updateCriteriaPartScore);
+			}
+			
+		]]>
+	</mx:Script>
+	<mx:NumberFormatter id="numberFormatter" precision="2" 
+        useThousandsSeparator="true" useNegativeSign="true"/>
+
+	<mx:VBox name="topvbox"  width="100%" height="100%" id="vertical">
+	  
+		<mx:HBox width="100%" height="100%" id="horizantal" >
+		  	
+		  	<flexlib:SuperTabNavigator id="tabnavigator" scrollSpeed="25" change="Changefn()" 
+			stopScrollingEvent="{MouseEvent.MOUSE_OUT}"  startScrollingEvent="{MouseEvent.MOUSE_OVER}" color="0x323232" fontSize="9"
+			width="100%" height="100%" horizontalGap="0" dropEnabled="false"  
+			closePolicy="{SuperTab.CLOSE_NEVER}" popUpButtonPolicy="off" selectedIndex="0" borderStyle="solid"/>
+		  	
+		  
+			<!--<mx:TabNavigator selectedIndex="0" borderStyle="solid" change="Changefn()" id="tabnavigator" width="100%" height="100%" color="0x323232" fontSize="9"/>-->
+			
+		</mx:HBox>
+		
+	</mx:VBox>
+
+</mx:Panel>

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<catalog>
+    <product productId="1">
+        <name>Lway</name>
+        <role>Consultant</role>
+        <team>Syna Development</team>
+        <designation>Project Sponsor</designation>
+    </product>
+    <product productId="2">
+        <name>Gengarajan</name>
+        <role>Consultant</role>
+        <team>Syna Development</team>
+        <designation>Deputy Project Manager</designation>
+    </product>
+</catalog>

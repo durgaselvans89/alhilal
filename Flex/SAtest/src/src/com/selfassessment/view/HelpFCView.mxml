@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:VBox styleName="Childpanelstyles" horizontalAlign="center" verticalAlign="middle" 
+	xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="init()" 
+	xmlns:com="com.fundamentals.view.*" xmlns:grad="com.gradientcomponents.*"    backgroundColor="white" dropShadowEnabled="false" dropShadowColor="black" shadowDirection="right" shadowDistance="-20" borderThickness="1" borderStyle="none"
+	 height="100%" width="100%" >
+	
+
+	
+	<mx:Script>
+    <![CDATA[													// import header files..
+    
+    	public function init():void {}
+       
+      
+    ]]>
+    </mx:Script>
+  
+    <mx:Label  text="@Resource(bundle='myResources', key='relationships')" width="{helpimg.width}" fontWeight="bold" fontSize="16"/>
+   	<!--<mx:Image id="helpimg" source="@Embed('assets/link.png')"/>-->
+   	<mx:Image id="helpimg" source="@Embed('assets/Relationship with FC.PNG')"/>
+   	
+</mx:VBox>

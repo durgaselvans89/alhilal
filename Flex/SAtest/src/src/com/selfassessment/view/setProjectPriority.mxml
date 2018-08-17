@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas styleName="Childpanelstyle" xmlns:mx="http://www.adobe.com/2006/mxml"  xmlns:s="library://ns.adobe.com/flex/spark"
+	borderStyle="none" width="100%" height="100%" includeInLayout="false"  
+	creationComplete="init()" horizontalScrollPolicy="off" verticalScrollPolicy="off">
+	
+	<mx:Style source="src/com/selfassessment/view/assets/Styles.css"/>	
+	
+	<mx:Script>
+		<![CDATA[
+			import src.com.selfassessment.model.PriorityDO;
+			import mx.containers.HBox;
+			import src.com.selfassessment.model.ProjectDo;
+			import mx.containers.Panel;
+			import mx.core.Application;
+			import src.com.selfassessment.model.TeamDO;
+			import com.boyzoid.PagableArrayCollection.PagableArrayCollection;
+			import mx.managers.CursorManager;
+			import mx.managers.PopUpManager;
+			import src.com.selfassessment.controller.TeamController;
+			import mx.controls.Alert;
+			
+			[Bindable]
+			public var myPageableArrCol:PagableArrayCollection=new PagableArrayCollection();
+			public var teamService:TeamController=new TeamController();
+		
+			private function validate():void{
+				
+				var total:int = new int();
+				
+				if ((parseInt(w1.text) != 0) && (parseInt (w2.text) != 0) && (parseInt(w3.text) != 0)){
+					
+					total =   parseInt(w1.text) + parseInt(w2.text) + parseInt(w3.text);
+					if (total != 100){
+						Alert.show("The sum of weights W1, W2, W3 should be equal to 100");
+					}
+					
+				}else if (parseInt(w1.text) == 0) {
+					if (parseInt(w2.text) != 0 && parseInt(w3.text) != 0){
+						total = 0 ;
+						total = 100 - (parseInt(w2.text) + parseInt(w3.text));
+						w1.text = total.toString(); 
+					}
+					
+				}else if (parseInt(w2.text) == 0) {
+					if (parseInt(w1.text) != 0 && parseInt(w3.text) != 0){
+						total = 0 ;
+						total = 100 - (parseInt(w1.text) + parseInt(w3.text));
+						w2.text = total.toString() ; 
+					}
+				}else if (parseInt(w3.text) == 0) {
+					if (parseInt(w2.text) != 0 && parseInt(w1.text) != 0){
+						total = 0 ;
+						total = 100 - (parseInt(w1.text) + parseInt(w2.text));
+						w3.text = total.toString(); 
+					}
+				}
+			}
+			
+			public function init():void{
+				if(Application.application.language=="en_US"){
+					mainVBox.styleName='ApplyFontSizeEn';
+				}
+				else{
+					mainVBox.styleName='ApplyFontSizeAr';
+				}
+				if(Application.application.IsExecutiveMember==1){
+					w1.enabled=true;
+					w2.enabled=true;
+					w3.enabled=true;
+				}
+				else{
+					w1.enabled=false;
+					w2.enabled=false;
+					w3.enabled=false;
+				}
+				teamService=new TeamController();
+				
+				teamService.selectprojectsPriority(function(result:PriorityDO):void{
+	   				//Alert.show(resultNum.toString());
+	   				w1.text = result.value1.toString();
+	   				w2.text = result.value2.toString();
+	   				w3.text = result.value3.toString();
+	   				
+	   				CursorManager.removeAllCursors();
+	   			});
+				
+			}
+			
+			private function updateprojectsPriority():void{
+				
+				var calculation:int=  parseInt(w1.text)+ parseInt(w2.text)+ parseInt(w3.text);
+	    		
+	    		if ( calculation == 100){	
+				
+				teamService=new TeamController();
+				
+				teamService.updateprojectsPriority(parseInt(w1.text),parseInt(w2.text),parseInt(w3.text) ,function(resultNum:Number):void{
+	   				//Alert.show(resultNum.toString());
+	   				if(resultNum>=0){
+	   					Alert.show(resourceManager.getString('myResources','ProjPriorityUpdateSucc'));
+	   					CursorManager.removeAllCursors();
+	   				}
+	   				CursorManager.removeAllCursors();
+	   			});
+	   			} else {
+	   				Alert.show(resourceManager.getString('myResources','scoreTotErrMsg'));
+	   			}
+			}	
+			
+			
+	  ]]>
+    </mx:Script>
+  	<mx:VBox width="100%" id="mainVBox" horizontalAlign="left">
+		
+		<mx:Spacer height="10"/>
+		<mx:HBox width="100%" height="5%" horizontalAlign="left">
+			<mx:Spacer width="1%"/>
+			<mx:TextArea width="99%" borderStyle="none" wordWrap="true" fontSize="13" selectable="false"  text="Set weights of priority components here, such that W1+ W2 + W3 = 100%. The individual project priority will be calculated on the basis of these weights." />	
+		</mx:HBox>
+		<mx:Spacer height="10" />
+		
+		<mx:HBox width="100%"  horizontalAlign="center" horizontalGap="0">
+			<mx:Spacer width="1%"/>
+			<mx:VBox width="40%" horizontalAlign="right">
+				<mx:Text fontWeight="bold" width="100%"   text="@Resource(bundle='myResources', key='impact')"/>
+			</mx:VBox>	
+			<mx:HBox width="60%">
+				<mx:Spacer width="1%"/>
+				<mx:TextInput tabIndex="1" restrict="0-9" id="w1"/>
+			</mx:HBox>	
+		</mx:HBox>
+		
+		<mx:Spacer height="10"/>
+		<mx:Spacer/>
+		
+		<mx:HBox width="100%"  horizontalAlign="center" horizontalGap="0">
+			<mx:Spacer width="1%"/>
+			<mx:VBox width="40%" horizontalAlign="right">
+				<mx:Text fontWeight="bold" width="100%"   text="@Resource(bundle='myResources', key='scoreImpact')"/>
+			</mx:VBox>	
+			<mx:HBox width="60%">
+				<mx:Spacer width="1%"/>
+				<mx:TextInput tabIndex="2" restrict="0-9" id="w2"/>
+			</mx:HBox>	
+		</mx:HBox>
+		
+		<mx:Spacer height="10"/>
+		<mx:Spacer/>
+		
+		<mx:HBox width="100%"  horizontalAlign="center" horizontalGap="0">
+			<mx:Spacer width="1%"/>
+			<mx:VBox width="40%" horizontalAlign="right">
+				<mx:Text fontWeight="bold" width="100%" text="@Resource(bundle='myResources', key='ease')"/>
+			</mx:VBox>	
+			<mx:HBox width="60%">
+				<mx:Spacer width="1%"/>
+				<mx:TextInput tabIndex="3" restrict="0-9" id="w3"/>
+				</mx:HBox>	
+		</mx:HBox>
+		
+		<mx:HBox width="100%"  horizontalAlign="right" horizontalGap="0">
+			<mx:Spacer width="5%"/>
+			<mx:Form width="35%"/>
+			<mx:Form width="60%">
+				<mx:HBox horizontalAlign="right">
+					<mx:Button id="btnUpdate"  click="updateprojectsPriority()" fontWeight="bold" label="@Resource(bundle='myResources', key='update')" useHandCursor="true" buttonMode="true" />
+				</mx:HBox>
+			</mx:Form>
+			
+		</mx:HBox>
+	</mx:VBox>	
+</mx:Canvas>

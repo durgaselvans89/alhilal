@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:VBox styleName="Childpanelstyle" xmlns:mx="http://www.adobe.com/2006/mxml" 
+	 width="100%" height="100%" creationComplete="init()"
+	 xmlns:com="src.com.selfassessment.view.*" borderStyle="none" >
+	 
+	<mx:Style source="src/com/selfassessment/view/assets/Styles.css"/>	
+
+	<mx:Metadata>
+		[Event("Createnew", type="com.selfassessment.events.UserEventConstants")]
+	</mx:Metadata>
+	 
+	<mx:Model id="imagesrc" source="src/catalog.xml"/> 
+	
+	<mx:Script>
+        <![CDATA[
+        	import mx.core.Application;
+        	import src.com.selfassessment.controller.Components;
+        	import com.boyzoid.PagableArrayCollection.PagableArrayCollection;
+        	import mx.events.ListEvent;
+        	import mx.managers.CursorManager;
+        	import src.com.selfassessment.controller.TeamController;
+        	import mx.controls.Alert;
+            import mx.collections.ArrayCollection;
+            
+            [Bindable]
+            private var products:ArrayCollection;
+            
+            public function init():void{
+            	if(Application.application.language=="en_US"){
+            		mainBox.styleName = 'ApplyFontSizeEn';
+            		tabNagivator.styleName = 'ApplyFontSizeEn';
+            	}
+            	else{
+            		mainBox.styleName = 'ApplyFontSizeAr';
+            		tabNagivator.styleName = 'ApplyFontSizeAr';
+            	}
+            	CriteriaService.selectSubAssessment(Application.application.selectedLocation,enabler.crit.lblCritID.text,function(criteriaArray:Array):void{
+							
+						enabler.crit.myPageableArrCol = new PagableArrayCollection(criteriaArray);
+						for(var i:int=0;i<enabler.crit.myPageableArrCol.length;i++){
+							
+							if(enabler.crit.myPageableArrCol[i]["approachtolink"].toString()=="Link"){
+								enabler.crit.myPageableArrCol[i]["approachtolink"]="Not assigned";
+							}
+						}
+						enabler.crit.myPageableArrCol.itemsPerPage =5;
+						enabler.crit.myDataGrid.dataProvider = enabler.crit.myPageableArrCol;
+						//enabler.crit.textArea.text = "";
+						//enabler.crit.chkPage();
+						CursorManager.removeBusyCursor();
+						for(var cri:int=0;cri<enabler.criteriapartArr.length;cri++){
+						 	if(enabler.criteriapartArr[cri]== enabler.tabnavigator.selectedChild.label){
+						 		enabler.crit.myDataGrid.addEventListener(ListEvent.ITEM_CLICK,enabler.EnablerResultDetail);
+						 	}
+						 }
+						
+				});
+            }
+                
+     
+			import src.com.selfassessment.view.*;
+			import src.com.selfassessment.events.UserEventConstants;
+			import flash.events.Event;
+ 			import flash.net.URLLoader;
+        	import flash.net.URLRequest;
+        	import flash.events.MouseEvent;
+			
+			[Bindable]
+        	private var xmlLoader:URLLoader;
+			
+			[Bindable]
+        	public var myDataObject:Object;
+        	public var CriteriaService:TeamController = new TeamController();
+			
+        	public function buttonclick(event:Event):void {
+        		dispatchEvent(new UserEventConstants(UserEventConstants.create_new));
+        	}
+        	
+        	private function creationCompleteHandler(event:Event):void {
+    			myDataObject = XML(xmlLoader.data);
+    		}
+    		public var flag:Boolean = true;
+    		public function TabChange():void{
+    			
+    			
+    			if(tabNagivator.selectedIndex==0){ 
+						
+						CriteriaService.selectSubAssessment(Application.application.selectedLocation,enabler.crit.lblCritID.text,function(criteriaArray:Array):void{
+							
+							enabler.crit.myPageableArrCol = new PagableArrayCollection(criteriaArray);
+							for(var i:int=0;i<enabler.crit.myPageableArrCol.length;i++){
+								
+								if(enabler.crit.myPageableArrCol[i]["approachtolink"].toString()=="Link"){
+									enabler.crit.myPageableArrCol[i]["approachtolink"]="Not assigned";
+								}
+							}
+							enabler.crit.myPageableArrCol.itemsPerPage =5;
+							//enabler.crit.chkPage();
+							enabler.crit.myDataGrid.dataProvider = enabler.crit.myPageableArrCol;
+							//enabler.crit.textArea.text = "";
+							CursorManager.removeBusyCursor();
+							for(var cri:int=0;cri<enabler.criteriapartArr.length;cri++){
+							 	if(enabler.criteriapartArr[cri]== enabler.tabnavigator.selectedChild.label){
+							 		enabler.crit.myDataGrid.addEventListener(ListEvent.ITEM_CLICK,enabler.EnablerResultDetail);
+							 	}
+							 }
+							
+					});
+				}
+				else{
+					CriteriaService.selectResultAssessment(Application.application.selectedLocation,enabler.crit.lblCritID.text,function(criteriaArray:Array):void{
+							enabler.crit.myPageableArrCol = new PagableArrayCollection(criteriaArray);
+							for(var i:int=0;i<enabler.crit.myPageableArrCol.length;i++){
+								if(enabler.crit.myPageableArrCol[i]["approachtolink"].toString()=="Link"){
+									enabler.crit.myPageableArrCol[i]["approachtolink"]="Not assigned";
+								}
+							}
+							enabler.crit.myPageableArrCol.itemsPerPage =5;
+							//enabler.crit.chkPage();
+							enabler.crit.myDataGrid.dataProvider = enabler.crit.myPageableArrCol;
+							CursorManager.removeBusyCursor();
+							
+						});
+				}
+    			if(tabNagivator.selectedIndex == 0){
+    				
+    				
+    			if(enabler.tabnavigator.selectedChild.label == "1a" || enabler.tabnavigator.selectedChild.label == "1b" || enabler.tabnavigator.selectedChild.label == "1c"
+				|| enabler.tabnavigator.selectedChild.label == "1d" || enabler.tabnavigator.selectedChild.label == "1e"){
+					SelectedCriteria = resourceManager.getString('myResources','leadership');
+				}
+				else if(enabler.tabnavigator.selectedChild.label == "2a" || enabler.tabnavigator.selectedChild.label == "2b" || enabler.tabnavigator.selectedChild.label == "2c"
+				|| enabler.tabnavigator.selectedChild.label == "2d" ){
+					SelectedCriteria = resourceManager.getString('myResources','policyAndStrategy');
+				}
+				else if(enabler.tabnavigator.selectedChild.label == "3a" || enabler.tabnavigator.selectedChild.label == "3b" || enabler.tabnavigator.selectedChild.label == "3c"
+				|| enabler.tabnavigator.selectedChild.label == "3d" || enabler.tabnavigator.selectedChild.label == "3e"){
+					SelectedCriteria = resourceManager.getString('myResources','people');
+				}
+				else if(enabler.tabnavigator.selectedChild.label == "4a" || enabler.tabnavigator.selectedChild.label == "4b" || enabler.tabnavigator.selectedChild.label == "4c"
+				|| enabler.tabnavigator.selectedChild.label == "4d" || enabler.tabnavigator.selectedChild.label == "4e"){
+					SelectedCriteria = resourceManager.getString('myResources','patnership');
+				}
+				
+				else if(enabler.tabnavigator.selectedChild.label == "5a" || enabler.tabnavigator.selectedChild.label == "5b" || enabler.tabnavigator.selectedChild.label == "5c"
+				|| enabler.tabnavigator.selectedChild.label == "5d" || enabler.tabnavigator.selectedChild.label == "5e"){
+					SelectedCriteria = resourceManager.getString('myResources','processes');
+				}
+				
+				
+    			}
+    			else if(tabNagivator.selectedIndex == 1){
+    				if(flag){
+    					results.tabnavigator.removeAllChildren();
+    					results.init();
+    					flag = false;
+    				}
+    				
+    				if(results.tabnavigator.selectedChild.label == "6a" || results.tabnavigator.selectedChild.label == "6b"){
+						SelectedCriteria = resourceManager.getString('myResources','customerResults');
+					}
+					else if(results.tabnavigator.selectedChild.label == "7a" || results.tabnavigator.selectedChild.label == "7b"){
+						SelectedCriteria = resourceManager.getString('myResources','peopleResults');
+					}
+					else if(results.tabnavigator.selectedChild.label == "8a" || results.tabnavigator.selectedChild.label == "8b"){
+						SelectedCriteria = resourceManager.getString('myResources','societyResults');
+					}
+					else if(results.tabnavigator.selectedChild.label == "9a" || results.tabnavigator.selectedChild.label == "9b"){
+						SelectedCriteria = resourceManager.getString('myResources','keyPerformance');
+					}
+    			}
+    		}
+    		[Bindable]
+    		public var SelectedCriteria:String = "";
+		]]>
+	</mx:Script>
+	
+	<mx:Canvas id="mainBox" name="topvbox" width="100%" height="100%">
+	
+	  	<mx:TabNavigator borderStyle="solid" creationPolicy="all" change="TabChange()" id="tabNagivator" width="100%" height="100%" color="0x323232" styleName="ApplyFontSize" horizontalScrollPolicy="off">
+				
+			<!-- Search TabNavigator Panel -->
+            <mx:VBox label="Enabler" id="boxEnabler" width="100%" height="100%" horizontalScrollPolicy="off">
+				<com:executiveteamenablerview id="enabler" width="100%" horizontalScrollPolicy="off"/>
+            </mx:VBox>
+            
+            <mx:VBox label="Results" id="boxResults" width="100%" height="100%" horizontalScrollPolicy="off">
+				<com:executiveteamenablerview id="results" width="100%" height="100%" horizontalScrollPolicy="off"/>
+            </mx:VBox>
+				
+		</mx:TabNavigator>
+		<mx:Label styleName="ApplyFontSize" text="{SelectedCriteria}" fontWeight="bold" right="10" top="2"/>
+	</mx:Canvas>
+
+</mx:VBox>

@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" 
+	styleName="Applicationstyle" name="main" 
+	xmlns:com="src.com.selfassessment.view.*" horizontalScrollPolicy="off" 
+	 xmlns:service="com.selfassessment.controller.*" 
+	verticalScrollPolicy="auto" creationComplete="init()">
+		
+ 	<mx:Style source="src/com/selfassessment/view/assets/Styles.css"/>	
+
+	<mx:Script>
+		<![CDATA[
+			import src.com.selfassessment.controller.MeetingController;
+		
+			import com.degrafa.geometry.segment.ClosePath;
+			import mx.collections.ArrayCollection;
+			import src.com.selfassessment.controller.Controller;
+			import mx.managers.IBrowserManager;
+			import mx.managers.BrowserManager;
+			import mx.skins.halo.WindowBackground;
+			import flash.net.navigateToURL;
+			import mx.controls.Alert;
+			
+			import src.com.selfassessment.controller.Components;
+			import mx.managers.CursorManager;
+			import src.com.selfassessment.controller.CustomerController;
+			import com.boyzoid.PagableArrayCollection.PagableArrayCollection;
+			import mx.effects.Parallel;
+			import src.com.selfassessment.view.*;
+			[Bindable]
+			public var CurrentSelection:String;
+			[Bindable]
+			public var MainCont:Number =0;
+			[Bindable]
+			public var RelivanceSelected1:String = "Medium";
+			[Bindable]
+			public var RelivanceSelected2:String = "Medium";
+			
+			[Bindable]
+			public var RGPSelected1:String = "NE";
+			[Bindable]
+			public var RGPSelected2:String = "NE";
+			[Bindable]
+			public var RGPSelected3:String = "NE";
+			[Bindable]
+			public var RGPSelected4:String = "NE";
+			[Bindable]
+			public var RGPSelected5:String = "NE";
+			[Bindable]
+			public var RGPSelected6:String = "NE";
+			[Bindable]
+			public var RGPSelected7:String = "NE";
+			[Bindable]
+			public var EditProfile:int=0;
+			
+			[Bindable]
+			public var SummaryReport:Number=0;
+			
+			[Bindable]
+			public var flagValue:int;
+			
+			[Bindable]
+			public var OldSummaryReport:Number=0;
+			
+			private var CustomerService:CustomerController = new CustomerController(); 
+			
+			[Bindable]
+        	public var myPageableArrCol:PagableArrayCollection = new PagableArrayCollection();
+        	
+        	[Bindable]
+        	public var attachmentClick:String="";
+        	
+        	[Bindable]
+        	public var selectedLocation:int;
+		
+			[Bindable]
+			//public var serverPath:String="http://localhost:8086";
+			public var serverPath:String="http://www.excellencebuilder.co.uk";
+			[Bindable]
+			public var language:String="ar_EG";
+			
+			public var rowCnt:Number = 0;
+      		public var executiveRoles:Array=new Array();
+        	public var LocationArray:Array=new Array();
+        	public var userName:String;
+        	public var password:String;
+        	[Bindable]
+        	public var IsExecutiveMember:Number=0;
+        	[Bindable]
+   			public var userArrayList:Array = new Array();
+        	public var meetingStatus:Array=new Array();
+        	public var pointsFlag:int;
+        	public var meetingID:int;
+        	public var agendaID:int;
+        	public var enablerTotPoints:ArrayCollection=new ArrayCollection();
+        	public var resultTotPoints:ArrayCollection=new ArrayCollection();
+        	public var meetingDate:Date;
+			
+			public function ContentPage(event:Event):void{
+				
+				var choosenChild:String = event.type;
+				
+				if(null != choosenChild){
+					content.activeEffects;
+					content.styleName="Applicationbgstyle"; 
+					currentState = "User";
+					adminview.logout.addEventListener(MouseEvent.CLICK, callLogout);
+					adminview.currentState = '';
+					
+					adminview.pageHeader.embededImage7.selected = true;
+				    adminview.pageHeader.embededImage4.selected = false;
+				    adminview.pageHeader.embededImage3.selected = false;
+		            adminview.pageHeader.embededImage2.selected = false;
+		           	adminview.pageHeader.embededImage1.selected = false;
+		            adminview.pageHeader.embededImage5.selected = false;
+		            adminview.pageHeader.embededImage6.selected = false;
+					
+					if(MainCont != 0){
+						adminview.Maincontent.height = MainCont;
+						adminview.pnlMain.height = adminview.Maincontent.height+40;
+					} 
+					
+					login.txtloginid.text=" ";
+					login.txtloginid.selectionBeginIndex=0;
+					Application.application.CurrentSelection = "Getting Started";
+				
+				}				
+			}
+			
+			public function callLogout(event:MouseEvent):void{
+				/* currentState = '';
+				login.txtloginid.text= "";
+				login.txtpassword.text= "";
+				content.styleName="LoginBGStyle"; */
+				this.removeAllChildren();
+				var url:URLRequest = new URLRequest("SA.html");
+				navigateToURL(url,"_self");
+			}
+			
+			
+			
+			private function init():void 
+	        {
+		        	var meetingcontroller:MeetingController = new MeetingController();
+			          	meetingcontroller.getUsersList(function(resultArr:Array):void{
+			          	userArrayList=new Array();
+			           	userArrayList = resultArr;
+		          });
+						
+        	}
+	]]>
+	</mx:Script>
+	
+	<mx:states>
+		<mx:State name="User">
+			<mx:RemoveChild target="{login}"/>
+			<mx:AddChild relativeTo="{content}">
+				<com:MainView id="adminview" width="91%" />
+            </mx:AddChild>
+    	</mx:State>
+    </mx:states>
+    
+  	<mx:Panel horizontalScrollPolicy="off" id="content" styleName="LoginBGStyle" horizontalAlign="center" width="100%" height="100%" >
+  		<com:Login id="login" width="100%"  height="100%" signin="ContentPage(event)" horizontalAlign="center" verticalAlign="top"/>
+  	</mx:Panel>
+  	
+</mx:Application>
+

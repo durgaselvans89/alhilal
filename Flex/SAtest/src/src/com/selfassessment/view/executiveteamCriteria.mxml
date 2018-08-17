@@ -1,0 +1,311 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<mx:Panel styleName="Childpanelstyle" xmlns:mx="http://www.adobe.com/2006/mxml" 
+	verticalScrollPolicy="off" horizontalScrollPolicy="off" width="100%" height="100%">
+
+<mx:Style source="src/com/selfassessment/view/assets/Styles.css"/>	
+
+	<mx:Script>
+    <![CDATA[
+    	import com.boyzoid.PagableArrayCollection.PagableArrayCollection;
+    	import src.com.selfassessment.controller.TeamController;
+        import flash.events.TextEvent;
+        import mx.controls.Alert;
+        import src.com.selfassessment.events.GuideLinesEvent;
+        import src.com.selfassessment.events.CriteriaEvent;
+        
+        import mx.collections.ArrayCollection;
+        import mx.controls.*;
+        import src.com.selfassessment.view.*;
+		import src.com.selfassessment.events.UserEventConstants;
+		import flash.events.Event;
+ 		import flash.net.URLLoader;
+        import flash.net.URLRequest;
+        import flash.events.MouseEvent;
+		import flash.events.TextEvent;
+		import src.com.selfassessment.controller.Components;
+		import src.com.selfassessment.controller.Controller;
+		import src.com.selfassessment.controller.CustomerController;
+        import mx.controls.Alert;
+        import mx.managers.CursorManager;
+        import mx.managers.PopUpManager;
+        
+        [Bindable]
+        public var CriteriaService:TeamController = new TeamController();
+        
+        [Bindable]
+        public var myPageableArrCol:PagableArrayCollection = new PagableArrayCollection();
+        [Bindable]
+		public var criteriadesc:String;
+		[Bindable]
+		public var strEnterApproach:String;
+		[Bindable]
+		public var strApproach:String;
+		[Bindable]
+		public var strTitle:String;
+		[Bindable]
+		public var strDgcTitle:String;
+		
+		[Bindable]
+		public var relevancecritical:String;
+		
+		[Bindable]
+		public var approachtolink:String;
+		[Bindable]
+		public var other:String;
+		
+    	private var xmlLoader:URLLoader;
+    	private var myDataObject:Object;
+    	public var selectedNode:XML;
+    	public var criteriadata:Array;
+    	private var numChild:Number = 5;
+		public var alerttext:int;
+    	public var criteriaArray:Array=new Array();
+    	[Bindable]
+    	public var Tablebel:String = "";
+    	private function initializeHandler():void {
+
+ 			xmlLoader = new URLLoader();
+            xmlLoader.addEventListener(Event.COMPLETE, completeHandler);
+                        
+            var uri:URLRequest = new URLRequest("com/selfassessment/view/team.xml");
+			xmlLoader.load(uri);
+    	}
+    	
+    	private function completeHandler(event:Event):void {
+			trace( xmlLoader.data );
+    	}
+    	
+    	private function creationCompleteHandler(event:Event):void {
+			myDataObject = XML(xmlLoader.data);
+		}
+
+        public function linkHandler(event:Event):void {
+        	
+        	
+        	var popupwindow:GuidancePopup = GuidancePopup(PopUpManager.createPopUp(this,GuidancePopup,true));
+			popupwindow.height = 350;
+			popupwindow.width = 750;
+			popupwindow.sourceOne.dataProvider=criteriaArray;
+			popupwindow.lblCritID.text = this.label.toString();
+			popupwindow.txtCriterionDesc.text=lblcriteriadesc.text;
+        }
+        
+        public function clickEvent(evt:Event):void {
+        	dispatchEvent(new CriteriaEvent(CriteriaEvent.criteriaevent_select));
+        }
+        
+		private function init():void {
+				
+			if(Components.instance.session.roleid < "5"){
+			
+				CriteriaService.GetcriteriaList(function(criteriaArray:Array):void{
+					
+					CursorManager.removeBusyCursor();
+					
+					criteriadata = new Array();
+					var i:int = 0;
+					
+					criteriadata = criteriaArray;
+					
+				});
+			}
+         }
+         
+    ]]>
+	</mx:Script>
+
+	<mx:Script>
+    <![CDATA[
+        import mx.collections.ArrayCollection;
+        
+        [Bindable]
+        private var products:ArrayCollection;
+        
+       /*   private function JumptoPage():void{
+        	if(jumpPage.text != ""  && Number(jumpPage.text) != 0  && jumpPage.enabled){
+			 	if(Number(jumpPage.text)>myPageableArrCol.pages){
+			 		//Alert.show("No Records Available");
+			 		Alert.show(resourceManager.getString('myResources','pageNotFound'));
+					jumpPage.text=myPageableArrCol.currentPage.toString();
+			 	}
+			 	else{
+	        		myPageableArrCol.currentPage = Number(jumpPage.text);
+	    		}
+    		}
+    		else{
+    			//Alert.show(resourceManager.getString('myResources','validNum'));
+    			if(jumpPage.enabled)
+    				Alert.show(resourceManager.getString('myResources','validNum'));
+    		}
+    		chkPage();
+        }
+         private function pageUP():void{
+		 	myPageableArrCol.pageUp();
+        	if(myPageableArrCol.currentPage==myPageableArrCol.pages){
+        		btnPageUp.enabled=false;
+        	}
+        	else{
+        		btnPageUp.enabled=true;
+        	}
+        	if(myPageableArrCol.currentPage>1){
+        		btnPageDown.enabled=true;
+        	}
+        	else{
+        		btnPageDown.enabled=false;
+        	}
+        }
+        private function pageDown():void{
+        	myPageableArrCol.pageDown();
+        	if(myPageableArrCol.currentPage==1){
+        		btnPageDown.enabled=false;
+        	}
+        	else{
+        		btnPageDown.enabled=true;
+        	}
+        	if(myPageableArrCol.currentPage==myPageableArrCol.pages){
+        		btnPageUp.enabled=false;
+        	}
+        	else{
+    			btnPageUp.enabled=true;
+        	}
+        }
+        public function chkPage():void{
+        	if(myPageableArrCol.currentPage==1){
+        		btnPageDown.enabled=false;
+        	}
+        	else{
+        		btnPageDown.enabled=true;
+        	}
+        	if(myPageableArrCol.currentPage==myPageableArrCol.pages){
+        		btnPageUp.enabled=false;
+        	}
+        	else{
+    			btnPageUp.enabled=true;
+        	}
+        	if(myPageableArrCol.currentPage==myPageableArrCol.pages){
+        		btnPageUp.enabled=false;
+        	}
+        	else{
+        		btnPageUp.enabled=true;
+        	}
+        	if(myPageableArrCol.currentPage>1){
+        		btnPageDown.enabled=true;
+        	}
+        	else{
+        		btnPageDown.enabled=false;
+        	}
+        	if(btnPageDown.enabled==false && btnPageUp.enabled==false){
+        		jumpPage.editable=false;
+        		jumpPage.enabled=false;
+        	}
+        	else{
+        		jumpPage.editable=true;
+        		jumpPage.enabled=true;
+        	}
+        } */
+
+
+    ]]>
+    </mx:Script>
+         
+<mx:VBox name="projectplan" width="100%" height="100%" styleName="ApplyFontSize">
+
+	<mx:HBox width="98%" height="7%">
+		<mx:Label text="@Resource(bundle='myResources', key='criterionPart')" fontSize="11" fontWeight="bold"/>
+		<!--<mx:Label id="lblcriteriadesc" text="{criteriadesc}"/>-->
+		<mx:TextArea borderStyle="none" width="80%" editable="false" id="lblcriteriadesc" text="{criteriadesc}"/>
+	</mx:HBox>
+
+	<mx:HBox width="98%">
+		<mx:VBox width="95%">
+			<mx:Spacer width="100%" height="100%"/>
+		</mx:VBox>
+		<mx:Label text="@Resource(bundle='myResources', key='guidanceNotes')" selectable="true" useHandCursor="true" buttonMode="true" mouseChildren="false" color="#2e3c84" click="linkHandler(event);" textDecoration="underline" textAlign="right"/>
+	</mx:HBox>
+	
+	<mx:HBox width="98%" height="2%">
+		<mx:Spacer width="100%" height="100%"/>
+	</mx:HBox>		
+	<mx:HBox width="{myDataGrid.width}" height="5%" horizontalAlign="right">
+		<mx:Label mouseChildren="false" id="lblShowComments" visible="false" useHandCursor="true" color="blue" buttonMode="true" textDecoration="underline" text="Show Comments" />
+	</mx:HBox>
+	<mx:HBox width="98%" height="75%" horizontalAlign="center">
+
+		<mx:DataGrid wordWrap="true" variableRowHeight="true" horizontalGridLines="true" verticalGridLines="true" id="myDataGrid" dataProvider="{products}" width="100%" height="100%" allowMultipleSelection="false" draggableColumns="false">
+			<mx:columns>
+		        <mx:DataGridColumn headerWordWrap="true" headerText="@Resource(bundle='myResources', key='part')" dataField="criteriaID" width="50">
+			        <mx:itemRenderer>
+			        	<mx:Component>
+			        		<mx:Label paddingLeft="5" text="{data.criteriaID}"/>
+			        	</mx:Component>
+			        </mx:itemRenderer>
+		        </mx:DataGridColumn>
+		        
+		        <mx:DataGridColumn id="dgcTitle" headerWordWrap="true" headerText="{strDgcTitle}" dataField="approachTitle" width="130">
+		        	<mx:itemRenderer>
+	            		<mx:Component>
+	            		<mx:Text useHandCursor="true" paddingLeft="5" buttonMode="true" mouseChildren="false" selectable="true" color="#2e3c84" fontSharpness="12" textDecoration="underline">
+	        			</mx:Text>
+	            		</mx:Component> 
+        			</mx:itemRenderer> 
+		        </mx:DataGridColumn>
+		        
+		        <mx:DataGridColumn headerWordWrap="true" headerText="@Resource(bundle='myResources', key='missing')" dataField="missing" width="65">
+		       		<mx:itemRenderer>
+			        	<mx:Component>
+			        		<mx:Label paddingLeft="5" text="{data.missing}"/>
+			        	</mx:Component>
+			        </mx:itemRenderer>
+		        </mx:DataGridColumn>
+		       <mx:DataGridColumn headerWordWrap="true" headerText="{approachtolink}" dataField="approachtolink" width="115">
+				<mx:itemRenderer>
+	            		<mx:Component>
+	            		<mx:Text focusOut="{data.approachtolink=this.text}" paddingLeft="5" mouseChildren="false" selectable="true" fontSharpness="12">
+	        			</mx:Text>
+	            		</mx:Component> 
+        			</mx:itemRenderer> 
+				</mx:DataGridColumn>
+				
+				<mx:DataGridColumn headerWordWrap="true" headerText="{other}" dataField="otherapproachlinkto" width="110">
+					<mx:itemRenderer>
+			        	<mx:Component>
+			        		<mx:Label paddingLeft="5" text="{data.otherapproachlinkto}"/>
+			        	</mx:Component>
+			        </mx:itemRenderer>
+				</mx:DataGridColumn>
+				
+				<mx:DataGridColumn headerWordWrap="true" headerText="Executive team comments" dataField="relevancetothiscriterionpart" width="110">
+					<mx:itemRenderer>
+			        	<mx:Component>
+			        		<mx:Text  text="Show comments" paddingLeft="5"  mouseChildren="false" useHandCursor="true" buttonMode="true" textDecoration="underline" color="#2e3c84" fontSharpness="12" selectable="true"/>
+			        	</mx:Component>
+			        </mx:itemRenderer>
+				</mx:DataGridColumn>
+				<mx:DataGridColumn  id="exeCommCol" headerWordWrap="true" headerText="@Resource(bundle='myResources', key='comments')">
+				<mx:itemRenderer>
+	            		<mx:Component>
+	            		<mx:Text  text="@Resource(bundle='myResources', key='showComments')" paddingLeft="5"  mouseChildren="false" useHandCursor="true" buttonMode="true" textDecoration="underline" color="#2e3c84" fontSharpness="12" selectable="true">
+	        			</mx:Text>
+	            		</mx:Component> 
+        			</mx:itemRenderer> 
+				</mx:DataGridColumn>
+			</mx:columns>
+		</mx:DataGrid>  
+	</mx:HBox>
+	
+	<!--<mx:HBox width="98%" horizontalAlign="right">
+		<mx:Spacer width="80%"/>
+		<mx:Text x="532" y="28" text="Page {myPageableArrCol.currentPage} of {myPageableArrCol.pages}"/>
+   		<mx:Label text="@Resource(bundle='myResources',key='jumpToPage')"/>
+   		<mx:TextInput restrict="0-9" id="jumpPage" width="40" maxChars="2" />
+   		<mx:Button skin="@Embed('assets/go.png')" click="JumptoPage()" useHandCursor="true" buttonMode="true"/>
+		<mx:Button skin="@Embed('assets/left arrow.png')" useHandCursor="true" buttonMode="true" id="btnPageDown" click="pageDown()" disabledSkin="@Embed('assets/disabledRight.png')"/>
+		<mx:Button skin="@Embed('assets/right arrow.png')" useHandCursor="true" buttonMode="true" id="btnPageUp" click="pageUP()" disabledSkin="@Embed('assets/disabledLeft.png')"/>	
+	</mx:HBox>-->
+	
+	
+<mx:Label id="lblCritID" height="0" visible="false" color="red"/>
+</mx:VBox>
+	
+</mx:Panel>

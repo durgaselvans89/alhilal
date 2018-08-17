@@ -1,0 +1,437 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Panel  styleName="Childpanelstyle"  
+	xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:goldhold="goldhold.controls.*"  creationComplete="init()" 
+	xmlns:com="src.com.selfassessment.view.*" height="100%" width="100%">
+	
+	<mx:Style source="src/com/selfassessment/view/assets/Styles.css"/>	
+
+	<mx:Model id="imagesrc" source="src/catalog.xml"/> 
+	
+	<mx:Script>
+        <![CDATA[
+        	import mx.events.CloseEvent;
+        	import src.com.selfassessment.model.TeamDO;
+        	import mx.events.ListEvent;
+        	import src.com.selfassessment.controller.TeamController;
+        	import com.degrafa.utilities.math.Newton;
+        	import src.com.selfassessment.model.RoleDO;
+        	import src.com.selfassessment.controller.Controller;
+        	import flashx.textLayout.factory.TruncationOptions;
+        	import mx.managers.PopUpManager;
+        	import mx.core.Application;
+        	import com.boyzoid.PagableArrayCollection.PagableArrayCollection;
+            import mx.collections.ArrayCollection;
+            import mx.managers.CursorManager;
+			import flash.events.Event;
+			import mx.controls.*;
+        	import flash.net.URLLoader;
+        	import flash.net.URLRequest;
+			import src.com.selfassessment.controller.Components;
+			import src.com.selfassessment.controller.CustomerController;
+			
+            [Bindable]
+            public var executiveTeam:ArrayCollection;
+                      
+			[Bindable]
+        	private var xmlLoader:URLLoader;
+			
+			[Bindable]
+        	private var myDataObject:Object;
+			
+			[Bindable]
+        	public var selectedNode:XML;
+
+			private var CustomerService:CustomerController = new CustomerController(); 
+			public var RowCount:Number = 0;
+			[Bindable]
+       		 public var myPageableArrCol:PagableArrayCollection = new PagableArrayCollection();
+		    
+		    public var LoginService:Controller=new Controller();
+            public function init():void{
+            	 if(Components.instance.session.roleid < "5"){
+					btnCreateExe.enabled=true;
+					btnRemove.enabled=true;
+				}
+				else{
+					btnCreateExe.enabled=false;
+					btnRemove.enabled=false;
+				}
+            	if(Application.application.language=="en_US"){
+            		exeTeam.setStyle('textAlign','left');
+            		mainHBox.styleName = 'ApplyFontSizeEn';
+            	}
+            	else{
+            		exeTeam.setStyle('textAlign','right');
+            		mainHBox.styleName = 'ApplyFontSizeAr';
+            	}
+            	RowCount =parseInt(((exeTeam.height-25)/30).toString());
+            	CustomerService.GetExeTeam(function(execTeam:Array): void {
+					CursorManager.removeBusyCursor();
+					
+					myPageableArrCol = new PagableArrayCollection(execTeam);
+					myPageableArrCol.itemsPerPage = RowCount;
+					exeTeam.dataProvider = myPageableArrCol;
+					chkPage();
+					//exeTeam.addEventListener("deleteRow", deleteRowHandler);
+				
+				}); 
+        		
+            }
+              
+            /* public function deleteRowHandler(event:Event):void{
+                executiveTeam.removeItemAt(exeTeam.selectedIndex);
+            } */
+			
+			private function initializeHandler():void {
+
+	 			xmlLoader = new URLLoader();
+	            xmlLoader.addEventListener(Event.COMPLETE, completeHandler);
+	                        
+	            var uri:URLRequest = new URLRequest("com/selfassessment/view/team.xml");
+				xmlLoader.load(uri);
+        	}
+        	
+        	private function completeHandler(event:Event):void {
+				trace( xmlLoader.data );
+        	}
+        	
+        	private function creationCompleteHandler(event:Event):void {
+    			myDataObject = XML(xmlLoader.data);
+    		}	
+    		
+    		private function JumptoPage():void{
+	        	if(jumpPage.text != ""  && Number(jumpPage.text) != 0  && jumpPage.enabled){
+				 	if(Number(jumpPage.text)>myPageableArrCol.pages){
+				 		//Alert.show("No Records Available");
+				 		Alert.show(resourceManager.getString('myResources','pageNotFound'));
+						jumpPage.text=myPageableArrCol.currentPage.toString();
+				 	}
+				 	else{
+		        		myPageableArrCol.currentPage = Number(jumpPage.text);
+		    		}
+	    		}
+	    		else{
+	    			//Alert.show(resourceManager.getString('myResources','validNum'));
+	    			if(jumpPage.enabled)
+    				Alert.show(resourceManager.getString('myResources','validNum'));
+	    		} 
+	    		chkPage();
+	        }
+        public var popUPExeTeam:createExTeam;
+        public var teamController:TeamController=new TeamController();
+        private var locArray:Array=new Array();
+         private function createExecutiveTeamPopUP():void{
+        	popUPExeTeam=createExTeam(PopUpManager.createPopUp(this,createExTeam,true));
+        	locArray[0]="All";
+        	for(var i:int=0;i<Application.application.LocationArray.length;i++){
+        		locArray[i+1]=Application.application.LocationArray[i];
+        	}
+        	popUPExeTeam.cmbLocation.dataProvider=locArray;
+        	popUPExeTeam.cmbLocation.selectedIndex=0;
+        	searchUnselectExMembers();
+        	
+        	 popUPExeTeam.btnAssign.addEventListener(MouseEvent.CLICK,saveExeRoles);
+        	popUPExeTeam.btnClose.addEventListener(MouseEvent.CLICK,closeExeRoles); 
+        	popUPExeTeam.cmbLocation.addEventListener(ListEvent.CHANGE,locationChange);
+         }
+         private function searchUnselectExMembers():void{
+         	if(popUPExeTeam.cmbLocation.selectedLabel=="All"){
+         		teamController=new TeamController();
+         		CursorManager.setBusyCursor();
+        		teamController.unselectExecutiveMemeber(0,function(resultArray:Array):void{
+	        		if(resultArray.length!=0){
+	        			popUPExeTeam.myPageableArrCol=new PagableArrayCollection(resultArray);
+		        		popUPExeTeam.myPageableArrCol.itemsPerPage = parseInt(((popUPExeTeam.myDataGrid.height-25)/30).toString());
+		        		popUPExeTeam.myDataGrid.dataProvider=popUPExeTeam.myPageableArrCol;
+		        		popUPExeTeam.chkPage();
+	        		}
+	        		else{
+	        			popUPExeTeam.myDataGrid.dataProvider="";
+	        			//Alert.show(resourceManager.getString('myResources','recordsNotFound'));
+	        		}
+	        		CursorManager.removeBusyCursor();
+	        		
+	        	});
+        	}
+        	else{
+        		teamController=new TeamController();
+        		CursorManager.setBusyCursor();
+        		teamController.unselectExecutiveMemeber(parseInt(popUPExeTeam.cmbLocation.selectedItem.LocationID),function(resultArray:Array):void{
+	        		if(resultArray.length!=0){
+	        			popUPExeTeam.myPageableArrCol=new PagableArrayCollection(resultArray);
+		        		popUPExeTeam.myPageableArrCol.itemsPerPage = parseInt(((popUPExeTeam.myDataGrid.height-25)/30).toString());
+		        		popUPExeTeam.myDataGrid.dataProvider=popUPExeTeam.myPageableArrCol;
+		        		popUPExeTeam.chkPage();
+	        		}
+	        		else{
+	        			popUPExeTeam.myDataGrid.dataProvider="";
+	        			//Alert.show(resourceManager.getString('myResources','recordsNotFound'));
+	        		}
+	        		CursorManager.removeBusyCursor();
+        		
+        		});
+        	}
+         }
+         private function locationChange(event:ListEvent):void{
+         	searchUnselectExMembers();
+         }
+        
+       
+        private function closeExeRoles(event:MouseEvent):void{
+         	PopUpManager.removePopUp(popUPExeTeam);
+         	init();
+		}
+        private function saveExeRoles(event:MouseEvent):void{
+        	if(popUPExeTeam.myDataGrid.selectedItems.length!=0){
+    		var teamArray:Array=new Array();
+         	for(var i:int=0;i<popUPExeTeam.myDataGrid.selectedItems.length;i++){
+         			var teamDo:TeamDO=new TeamDO();
+         			teamDo.roleID=parseInt(popUPExeTeam.myDataGrid.selectedItems[i]["roleID"].toString());
+         			teamDo.userid=parseInt(popUPExeTeam.myDataGrid.selectedItems[i]["userid"].toString());
+         			teamArray.push(teamDo);
+         		}
+         
+	     		var CriteriaService:TeamController=new TeamController();
+				
+				cursorManager.setBusyCursor();
+				CriteriaService.insertExeRoles(teamArray,function(result:Number):void{
+					
+					if(result!=-1){
+						//Alert.show("Executive team created successfully");
+						Alert.show(resourceManager.getString('myResources','exeCreatedSucc'));
+						searchUnselectExMembers();
+					}
+					
+					cursorManager.removeBusyCursor();	
+				}); 
+        	}
+        	else{
+        		//Alert.show("Select atleast a member to assign");
+        		Alert.show(resourceManager.getString('myResources','selectAtleastAMem'));
+        	}
+      }
+      public var popUpAlert:ShowAlert=new ShowAlert();
+		private function removeExeTeamMember():void{
+			if(exeTeam.selectedItems.length!=0){
+				var flag:int=0;
+				for(var i:int=0;i<exeTeam.selectedItems.length;i++){
+						if(parseInt(exeTeam.selectedItems[i]["roleid"].toString())<5){
+	         				flag=1;
+	         			}
+	     				
+				}
+				if(flag==1){
+					//Alert.show("Delete cannot be possible for Project sponsor/Deputy Project Sponsor/Project Lead Co-ordinator/Deputy Project Lead Co-ordinator");
+					Alert.show(resourceManager.getString('myResources','deleteCannotBePossible'));
+				}
+				else{
+					/* var removeMemberArr:Array=new Array();
+					for(var i:int=0;i<exeTeam.selectedItems.length;i++){
+						var teamDo:TeamDO=new TeamDO();
+		         			teamDo.userid=parseInt(exeTeam.selectedItems[i]["userid"].toString());
+		     				removeMemberArr.push(teamDo);
+					}
+					var CriteriaService:TeamController=new TeamController();
+					cursorManager.setBusyCursor();
+					CriteriaService.deleteExeRoles(removeMemberArr,function(result:Number):void{
+						if(result!=-1){
+							//Alert.show("Executive team deleted successfully");
+							Alert.show(resourceManager.getString('myResources','exeTeamDelSucc'));
+							init();
+						}
+						cursorManager.removeBusyCursor();	
+					});  */
+					
+					popUpAlert = ShowAlert(PopUpManager.createPopUp(this,ShowAlert,true));
+					var vbox:VBox=new VBox();
+					popUpAlert.mainBox.addChild(vbox);
+					var alert:Alert=new Alert();
+					vbox.layoutDirection="ltr";
+					if(Application.application.language=="en_US"){
+						alert.styleName='AlertEn';
+					}
+					else{
+						alert.styleName='AlertAr';
+					}
+					alert=Alert.show(resourceManager.getString('myResources','removeExeMember'),"",Alert.YES|Alert.NO,this,DeleteAddLister);
+					vbox.addChild(alert);
+					
+				}
+			}
+			else{
+				//Alert.show("Select atleast a member to remove");
+				Alert.show(resourceManager.getString('myResources','selectAtleaseAMemToRemove'));
+			}
+		}
+		public function DeleteAddLister(event:CloseEvent):void{
+			if (event.detail==Alert.YES){
+					var removeMemberArr:Array=new Array();
+					for(var i:int=0;i<exeTeam.selectedItems.length;i++){
+						var teamDo:TeamDO=new TeamDO();
+		         			teamDo.userid=parseInt(exeTeam.selectedItems[i]["userid"].toString());
+		     				removeMemberArr.push(teamDo);
+					}
+					var CriteriaService:TeamController=new TeamController();
+					cursorManager.setBusyCursor();
+					CriteriaService.deleteExeRoles(removeMemberArr,function(result:Number):void{
+						if(result!=-1){
+							//Alert.show("Executive team deleted successfully");
+							Alert.show(resourceManager.getString('myResources','exeTeamDelSucc'));
+							init();
+						}
+						cursorManager.removeBusyCursor();	
+					});
+					
+			}
+			PopUpManager.removePopUp(popUpAlert);
+		}
+		 private function pageUP():void{
+		 	myPageableArrCol.pageUp();
+        	if(myPageableArrCol.currentPage==myPageableArrCol.pages){
+        		btnPageUp.enabled=false;
+        	}
+        	else{
+        		btnPageUp.enabled=true;
+        	}
+        	if(myPageableArrCol.currentPage>1){
+        		btnPageDown.enabled=true;
+        	}
+        	else{
+        		btnPageDown.enabled=false;
+        	}
+        }
+        private function pageDown():void{
+        	myPageableArrCol.pageDown();
+        	if(myPageableArrCol.currentPage==1){
+        		btnPageDown.enabled=false;
+        	}
+        	else{
+        		btnPageDown.enabled=true;
+        	}
+        	if(myPageableArrCol.currentPage==myPageableArrCol.pages){
+        		btnPageUp.enabled=false;
+        	}
+        	else{
+    			btnPageUp.enabled=true;
+        	}
+        }
+        public function chkPage():void{
+        	if(myPageableArrCol.currentPage==1){
+        		btnPageDown.enabled=false;
+        	}
+        	else{
+        		btnPageDown.enabled=true;
+        	}
+        	if(myPageableArrCol.currentPage==myPageableArrCol.pages){
+        		btnPageUp.enabled=false;
+        	}
+        	else{
+    			btnPageUp.enabled=true;
+        	}
+        	if(myPageableArrCol.currentPage==myPageableArrCol.pages){
+        		btnPageUp.enabled=false;
+        	}
+        	else{
+        		btnPageUp.enabled=true;
+        	}
+        	if(myPageableArrCol.currentPage>1){
+        		btnPageDown.enabled=true;
+        	}
+        	else{
+        		btnPageDown.enabled=false;
+        	}
+        	if(btnPageDown.enabled==false && btnPageUp.enabled==false){
+        		jumpPage.editable=false;
+        		jumpPage.enabled=false;
+        	}
+        	else{
+        		jumpPage.editable=true;
+        		jumpPage.enabled=true;
+        	}
+        }
+        ]]>
+    </mx:Script>
+	
+		<mx:HBox height="5%">
+			<mx:Spacer width="100%"/>
+		</mx:HBox>
+			
+		<mx:HBox id="mainHBox" name="titlehbox" width="100%" height="90%" styleName="ApplyFontSize" horizontalAlign="center">
+   				
+       		<mx:VBox width="5%" height="100%">
+   				<mx:Spacer width="100%" height="100%"/>
+   			</mx:VBox>
+   				
+	   		<goldhold:CheckboxDataGrid wordWrap="true" id="exeTeam" width="100%" height="100%" variableRowHeight="true" rowCount="10" allowMultipleSelection="true" draggableColumns="false">
+				<goldhold:columns>
+				   <mx:DataGridColumn wordWrap="true" headerText="@Resource(bundle='myResources', key='name')" dataField="username" width="120">
+			        	<mx:itemRenderer>
+                    		<mx:Component>
+                    		<mx:Text  paddingLeft="5" text="{data.username}">
+                			</mx:Text>
+                    		</mx:Component> 
+            			</mx:itemRenderer> 
+			        </mx:DataGridColumn>
+			        
+			       
+		    	    <mx:DataGridColumn wordWrap="true"  headerText="@Resource(bundle='myResources', key='designation')" dataField="designation" width="120">
+		    	    	<mx:itemRenderer>
+                    		<mx:Component>
+                    		<mx:Text  paddingLeft="5" text="{data.designation}">
+                			</mx:Text>
+                    		</mx:Component> 
+            			</mx:itemRenderer> 
+					</mx:DataGridColumn>
+	
+			        <mx:DataGridColumn wordWrap="true"  headerText="@Resource(bundle='myResources', key='role')" dataField="rolename" width="150">
+			        	<mx:itemRenderer>
+                    		<mx:Component>
+                    		<mx:Text  paddingLeft="5" text="{data.role}">
+                			</mx:Text>
+                    		</mx:Component> 
+            			</mx:itemRenderer> 
+			        </mx:DataGridColumn>
+			        
+			        <!-- <mx:DataGridColumn wordWrap="true"  headerText="@Resource(bundle='myResources', key='location')" dataField="location" width="120">
+			        	 <mx:itemRenderer>
+                    		<mx:Component>
+                    		<mx:Text  paddingLeft="5" text="{data.location}">
+                			</mx:Text>
+                    		</mx:Component> 
+            			</mx:itemRenderer> 
+			        </mx:DataGridColumn>-->
+			        
+			          <mx:DataGridColumn wordWrap="true" headerText="@Resource(bundle='myResources', key='excellenceID')" dataField="loginname" width="120">
+			        	 <mx:itemRenderer>
+                    		<mx:Component>
+                    		<mx:Text  paddingLeft="5" text="{data.loginname}">
+                			</mx:Text>
+                    		</mx:Component> 
+            			</mx:itemRenderer> 
+			        </mx:DataGridColumn>
+			    
+				</goldhold:columns>
+			</goldhold:CheckboxDataGrid>
+			
+			<mx:VBox width="5%" height="100%">
+   				<mx:Spacer width="100%" height="100%"/>
+   			</mx:VBox>
+				
+		</mx:HBox>
+		
+		 <mx:HBox width="95%" horizontalAlign="right" verticalAlign="middle">
+		 
+		 	<mx:Button label="@Resource(bundle='myResources', key='createExeTeam')" id="btnCreateExe" click="createExecutiveTeamPopUP()"/>
+		 	<mx:Button label="@Resource(bundle='myResources', key='removeExeTEam')" id="btnRemove" click="removeExeTeamMember()"/>
+		 	
+   			<mx:Text x="532" y="28" text="Page {myPageableArrCol.currentPage} of {myPageableArrCol.pages}"/>
+   			<mx:Label text="@Resource(bundle='myResources',key='jumpToPage')"/>
+   			<mx:TextInput restrict="0-9" id="jumpPage" width="40" maxChars="2" />
+   			<mx:Button skin="@Embed('assets/go.png')" click="JumptoPage()" useHandCursor="true" buttonMode="true"/>
+			<mx:Button skin="@Embed('assets/left arrow.png')" useHandCursor="true" buttonMode="true" id="btnPageDown" click="pageDown()" disabledSkin="@Embed('assets/disabledRight.png')"/>
+			<mx:Button skin="@Embed('assets/right arrow.png')" useHandCursor="true" buttonMode="true" id="btnPageUp" click="pageUP()" disabledSkin="@Embed('assets/disabledLeft.png')"/>	
+
+		</mx:HBox>
+			
+		
+</mx:Panel>

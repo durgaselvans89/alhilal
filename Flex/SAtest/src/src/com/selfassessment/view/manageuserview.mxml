@@ -1,0 +1,475 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" borderStyle="none" 
+	width="100%" height="100%" creationComplete="init()">
+	 
+	<mx:Script>
+		<![CDATA[
+		
+			import src.com.selfassessment.controller.Controller;
+			import mx.containers.VBox;
+			import mx.managers.PopUpManager;
+			import mx.events.CloseEvent;
+			import src.com.selfassessment.controller.TeamController;
+			import mx.core.Application;
+			import mx.utils.StringUtil;
+			import src.com.selfassessment.model.CustomerDO;
+			import mx.collections.ArrayCollection;
+	        import mx.managers.CursorManager;
+			import mx.controls.*;
+	        import src.com.selfassessment.controller.Components;
+			import src.com.selfassessment.controller.CustomerController;
+			public var popUpAlert:ShowAlert;
+		
+			public var restrict_:String ="0-9,-,+";
+			[Bindable]
+	        private var roledata:Array;
+	       		
+			public var Username:String;
+			
+			private var customerService:CustomerController = new CustomerController; 
+	        private var customerDetails:CustomerDO = new CustomerDO;
+	        private var controller:TeamController=new TeamController();
+				    
+	        public function init():void{
+        		txtemailid.setStyle('borderColor','#B7BABC');
+				txtsurname.setStyle('borderColor','#B7BABC');
+				txtloginname.setStyle('borderColor','#B7BABC');
+				txtpassword.setStyle('borderColor','#B7BABC');
+				txtreenterpasswd.setStyle('borderColor','#B7BABC');
+				
+        	    if(Application.application.language=="en_US"){
+					manageUserHBox.styleName = 'ApplyFontSizeEn';
+				}
+				else{
+					manageUserHBox.styleName = 'ApplyFontSizeAr';
+				}
+         		if(Application.application.EditProfile==1){
+         			rolename.visible=false;
+         			lblRoleName.visible=true;
+         			lblRoleName.text=Components.instance.session.rolename;
+         		}
+         		if(Application.application.EditProfile==2){
+         			rolename.visible=true;
+         			lblRoleName.visible=false;
+         		}
+     			roledata = new Array();
+			 	var i:int = 0;
+			 	
+			 	roledata.length = Components.instance.roleValues.length;
+			 	
+			 	for (i=0; i <= roledata.length; i++){
+			 		roledata[i] = Components.instance.roleValues[i].rolename;
+				}
+				rolename.dataProvider = roledata;
+         }
+         
+        public function updateCustomers(event:Event):void{
+        	var testUser:userview = new userview();
+        	testUser = this.parent as userview;
+            if(txtdesignation.text != "" && txtemailid.text != "" && txtfname.text != "" && 
+	        	txtloginname.text != "" && txtmobileno.text != "" && txtpassword.text != "" && 
+	        	txtreenterpasswd.text != "" && txtsurname.text != "" && txttelphoneno.text != "" && txtCityName.text!=""){
+		        	if(txtdesignation.errorString == "" && txtemailid.errorString == "" && txtfname.errorString == "" && 
+		        	txtloginname.errorString =="" && txtmobileno.errorString =="" && txtpassword.errorString == "" && 
+		        	txtreenterpasswd.errorString =="" && txtsurname.errorString == "" && txttelphoneno.errorString == "" && txtCityName.errorString==""){
+			        	/* if (Components.instance.session.roleid < "5"){ */
+			        		
+			        		customerDetails = new CustomerDO;
+			              	customerDetails.username    = 	StringUtil.trim(txtfname.text);
+			        	  	customerDetails.surname     =	StringUtil.trim(txtsurname.text);
+			        	  	if(Application.application.EditProfile==1){
+			        	  		customerDetails.roleid=Components.instance.session.roleid;
+			        	  	}
+			        	  	else{
+			        	  		customerDetails.roleid		=   rolename.selectedItem.roleid.toString();
+			        	  	}
+			        	  	customerDetails.designation =	StringUtil.trim(txtdesignation.text);
+			        	  	customerDetails.phoneno		=	StringUtil.trim(txttelphoneno.text);
+			        	  	customerDetails.mobileno	=	StringUtil.trim(txtmobileno.text);
+			        	  	customerDetails.emailid		=	StringUtil.trim(txtemailid.text);
+			        	  	customerDetails.loginname	=	StringUtil.trim(txtloginname.text);
+			        	  	customerDetails.password	=	StringUtil.trim(txtpassword.text);
+			        	  	/* customerDetails.locationID = cmbLocation.selectedItem.LocationID;
+			        	  	customerDetails.location = cmbLocation.selectedLabel; */
+			        	  	customerDetails.locationID = 1;
+				    	  	customerDetails.location = "Dr Lway";
+				    	  	customerDetails.cityName=txtCityName.text;
+			        	  	customerDetails.userid = hiddenfld.text;
+			        	  	//Alert.show(customerDetails.password.toString());
+			        	  	//Alert.show(customerDetails.userid.toString());
+			        	  	if (txtpassword.text == txtreenterpasswd.text){
+			        	  		if(testUser.myDataGrid.selectedItem.rolename==rolename.selectedLabel){
+				        	  		customerService.Updateusers(customerDetails, function(status:int): void {
+				        	  			
+										if (status == 1 || status==0)
+										{
+											//Alert.show("User information updated successfully");
+											Alert.show(resourceManager.getString('myResources','userInformationUpdSuc'));
+											txtemailid.setStyle('borderColor','#B7BABC');
+											txtsurname.setStyle('borderColor','#B7BABC');
+											txtloginname.setStyle('borderColor','#B7BABC');
+											rolename.setStyle('borderColor','#B7BABC');
+											txtpassword.setStyle('borderColor','#B7BABC');
+											txtreenterpasswd.setStyle('borderColor','#B7BABC');
+											
+											if(Components.instance.session.userid==hiddenfld.text){
+												//Alert.show("Calling");
+												var loginController:Controller=new Controller();
+												loginController.validateLogin(StringUtil.trim(txtloginname.text),StringUtil.trim(txtpassword.text),function():void{
+													//Alert.show(Components.instance.session.rolename);
+												});
+											}
+											testUser.manageuserview.visible = false;
+											testUser.tabNagivator.visible = true;
+											testUser.searchuser();
+										}
+										else if(status == 5){
+											//Alert.show("Firstname and Surname already exists");
+											Alert.show(resourceManager.getString('myResources','surnameExists'));
+											//txtfname.setStyle('borderColor','red');
+											txtemailid.setStyle('borderColor','#B7BABC');
+											txtsurname.setStyle('borderColor','red');
+											txtloginname.setStyle('borderColor','#B7BABC');
+											rolename.setStyle('borderColor','#B7BABC');
+											txtpassword.setStyle('borderColor','#B7BABC');
+											txtreenterpasswd.setStyle('borderColor','#B7BABC');
+										} 
+										else if(status == 2){
+											//Alert.show("Email-ID already exists");
+											Alert.show(resourceManager.getString('myResources','emailAlreadyExists'));
+											txtemailid.setStyle('borderColor','red');
+											txtsurname.setStyle('borderColor','#B7BABC');
+											txtloginname.setStyle('borderColor','#B7BABC');
+											rolename.setStyle('borderColor','#B7BABC');
+											txtpassword.setStyle('borderColor','#B7BABC');
+											txtreenterpasswd.setStyle('borderColor','#B7BABC');
+										}
+										else if(status == 4){
+											//Alert.show("Selected role already assigned for an user");
+											Alert.show(resourceManager.getString('myResources','selectedRoleAlreadyAssigned'));
+											txtemailid.setStyle('borderColor','#B7BABC');
+											txtsurname.setStyle('borderColor','#B7BABC');
+											txtloginname.setStyle('borderColor','#B7BABC');
+											rolename.setStyle('borderColor','red');
+											txtpassword.setStyle('borderColor','#B7BABC');
+											txtreenterpasswd.setStyle('borderColor','#B7BABC');
+										}
+										else
+										{
+											//Alert.show("Login name already exists");
+											Alert.show(resourceManager.getString('myResources','loginNameAlreadyExists'));
+											txtemailid.setStyle('borderColor','#B7BABC');
+											txtsurname.setStyle('borderColor','#B7BABC');
+											txtloginname.setStyle('borderColor','red');
+											rolename.setStyle('borderColor','#B7BABC');
+											txtpassword.setStyle('borderColor','#B7BABC');
+											txtreenterpasswd.setStyle('borderColor','#B7BABC');
+										}
+									
+									});	
+			        	  		}
+			        	  		else{
+			        	  			if(parseInt(testUser.myDataGrid.selectedItem.roleid)==5 && rolename.selectedItem.roleid>5){
+			        	  				controller=new TeamController();
+			        	  				controller.chkExeRoleExists(parseInt(hiddenfld.text),function(result:Number):void{
+			        	  					if(result>0){
+			        	  						callThisFunction();
+			        	  					}
+			        	  					else{
+			        	  						updateCustomerDetails();
+			        	  					}
+			        	  					
+			        	  				});
+			        	  					
+			        	  			}	
+			        	  			else if(parseInt(testUser.myDataGrid.selectedItem.roleid)<5 && rolename.selectedItem.roleid>=5){
+			        	  				callThisFunction();
+			        	  			}
+			        	  			else{
+			        	  				updateCustomerDetails();
+			        	  			}
+			        	  			
+			        	  		}
+			        		}
+							else
+							{
+								//Alert.show("Password and Re-enter password must be same");
+								Alert.show(resourceManager.getString('myResources','passwordShouldMatch'));
+								txtemailid.setStyle('borderColor','#B7BABC');
+								txtsurname.setStyle('borderColor','#B7BABC');
+								txtloginname.setStyle('borderColor','#B7BABC');
+								rolename.setStyle('borderColor','#B7BABC');
+								txtpassword.setStyle('borderColor','red');
+								txtreenterpasswd.setStyle('borderColor','red');
+							}
+					  /*   }
+					    else{
+					    	Alert.show("Dont have permission to edit");
+					    } */
+		        	}
+		        	else{
+		        		//Alert.show("Enter correct values");
+		        		Alert.show(resourceManager.getString('myResources','enterCorrectValues'));
+		        	}
+		        	
+	        	}
+	        	else{
+	        		//Alert.show("Enter the required values");
+	        		Alert.show(resourceManager.getString('myResources','enterReqValues'));
+	        	}
+	        	
+        } 
+        private function callThisFunction():void{
+        	
+        	popUpAlert = ShowAlert(PopUpManager.createPopUp(this,ShowAlert,true));
+			var vbox:VBox=new VBox();
+			popUpAlert.mainBox.addChild(vbox);
+			var alert:Alert=new Alert();
+			vbox.layoutDirection="ltr";
+			if(Application.application.language=="en_US"){
+				alert.styleName='AlertEn';
+			}
+			else{
+				alert.styleName='AlertAr';
+			}
+			alert=Alert.show(resourceManager.getString('myResources','changeExeRoleConfirm'),"",Alert.YES|Alert.NO,this,changeExeRole);
+			vbox.addChild(alert);
+        }
+         private function changeExeRole(event:CloseEvent):void{
+         	var dataProvider:*;
+         	var testUser:userview = new userview();
+        	testUser = this.parent as userview;
+			if (event.detail==Alert.YES){
+				controller.deleteSelectedExeRole(parseInt(hiddenfld.text),function(result:Number):void{
+					if(result==0){
+						updateCustomerDetails();
+					}
+  				});
+			}
+			else{
+				dataProvider= rolename.dataProvider;
+			    var roleIndexNo:int=0;
+			    for(var index:int=0;index<dataProvider.length;index++){
+			    	if(dataProvider[index]["rolename"]==testUser.myDataGrid.selectedItem.rolename){
+			    		
+			    		roleIndexNo=index;
+			    		//Alert.show(roleIndexNo.toString());
+			    	}
+			    }
+			    rolename.selectedIndex=roleIndexNo;
+			}
+			PopUpManager.removePopUp(popUpAlert);
+		}	
+		private function updateCustomerDetails():void{
+			var testUser:userview = new userview();
+        	testUser = this.parent as userview;
+			customerDetails = new CustomerDO;
+			customerDetails.username    = 	StringUtil.trim(txtfname.text);
+    	  	customerDetails.surname     =	StringUtil.trim(txtsurname.text);
+    	  	if(Application.application.EditProfile==1){
+    	  		customerDetails.roleid=Components.instance.session.roleid;
+    	  	}
+    	  	else{
+    	  		customerDetails.roleid		=   rolename.selectedItem.roleid.toString();
+    	  	}
+    	  	customerDetails.designation =	StringUtil.trim(txtdesignation.text);
+    	  	customerDetails.phoneno		=	StringUtil.trim(txttelphoneno.text);
+    	  	customerDetails.mobileno	=	StringUtil.trim(txtmobileno.text);
+    	  	customerDetails.emailid		=	StringUtil.trim(txtemailid.text);
+    	  	customerDetails.loginname	=	StringUtil.trim(txtloginname.text);
+    	  	customerDetails.password	=	StringUtil.trim(txtpassword.text);
+    	  	/* customerDetails.locationID = cmbLocation.selectedItem.LocationID;
+    	  	customerDetails.location = cmbLocation.selectedLabel; */
+    	  	customerDetails.locationID = 1;
+    	  	customerDetails.location = "Dr Lway";
+    	  	customerDetails.cityName=txtCityName.text;
+    	  	customerDetails.userid = hiddenfld.text;
+    	  	customerService.Updateusers(customerDetails, function(status:int): void {
+				if (status == 1)
+				{
+					//Alert.show("User information updated successfully");
+					txtemailid.setStyle('borderColor','#B7BABC');
+					txtsurname.setStyle('borderColor','#B7BABC');
+					txtloginname.setStyle('borderColor','#B7BABC');
+					rolename.setStyle('borderColor','#B7BABC');
+					txtpassword.setStyle('borderColor','#B7BABC');
+					txtreenterpasswd.setStyle('borderColor','#B7BABC');
+					
+					Alert.show(resourceManager.getString('myResources','userInformationUpdSuc'));
+					testUser.manageuserview.visible = false;
+					testUser.tabNagivator.visible = true;
+					testUser.searchuser();
+					if(Components.instance.session.userid==hiddenfld.text){
+						var loginController:Controller=new Controller();
+						loginController.validateLogin(StringUtil.trim(txtloginname.text),StringUtil.trim(txtpassword.text),function():void{
+						});
+					}
+				}
+				else if(status == 5){
+					//Alert.show("Firstname and Surname already exists");
+					Alert.show(resourceManager.getString('myResources','surnameExists'));
+					txtemailid.setStyle('borderColor','#B7BABC');
+					txtsurname.setStyle('borderColor','red');
+					txtloginname.setStyle('borderColor','#B7BABC');
+					rolename.setStyle('borderColor','#B7BABC');
+					txtpassword.setStyle('borderColor','#B7BABC');
+					txtreenterpasswd.setStyle('borderColor','#B7BABC');
+				} 
+				else if(status == 2){
+					//Alert.show("Email-ID already exists");
+					Alert.show(resourceManager.getString('myResources','emailAlreadyExists'));
+					txtemailid.setStyle('borderColor','red');
+					txtsurname.setStyle('borderColor','#B7BABC');
+					txtloginname.setStyle('borderColor','#B7BABC');
+					rolename.setStyle('borderColor','#B7BABC');
+					txtpassword.setStyle('borderColor','#B7BABC');
+					txtreenterpasswd.setStyle('borderColor','#B7BABC');
+				}
+				else if(status == 4){
+					//Alert.show("Selected role already assigned for an user");
+					 Alert.show(resourceManager.getString('myResources','selectedRoleAlreadyAssigned'));
+					txtemailid.setStyle('borderColor','#B7BABC');
+					txtsurname.setStyle('borderColor','#B7BABC');
+					txtloginname.setStyle('borderColor','#B7BABC');
+					rolename.setStyle('borderColor','red');
+					txtpassword.setStyle('borderColor','#B7BABC');
+					txtreenterpasswd.setStyle('borderColor','#B7BABC');
+				}
+				else
+				{
+					//Alert.show("Login name already exists");
+					Alert.show(resourceManager.getString('myResources','loginNameAlreadyExists'));
+					txtemailid.setStyle('borderColor','#B7BABC');
+					txtsurname.setStyle('borderColor','#B7BABC');
+					txtloginname.setStyle('borderColor','red');
+					rolename.setStyle('borderColor','#B7BABC');
+					txtpassword.setStyle('borderColor','#B7BABC');
+					txtreenterpasswd.setStyle('borderColor','#B7BABC');
+				}
+			
+			});	
+    	  	
+		}
+		
+		private function callCancelEvent(event:Event):void{
+       			var newUserChild:userview = new userview();
+    			this.removeAllChildren();
+    			this.addChildAt(newUserChild,0);
+    			
+      	}	
+		
+
+		]]>
+	</mx:Script>
+	
+	
+	<mx:HBox id="manageUserHBox" width="100%" top="25" height="98%" verticalAlign="top" horizontalAlign="center">
+	
+	<mx:Form >
+		
+			<mx:FormItem  fontWeight="bold"  label="@Resource(bundle='myResources', key='fname')">
+				<mx:TextInput fontWeight="normal" id="txtfname" tabIndex="0" width="95%"  maxChars="25"/>
+			</mx:FormItem>
+			<mx:FormItem fontWeight="bold"  label="@Resource(bundle='myResources', key='surname')">
+					<mx:TextInput fontWeight="normal"  id="txtsurname" tabIndex="1"  width="95%"   maxChars="25"/>
+			</mx:FormItem>
+
+					
+				
+			<mx:FormItem fontWeight="bold" label="@Resource(bundle='myResources', key='telphoneno')">
+				<mx:TextInput fontWeight="normal" id="txttelphoneno" tabIndex="4"  width="95%" restrict="{restrict_}" maxChars="15"/>
+			</mx:FormItem>
+
+			<mx:FormItem fontWeight="bold" label="@Resource(bundle='myResources', key='mobileno')">
+				<mx:TextInput fontWeight="normal" id="txtmobileno" tabIndex="6"  width="95%" restrict="{restrict_}" maxChars="15"/>
+			</mx:FormItem>
+			
+			<mx:FormItem fontWeight="bold" label="@Resource(bundle='myResources', key='loginname')" horizontalAlign="left">
+				<mx:TextInput fontWeight="normal" id="txtloginname" tabIndex="7"  width="95%" maxChars="20"/>
+			</mx:FormItem>
+			
+			
+			
+		</mx:Form>
+			
+		<mx:Form >
+			<mx:FormItem fontWeight="bold" label="@Resource(bundle='myResources', key='role')">
+			<mx:Canvas>
+				<mx:Canvas id="canvasRole" width="90%" resize="{rolename.width=canvasRole.width}">
+						<mx:ComboBox fontWeight="normal" width="100%" dropdownWidth="175" tabIndex="2" id="rolename" selectedIndex="0" labelField="rolename" data="roleid"  dataProvider="{roledata}"/>
+					</mx:Canvas>
+						
+				<mx:TextInput editable="false" id="lblRoleName" visible="false" fontWeight="normal"/>
+			</mx:Canvas>
+					
+			</mx:FormItem>	
+			
+			<mx:FormItem fontWeight="bold" label="@Resource(bundle='myResources', key='designation')">
+				<mx:TextInput fontWeight="normal" id="txtdesignation" tabIndex="3"  width="95%"  maxChars="25"/>
+			</mx:FormItem>
+			
+			<mx:FormItem fontWeight="bold" label="@Resource(bundle='myResources', key='emailid')">
+				<mx:TextInput fontWeight="normal" id="txtemailid" tabIndex="5"  width="95%"   maxChars="25"/>
+			</mx:FormItem>
+			<!--<mx:FormItem fontWeight="bold" label="@Resource(bundle='myResources', key='location')">
+				<mx:HBox horizontalGap="0">
+					<mx:ComboBox fontWeight="normal" width="50%" tabIndex="2" id="cmbLocation" selectedIndex="0" labelField="Location"  data="LocationID"  />	
+				</mx:HBox>
+			
+			</mx:FormItem>	-->
+			<mx:HBox horizontalGap="0" width="0" height="0">
+				<mx:ComboBox fontWeight="normal" width="50%" tabIndex="2" id="cmbLocation" selectedIndex="0" labelField="Location"  data="LocationID"  />	
+			</mx:HBox>
+			<mx:FormItem fontWeight="bold" label="@Resource(bundle='myResources', key='cityName')">
+				<mx:TextInput fontWeight="normal" id="txtCityName" tabIndex="6"  width="95%"   maxChars="50"/>
+			</mx:FormItem>
+			<mx:FormItem fontWeight="bold" label="@Resource(bundle='myResources', key='password')" horizontalAlign="left">
+				<mx:TextInput fontWeight="normal" id="txtpassword" tabIndex="8"  displayAsPassword="true" width="95%"  maxChars="15"/>
+			</mx:FormItem>
+			<mx:FormItem fontWeight="bold" label="@Resource(bundle='myResources', key='reenterpassword')" horizontalAlign="left">
+				<mx:TextInput fontWeight="normal" id="txtreenterpasswd" tabIndex="9"  width="95%" displayAsPassword="true"   maxChars="15"/>
+			</mx:FormItem>
+			<mx:FormItem></mx:FormItem>
+		<mx:FormItem>
+				<mx:HBox>
+				<mx:Button id="btnAdd" name="btncreate" tabIndex="10"  label="@Resource(bundle='myResources', key='update')" click="updateCustomers(event)"/>
+				<mx:Button name="btncancel" label="@Resource(bundle='myResources', key='cancel')"  tabIndex="11"  id="btncancel"/>		
+				</mx:HBox>
+					
+			</mx:FormItem>
+		</mx:Form>
+	
+	</mx:HBox>
+	
+	<mx:HBox width="100%" height="35%"  horizontalAlign="center">
+		<mx:Label visible="false" id="hiddenfld"/>
+	</mx:HBox>
+
+<!--<mx:EmailValidator source="{txtemailid}" property="text" required="true" requiredFieldError="Email ID is required"/>
+<mx:StringValidator id="valfname" source="{txtfname}" property="text" minLength="3" maxLength="25" required="true"  requiredFieldError="First name is required" trigger="{btnAdd}" triggerEvent="click"/>
+<mx:StringValidator id="valtelphoneno" source="{txttelphoneno}" property="text" minLength="8" maxLength="15" required="true" requiredFieldError="Telephone No is required" trigger="{btnAdd}" triggerEvent="click"/>
+<mx:StringValidator id="valmobileno" source="{txtmobileno}" property="text" minLength="10" maxLength="15" required="true" requiredFieldError="Mobile is required" trigger="{btnAdd}" triggerEvent="click"/>
+<mx:StringValidator id="valpassword" source="{txtpassword}" property="text" minLength="5" maxLength="15" required="true" requiredFieldError="Password is required" trigger="{btnAdd}" triggerEvent="click"/>
+
+<mx:StringValidator id="valrepassword" source="{txtreenterpasswd}" property="text" minLength="5" maxLength="15" required="true" requiredFieldError="Re-enter Password is required" trigger="{btnAdd}" triggerEvent="click"/>
+
+<mx:StringValidator id="valLoginName" source="{txtloginname}" property="text" minLength="5" maxLength="20" required="true" requiredFieldError="Login name is required" trigger="{btnAdd}" triggerEvent="click"/>
+<mx:StringValidator id="valdesignation" source="{txtdesignation}" property="text" minLength="5" maxLength="25" required="true" requiredFieldError="Designation is required" trigger="{btnAdd}" triggerEvent="click"/>
+<mx:StringValidator id="valsurname" source="{txtsurname}" property="text" minLength="3" maxLength="25" required="true" requiredFieldError="Sur name is required" trigger="{btnAdd}" triggerEvent="click"/>
+-->	
+<mx:EmailValidator source="{txtemailid}" property="text"/>
+<mx:StringValidator id="valfname" source="{txtfname}" property="text" minLength="3" maxLength="25" required="true"  requiredFieldError="First name is required"/>
+<mx:StringValidator id="valtelphoneno" source="{txttelphoneno}" property="text" minLength="8" maxLength="15" required="true" requiredFieldError="Telephone No is required"/>
+<mx:StringValidator id="valmobileno" source="{txtmobileno}" property="text" minLength="10" maxLength="15" required="true" requiredFieldError="Mobile is required"/>
+<mx:StringValidator id="valpassword" source="{txtpassword}" property="text" minLength="5" maxLength="15" required="true" requiredFieldError="Password is required"/>
+
+<mx:StringValidator id="valrepassword" source="{txtreenterpasswd}" property="text" minLength="5" maxLength="15" required="true" requiredFieldError="Re-enter Password is required"/>
+
+<mx:StringValidator id="valLoginName" source="{txtloginname}" property="text" minLength="4" maxLength="20" required="true" requiredFieldError="Login name is required"/>
+<mx:StringValidator id="valdesignation" source="{txtdesignation}" property="text" minLength="5" maxLength="25" required="true" requiredFieldError="Designation is required"/>
+<mx:StringValidator id="valsurname" source="{txtsurname}" property="text" minLength="3" maxLength="25" required="true" requiredFieldError="Sur name is required"/>
+<mx:StringValidator id="valtxtCityName" source="{txtCityName}" property="text" minLength="3" maxLength="50" required="true" requiredFieldError="City name is required"/>
+
+
+</mx:Panel>
+

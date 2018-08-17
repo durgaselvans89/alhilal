@@ -1,0 +1,918 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:s="library://ns.adobe.com/flex/spark" xmlns:goldhold="goldhold.controls.*" 
+	   y="{(Application.application.height/2)-(this.height/2)}" 
+	 x="{(Application.application.width/2)-(this.width/2)}" horizontalScrollPolicy="off" 
+	 verticalScrollPolicy="off" creationComplete="init()">
+
+
+	<mx:Script>
+		<![CDATA[
+			import src.com.selfassessment.model.AFIDO;
+			import mx.events.DataGridEvent;
+			import mx.events.ListEvent;
+			import mx.collections.ArrayCollection;
+			import src.com.selfassessment.model.EnablerAssessmentDO;
+			
+			import mx.managers.CursorManager;
+			import mx.core.Application;
+			import mx.managers.PopUpManager;
+			import mx.controls.*;
+			import src.com.selfassessment.controller.TeamController;
+			
+			[Bindable]
+			public var txtFromOutSide:String;
+			[Bindable]
+			public var txtvalue:int;
+			
+			[Bindable]
+        	public var CriteriaService:TeamController = new TeamController();
+			
+			[Bindable]
+			public var criteriaArray:Array = new Array();
+			
+			[Bindable]
+			public var strAvgScore:String = "";
+			
+			
+			//private var changesMade:Boolean=false;
+			
+			public function init():void {
+				if(Application.application.language=="en_US"){
+					mainVBox.styleName='ApplyFontSizeEn';
+				}
+				else{
+					mainVBox.styleName='ApplyFontSizeAr';
+				}
+				criteriaArray = new Array();
+				criteriaArray.push("None");
+				criteriaArray.push("High");
+				criteriaArray.push("Low");
+				criteriaArray.push("Medium");
+				criteriaArray.push("Missing");
+				mainVBox.height = screen.height - 75;
+				mainVBox.width = screen.width - 175;
+				
+				cmbRelevence.dataProvider = criteriaArray;
+				cmbRelevencedeli.dataProvider = criteriaArray;
+				if(Missrad1.selected){
+					Soundrational.enabled =false;
+					Integrated.enabled = false;
+					Implemented.enabled = false;
+					Systematic.enabled = false;
+					Measurement.enabled = false;
+					Improvement.enabled = false;
+					Learning.enabled = false;
+					cmbRelevence.selectedIndex = 0;
+					cmbRelevencedeli.selectedIndex = 0;
+					lblSysGenScore.text="Not defined";
+					txtScore.text="0";
+					txtScore.editable=false;
+				}
+				else{
+					txtScore.editable=true;
+					Soundrational.enabled = true;
+					Integrated.enabled = true;
+					Implemented.enabled = true;
+					Systematic.enabled = true;
+					Measurement.enabled = true;
+					Improvement.enabled = true;
+					Learning.enabled = true;
+					cmbRelevence.selectedItem = Application.application.RelivanceSelected1!=""? Application.application.RelivanceSelected1 : "Medium";
+					cmbRelevencedeli.selectedItem = Application.application.RelivanceSelected2!=""? Application.application.RelivanceSelected2 : "Medium";
+				
+				}
+				
+				
+	           
+				rgp2.selectedValue = Application.application.RGPSelected1;
+				rgp3.selectedValue = Application.application.RGPSelected2;
+				rgp4.selectedValue = Application.application.RGPSelected3;
+				rgp5.selectedValue = Application.application.RGPSelected4;
+				rgp6.selectedValue = Application.application.RGPSelected5;
+				rgp7.selectedValue = Application.application.RGPSelected6;
+				rgp8.selectedValue = Application.application.RGPSelected7;
+				SoundRationalFn();
+				IntagratedFn();
+				ImplementedFn();
+				SystematicFn();
+				MeasurementFn();
+				ImprovementFn();
+				LearningFn();
+				appAvg = (RationalValue+IntagratedValue)/2;
+				depAvg = (ImplementedValue+SystematicValue)/2;
+				assessmentReviewAvg = (MeasurementValue+ImprovementValue+LearningValue)/3;
+				
+				avgScore = Math.round((appAvg + depAvg + assessmentReviewAvg) / 3);
+				
+				if ((avgScore <= 14) && (avgScore >= 0))
+	            {
+	                lblSysGenScore.text = "No evidence or anecdotal (5% +/- 5)";
+	                strAvgScore = "NE";
+	            }
+	
+	            if ( ( avgScore <= 39 ) && ( avgScore >= 15 ) )
+	            {
+	                lblSysGenScore.text = "Limited evidence (25% +/- 10)";
+	                strAvgScore = "SE";
+	            }
+	
+	            if ( ( avgScore <= 64 ) && ( avgScore >= 40 ) )
+	            {
+	                lblSysGenScore.text = "Evidence (50% +/- 10)";
+	                strAvgScore = "E";
+	            }
+	
+	            if ( ( avgScore <= 89 ) && ( avgScore >= 65 ) )
+	            {
+	                lblSysGenScore.text = "Clear evidence (75% +/- 10)";
+	                strAvgScore = "ClrE";
+	            }
+	
+	            if ( ( avgScore <= 100 ) && ( avgScore >= 90 ) )
+	            {
+	                lblSysGenScore.text = "Comprehensive evidence (95% +/- 5)";
+	                strAvgScore = "CompE";
+	            }
+				
+			}
+			
+			public var avgScore:Number = 0;
+			
+			private function onClose():void {
+				PopUpManager.removePopUp(this);
+			}
+			public function relevanceCriteria():void{
+				//Alert.show("sdfsdf");
+				if(Missrad1.selected){
+					Alert.show("Confirm the approach is missing or not");
+					cmbRelevence.selectedItem="None";
+					cmbRelevencedeli.selectedItem="None";
+				}
+			}
+
+			public function MissingFn():void{
+				if(Missrad1.selected){
+					Soundrational.enabled =false;
+					Integrated.enabled = false;
+					Implemented.enabled = false;
+					Systematic.enabled = false;
+					Measurement.enabled = false;
+					Improvement.enabled = false;
+					Learning.enabled = false;
+					cmbRelevence.selectedItem="None";
+					cmbRelevencedeli.selectedItem="None";
+					lblSysGenScore.text="Not defined";
+					txtScore.text="0";
+					txtScore.editable=false;
+				}
+				else{
+					txtScore.editable=true;
+					Soundrational.enabled = true;
+					Integrated.enabled = true;
+					Implemented.enabled = true;
+					Systematic.enabled = true;
+					Measurement.enabled = true;
+					Improvement.enabled = true;
+					Learning.enabled = true;
+					SoundRationalFn();
+					IntagratedFn();
+					ImplementedFn();
+					SystematicFn();
+					MeasurementFn();
+					ImprovementFn();
+					LearningFn();
+					cmbRelevence.selectedItem = Application.application.RelivanceSelected1!="" && Application.application.RelivanceSelected1!="None"? Application.application.RelivanceSelected1 : "Medium";
+					cmbRelevencedeli.selectedItem = Application.application.RelivanceSelected2!="" && Application.application.RelivanceSelected2!="None"? Application.application.RelivanceSelected2 : "Medium";
+				
+					Calculate();
+				}
+			}
+			
+			
+			public var popupAttach:AttachmentView;
+			
+			public function AttachFile():void{
+				popupAttach = AttachmentView(PopUpManager.createPopUp(this,AttachmentView,true));
+			}
+			
+			public function ScoreFn():void{
+				if(strAvgScore=="NE"){
+					if(!(parseFloat(txtScore.text)<= 14 && parseFloat(txtScore.text)>= 0)){
+						txtScore.text = "";
+						Alert.show("Enter score in the range of (5% +/- 5)");
+						txtScore.setFocus();
+					}
+				}
+				else if(strAvgScore=="SE"){
+					if(!(parseFloat(txtScore.text)<= 39 && parseFloat(txtScore.text)>= 15)){
+						txtScore.text = "";
+						Alert.show("Enter score in the range of (25% +/- 10)");
+						txtScore.setFocus();
+					}
+				}
+				else if(strAvgScore=="E"){
+					if(!(parseFloat(txtScore.text)<= 64 && parseFloat(txtScore.text)>= 40)){
+						txtScore.text = "";
+						Alert.show("Enter score in the range of (50% +/- 10)");
+						txtScore.setFocus();
+					}
+				}
+				else if(strAvgScore=="ClrE"){
+					if(!(parseFloat(txtScore.text)<= 89 && parseFloat(txtScore.text)>= 65)){
+						txtScore.text = "";
+						Alert.show("Enter score in the range of (75% +/- 10)");
+						txtScore.setFocus();
+					}
+				}
+				else if(strAvgScore=="CompE"){
+					if(!(parseFloat(txtScore.text)<= 100 && parseFloat(txtScore.text)>= 90)){
+						txtScore.text = "";
+						Alert.show("Enter score in the range of (95% +/- 5)");
+						txtScore.setFocus();
+					}
+				}
+			}
+			public function Calculate():void{
+				
+				appAvg = (RationalValue+IntagratedValue)/2;
+				depAvg = (ImplementedValue+SystematicValue)/2;
+				assessmentReviewAvg = (MeasurementValue+ImprovementValue+LearningValue)/3;
+				//Alert.show(SystematicValue.toString());
+				avgScore = Math.round((appAvg + depAvg + assessmentReviewAvg) / 3);
+				//Alert.show(Math.round(64.2).toString());
+				//Alert.show(appAvg.toString()+" - "+depAvg.toString()+" - "+assessmentReviewAvg.toString()+" - "+avgScore.toString());
+				if ((avgScore <= 14) && (avgScore >= 0))
+	            {
+	            	//Alert.show("10-14");
+	                lblSysGenScore.text = "No evidence or anecdotal (5% +/- 5)";
+	                strAvgScore = "NE";
+	            }
+	
+	            if ( ( avgScore <= 39 ) && ( avgScore >= 15 ) )
+	            {
+	            	//Alert.show("15-39");
+	                lblSysGenScore.text = "Limited evidence (25% +/- 10)";
+	                strAvgScore = "SE";
+	            }
+	
+	            if ( ( avgScore <= 64 ) && ( avgScore >= 40 ) )
+	            {
+	            	//Alert.show("40-64");
+	                lblSysGenScore.text = "Evidence (50% +/- 10)";
+	                strAvgScore = "E";
+	            }
+	
+	            if ( ( avgScore <= 89 ) && ( avgScore >= 65 ) )
+	            {
+	            	//Alert.show("65-89");
+	                lblSysGenScore.text = "Clear evidence (75% +/- 10)";
+	                strAvgScore = "ClrE";
+	            }
+	
+	            if ( ( avgScore <= 100 ) && ( avgScore >= 90 ) )
+	            {
+	            	//Alert.show("90-100");
+	                lblSysGenScore.text = "Comprehensive evidence (95% +/- 5)";
+	                strAvgScore = "CompE";
+	            }
+	  }
+			public var appAvg:Number = 0;
+			public var RationalValue:Number=0;
+			public function SoundRationalFn():void{
+				if(rgp2.selectedValue == "NE"){
+					RationalValue = 10;
+				}
+				else if(rgp2.selectedValue == "SE"){
+					RationalValue = 25;
+				}
+				else if(rgp2.selectedValue == "E"){
+					RationalValue = 50;
+				}
+				else if(rgp2.selectedValue == "ClrE"){
+					RationalValue = 75;
+				}
+				else if(rgp2.selectedValue == "CompE"){
+					RationalValue = 95;
+				}
+				
+				Calculate();
+			}
+			
+			public var IntagratedValue:Number=0;
+			public function IntagratedFn():void{
+				if(rgp3.selectedValue == "NE"){
+					IntagratedValue = 10;
+				}
+				else if(rgp3.selectedValue == "SE"){
+					IntagratedValue = 25;
+				}
+				else if(rgp3.selectedValue == "E"){
+					IntagratedValue = 50;
+				}
+				else if(rgp3.selectedValue == "ClrE"){
+					IntagratedValue = 75;
+				}
+				else if(rgp3.selectedValue == "CompE"){
+					IntagratedValue = 95;
+				}
+				Calculate();
+			}
+			
+			public var depAvg:Number = 0;
+			public var ImplementedValue:Number=0;
+			public function ImplementedFn():void{
+				if(rgp4.selectedValue == "NE"){
+					ImplementedValue = 10;
+				}
+				else if(rgp4.selectedValue == "SE"){
+					ImplementedValue = 25;
+				}
+				else if(rgp4.selectedValue == "E"){
+					ImplementedValue = 50;
+				}
+				else if(rgp4.selectedValue == "ClrE"){
+					ImplementedValue = 75;
+				}
+				else if(rgp4.selectedValue == "CompE"){
+					ImplementedValue = 95;
+				}
+				Calculate();
+			}
+			
+			public var SystematicValue:Number=0;
+			public function SystematicFn():void{
+				if(rgp5.selectedValue == "NE"){
+					SystematicValue = 10;
+				}
+				else if(rgp5.selectedValue == "SE"){
+					
+					SystematicValue = 25;
+				}
+				else if(rgp5.selectedValue == "E"){
+					SystematicValue = 50;
+				}
+				else if(rgp5.selectedValue == "ClrE"){
+					SystematicValue = 75;
+				}
+				else if(rgp5.selectedValue == "CompE"){
+					SystematicValue = 95;
+				}
+				Calculate();
+			}
+			
+			public var assessmentReviewAvg:Number = 0;
+			public var MeasurementValue:Number=0;
+			public function MeasurementFn():void{
+				if(rgp6.selectedValue == "NE"){
+					MeasurementValue = 10;
+				}
+				else if(rgp6.selectedValue == "SE"){
+					MeasurementValue = 25;
+				}
+				else if(rgp6.selectedValue == "E"){
+					MeasurementValue = 50;
+				}
+				else if(rgp6.selectedValue == "ClrE"){
+					MeasurementValue = 75;
+				}
+				else if(rgp6.selectedValue == "CompE"){
+					MeasurementValue = 95;
+				}
+				Calculate();
+			}
+			
+			public var ImprovementValue:Number=0;
+			public function ImprovementFn():void{
+				if(rgp7.selectedValue == "NE"){
+					ImprovementValue = 10;
+				}
+				else if(rgp7.selectedValue == "SE"){
+					ImprovementValue = 25;
+				}
+				else if(rgp7.selectedValue == "E"){
+					ImprovementValue = 50;
+				}
+				else if(rgp7.selectedValue == "ClrE"){
+					ImprovementValue = 75;
+				}
+				else if(rgp7.selectedValue == "CompE"){
+					ImprovementValue = 95;
+				}
+				Calculate();
+			}
+			
+			public var LearningValue:Number=0;
+			public function LearningFn():void{
+				if(rgp8.selectedValue == "NE"){
+					LearningValue = 10;
+				}
+				else if(rgp8.selectedValue == "SE"){
+					LearningValue = 25;
+				}
+				else if(rgp8.selectedValue == "E"){
+					LearningValue = 50;
+				}
+				else if(rgp8.selectedValue == "ClrE"){
+					LearningValue = 75;
+				}
+				else if(rgp8.selectedValue == "CompE"){
+					LearningValue = 95;
+				}
+				Calculate();
+			}
+			public var popupwindow:RadarEnabler;
+			public function showRadar():void{
+				popupwindow = RadarEnabler(PopUpManager.createPopUp(this,RadarEnabler,true));
+				
+			}
+			public var needToRaisePopUp:Boolean=false;
+			public var strengthArr:ArrayCollection=new ArrayCollection();
+			public var afiArr:ArrayCollection=new ArrayCollection();
+			private function strengthItemClick(event:ListEvent):void{
+				 if(event.columnIndex==2){
+					if(myDataGridStrength.selectedItem.strengthID=="Add New"){
+						strengthArr.removeItemAt(strengthArr.length-1);
+						strengthArr.addItem({Index:strengthArr.length+1,strengthID:"",criterionPartID:"",approachID:"",type:"Enabler",strength:"",deleteVisible:false});
+						if(strengthArr.length<3)
+							strengthArr.addItem({Index:"",strengthID:"Add New",criterionPartID:"",approachID:"",type:"Enabler",strength:"Click here Add New Strength",deleteVisible:false});
+					}
+					else{
+						strengthArr.removeItemAt(event.rowIndex);
+						if(strengthArr.length<3 && strengthArr[strengthArr.length-1]["strength"]!="Click here Add New Strength")
+							strengthArr.addItem({Index:"",strengthID:"Add New",criterionPartID:"",approachID:"",type:"Enabler",strength:"Click here Add New Strength",deleteVisible:false}); 
+					}
+					strengthArr.refresh();
+					myDataGridStrength.dataProvider=strengthArr; 
+				}
+				else{
+					if(myDataGridStrength.selectedItem.strengthID=="Add New"){
+						strengthArr.removeItemAt(strengthArr.length-1);
+						strengthArr.addItem({Index:strengthArr.length+1,strengthID:"",criterionPartID:"",approachID:"",type:"Enabler",strength:"",deleteVisible:false});
+						if(strengthArr.length<3)
+							strengthArr.addItem({Index:"",strengthID:"Add New",criterionPartID:"",approachID:"",type:"Enabler",strength:"Click here Add New Strength",deleteVisible:false});
+						strengthArr.refresh();
+						myDataGridStrength.dataProvider=strengthArr;
+					} 
+					
+				}
+				
+			}
+			
+			private function afiItemClick(event:ListEvent):void{
+				//Alert.show("Calling");
+				 if(event.columnIndex==2){
+					if(myDataGridAFI.selectedItem.afiID=="Add New"){
+						afiArr.removeItemAt(afiArr.length-1);
+						afiArr.addItem({Index:afiArr.length+1,afiID:"",criterionPartID:"",approachID:"",type:"Enabler",afi:"",deleteVisible:false});
+						if(afiArr.length<3)
+							afiArr.addItem({Index:"",afiID:"Add New",criterionPartID:"",approachID:"",type:"Enabler",afi:"Click here Add New AFI",deleteVisible:false});
+					}
+					else{
+						afiArr.removeItemAt(event.rowIndex);
+						if(afiArr.length<3 && afiArr[afiArr.length-1]["afi"]!="Click here Add New AFI")
+							afiArr.addItem({Index:"",afiID:"Add New",criterionPartID:"",approachID:"",type:"Enabler",afi:"Click here Add New AFI",deleteVisible:false});
+					}
+					afiArr.refresh();
+					myDataGridAFI.dataProvider=afiArr;
+				}
+				else{
+					if(myDataGridAFI.selectedItem.afiID=="Add New"){
+						afiArr.removeItemAt(afiArr.length-1);
+						afiArr.addItem({Index:afiArr.length+1,afiID:"",criterionPartID:"",approachID:"",type:"Enabler",afi:"",deleteVisible:false});
+						if(afiArr.length<3)
+							afiArr.addItem({Index:"",afiID:"Add New",criterionPartID:"",approachID:"",type:"Enabler",afi:"Click here Add New AFI",deleteVisible:false});
+						afiArr.refresh();
+						myDataGridAFI.dataProvider=afiArr;
+					}
+					
+				} 
+				
+			}
+			private var strength:String;
+			
+			private function strengthEditBegin(event:DataGridEvent):void{
+				strength=strengthArr[event.rowIndex]["strength"];
+			}
+			private function strengthEditEnd(event:DataGridEvent):void{
+				strengthArr.refresh();
+				if(strength!=strengthArr[event.rowIndex]["strength"]){
+					needToRaisePopUp=true;
+				}
+			}
+			private var afi:String;
+			private function afiEditBegin(event:DataGridEvent):void{
+				afi=afiArr[event.rowIndex]["afi"];
+			}
+			private function afiEditEnd(event:DataGridEvent):void{
+				afiArr.refresh();
+				if(afi!=afiArr[event.rowIndex]["afi"]){
+					needToRaisePopUp=true;
+				}
+			}
+						
+		]]>
+	</mx:Script>
+	
+	<mx:VBox id="mainVBox" borderStyle="solid" height="100%" verticalGap="0" borderThickness="3" 
+		shadowDistance="8" shadowDirection="right" dropShadowEnabled="true" dropShadowColor="#000000" 
+		borderColor="#636e83" width="100%" horizontalAlign="left" verticalAlign="top" horizontalScrollPolicy="off" verticalScrollPolicy="auto" 
+		backgroundColor="white">
+		
+		<mx:Canvas width="100%" useHandCursor="true" buttonMode="true" mouseDown="{this.startDrag()}" mouseUp="{this.stopDrag()}" height="25" styleName="panel1filled"  borderSides="left,right,top" cornerRadius="3" borderStyle="none">
+			<mx:Label left="10" fontWeight="bold"  id="lblTitle" text="@Resource(bundle='myResources', key='subteamEnablerDetails')" color="#FFFFFF" fontSize="14"/>
+			<mx:Image id="imgClose" toolTip="Close" right="10" top="2" source="@Embed('assets/close.png')" useHandCursor="true" buttonMode="true"/>
+		</mx:Canvas>
+		
+		<mx:VBox horizontalScrollPolicy="off" horizontalAlign="center" width="99%" height="100%">  
+			<mx:Spacer/>	
+			<mx:HBox width="90%">
+				<mx:Label width="30%" fontWeight="bold" text="@Resource(bundle='myResources', key='criterionPart')"/>
+				<mx:Text width="70%" mouseChildren="false" id="Criterionpart"/>
+			</mx:HBox>
+			<mx:HBox width="90%">
+				<mx:Text width="30%" mouseChildren="false" fontWeight="bold" id="OtherCriterionpart"/>
+				<mx:Text width="70%" mouseChildren="false" id="otherCriteria"/>	
+			</mx:HBox>
+			
+			<mx:HBox width="90%">
+				<mx:Text width="30%" mouseChildren="false" fontWeight="bold" id="Titleofapproach"/>
+				<s:TextArea width="70%" height="60"  id="txtAreaTitleappro"/>
+			</mx:HBox>
+			
+			<mx:HBox width="90%" horizontalScrollPolicy="off">
+				<mx:Label width="30%"  mouseChildren="false" fontWeight="bold" text="@Resource(bundle='myResources', key='missingWithQstnMark')"/>
+				<mx:RadioButtonGroup id="rgp" />
+				<mx:RadioButton selected="true" label="@Resource(bundle='myResources', key='yes')" click="MissingFn()" group="{rgp}" id="Missrad1" groupName="{rgp}"/>
+				<mx:RadioButton label="@Resource(bundle='myResources', key='no')" id="Missrad2" click="MissingFn()" group="{rgp}" groupName="{rgp}"/>
+			</mx:HBox>
+			
+			<mx:Spacer/>
+			<mx:Spacer/>
+			
+			<mx:HBox width="90%" >
+			  <mx:VBox width="30%" horizontalGap="0" >
+			  		<mx:Text width="100%" mouseChildren="false" fontWeight="bold" text="@Resource(bundle='myResources', key='evidenceApproach')" />
+			  		<mx:Label mouseChildren="false" useHandCursor="true" color="blue" buttonMode="true" textDecoration="underline" click="showRadar()" text="See RADAR definition"/>
+			  </mx:VBox>
+				<s:TextArea height="80" width="70%"   id="txtEvidence"/>
+			</mx:HBox>
+			
+			<mx:Spacer/>
+			<mx:Spacer/>
+			
+			<mx:HBox width="90%" >
+				<mx:VBox width="30%" horizontalGap="0" >
+			  		<mx:Text width="100%" mouseChildren="false" fontWeight="bold"  text="@Resource(bundle='myResources', key='approachDeployedAndImplemented')"/>
+			  		<mx:Label mouseChildren="false" useHandCursor="true" color="blue" buttonMode="true" click="showRadar()" textDecoration="underline" text="@Resource(bundle='myResources', key='seeRaderDefinition')"/>
+			   </mx:VBox>
+				<s:TextArea height="80" width="70%"   id="txtEvidenceAppro"/>
+			</mx:HBox>
+			
+			<mx:Spacer/>
+			<mx:Spacer/>
+			
+			<mx:HBox width="90%" >
+				<mx:VBox width="30%" horizontalGap="0">
+			  		<mx:Text width="100%" mouseChildren="false" fontWeight="bold"  text="@Resource(bundle='myResources', key='approachEffectiveness')"/>
+			  		<mx:Label mouseChildren="false" useHandCursor="true" color="blue" buttonMode="true" textDecoration="underline" click="showRadar()" text="@Resource(bundle='myResources', key='seeRaderDefinition')"/>
+			 	 </mx:VBox>
+				<s:TextArea height="80" width="70%"   id="txtEvidenceAppro2"/>
+			</mx:HBox>
+			
+			<mx:Spacer/>
+			
+			<mx:HBox width="90%">
+				<mx:Text width="30%" mouseChildren="false" fontWeight="bold" text="@Resource(bundle='myResources', key='sourceOfInformation')"/>
+				<s:TextArea width="70%" height="60"  id="txtsourceInfo"/>
+			</mx:HBox>
+			
+			<mx:HBox width="90%">
+				<mx:Text width="30%" mouseChildren="false" fontWeight="bold" text="@Resource(bundle='myResources', key='relevanceToThisCriterionPart')"/>
+				<mx:HBox width="70%">
+					<mx:ComboBox width="20%" fontWeight="normal" id="cmbRelevence"  change="relevanceCriteria()" />
+					<mx:Spacer width="20%" />
+					<mx:Text width="40%" mouseChildren="false" fontWeight="bold" text="@Resource(bundle='myResources', key='relevanceToDeliveringthisOriginal')"/>
+					<mx:ComboBox width="20%" fontWeight="normal" id="cmbRelevencedeli"   change="relevanceCriteria()"/>
+				</mx:HBox>
+			</mx:HBox>
+			<mx:Spacer/>
+			<mx:Spacer/>
+			<mx:HBox width="90%" height="40%">
+				<mx:VBox width="30%" height="100%">
+					<mx:Label fontWeight="bold" text="Strengths"/>
+					<mx:Text width="100%" mouseChildren="false" fontWeight="normal" text="@Resource(bundle='myResources', key='bestPracticeObserved')"/>	
+				</mx:VBox>
+				<mx:VBox width="70%" height="100%">
+					<mx:Text text="Please enter the major strengths(max:3)" width="100%" height="2%"/>
+					<mx:DataGrid id="myDataGridStrength" minHeight="110" showHeaders="false" verticalGridLines="false" editable="true" itemClick="strengthItemClick(event)" width="100%" height="98%" variableRowHeight="true" wordWrap="true" allowMultipleSelection="true" itemEditBegin="strengthEditBegin(event)" itemEditEnd="strengthEditEnd(event)">
+						<mx:columns>
+							<mx:DataGridColumn wordWrap="true" dataField="Index" width="50"/>
+							<mx:DataGridColumn wordWrap="true" dataField="strength">
+								<mx:itemRenderer>
+									<mx:Component>
+										<mx:Text paddingLeft="5" text="{data.strength}"/>
+									</mx:Component>
+								</mx:itemRenderer>
+								<mx:itemEditor>
+									<mx:Component>
+										<mx:TextArea wordWrap="true"  paddingLeft="5" text="{data.strength}"/>
+									</mx:Component>
+								</mx:itemEditor>
+							</mx:DataGridColumn> 
+							<mx:DataGridColumn width="80" id="imageColStrength">
+							<mx:itemRenderer>
+	                    		<mx:Component> 
+	                    			<mx:VBox  width="73" verticalAlign="middle" horizontalCenter="0" verticalScrollPolicy="off" horizontalScrollPolicy="off">
+	                    				<mx:Script>
+										        <![CDATA[
+										        
+										        override public function set data(data:Object):void
+							                    {
+							                    	iconHbox.removeAllChildren();
+							                    	var value:String = data.strengthID;
+							                        if(value == "Add New"){
+														addIcon.visible = true;
+														addIcon.width = 25;
+														iconHbox.addChild(addIcon);
+													} else{
+														deleteIcon.visible = true;
+														deleteIcon.width = 25;
+														iconHbox.addChild(deleteIcon);
+													}
+							                    }
+										        ]]>
+										    </mx:Script>
+										 <mx:HBox id="iconHbox" width="25"/>
+	                    				<mx:HBox width="0" height="0">
+	                    					 <mx:Image id="deleteIcon" visible="false" scaleContent="false" horizontalCenter="0" horizontalAlign="center" source="@Embed('assets/newdeleteicon.png')" useHandCursor="true" buttonMode="true"/>
+	                    					 <mx:Image id="addIcon" visible="false" scaleContent="false" horizontalCenter="0" horizontalAlign="center" source="@Embed('assets/add-icon.png')" useHandCursor="true" buttonMode="true"/>
+	                    				</mx:HBox>
+	                    			</mx:VBox>
+			                        
+	                    		</mx:Component> 
+	                		</mx:itemRenderer> 
+						</mx:DataGridColumn>
+						</mx:columns>
+					</mx:DataGrid>
+				</mx:VBox>
+			</mx:HBox>
+			<mx:Spacer/>
+			<mx:HBox width="90%" height="40%">
+				<mx:VBox width="30%" height="100%">
+					<mx:Text width="100%" mouseChildren="false" fontWeight="bold" text="@Resource(bundle='myResources', key='areasForImprovement')"/>
+					<mx:Text width="100%" mouseChildren="false" text="@Resource(bundle='myResources', key='needForActionPlanning')"/>	
+				</mx:VBox>
+				<mx:VBox width="70%" height="100%">
+					<mx:Text text="Please enter the major AFI(max:3)" width="100%" height="2%"/>
+					<mx:DataGrid showHeaders="false"  minHeight="110" verticalGridLines="false" itemClick="afiItemClick(event)" editable="true" id="myDataGridAFI" width="100%" height="98%" variableRowHeight="true" wordWrap="true" allowMultipleSelection="true" itemEditBegin="afiEditBegin(event)" itemEditEnd="afiEditEnd(event)">
+						<mx:columns>
+							<mx:DataGridColumn wordWrap="true" dataField="Index" width="50"/>
+							<mx:DataGridColumn wordWrap="true" dataField="afi" editable="true">
+								<mx:itemRenderer>
+									<mx:Component>
+										<mx:Text paddingLeft="5" text="{data.afi}"/>
+									</mx:Component>
+								</mx:itemRenderer>
+								<mx:itemEditor>
+									<mx:Component>
+										<mx:TextArea wordWrap="true"  paddingLeft="5" text="{data.afi}"/>
+									</mx:Component>
+								</mx:itemEditor>
+							</mx:DataGridColumn> 
+							<mx:DataGridColumn width="80" id="imageColAFI">
+								<mx:itemRenderer>
+		                    		<mx:Component> 
+		                    			<mx:VBox  width="73" verticalAlign="middle" horizontalCenter="0" verticalScrollPolicy="off" horizontalScrollPolicy="off">
+		                    				<mx:Script>
+											        <![CDATA[
+											        override public function set data(data:Object):void
+								                    {
+								                    	iconHbox.removeAllChildren();
+								                    	var value:String = data.afiID;
+								                        if(value == "Add New"){
+															addIcon.visible = true;
+															addIcon.width = 25;
+															iconHbox.addChild(addIcon);
+														}
+														else{
+															deleteIcon.visible = true;
+															deleteIcon.width = 25;
+															iconHbox.addChild(deleteIcon);
+														}
+														
+								                    }
+											        ]]>
+											    </mx:Script>
+											 <mx:HBox id="iconHbox" width="25"/>
+		                    				<mx:HBox width="0" height="0">
+		                    					 <mx:Image id="deleteIcon" visible="false" scaleContent="false" horizontalCenter="0" horizontalAlign="center" source="@Embed('assets/newdeleteicon.png')" useHandCursor="true" buttonMode="true"/>
+		                    					 <mx:Image id="addIcon" visible="false" scaleContent="false" horizontalCenter="0" horizontalAlign="center" source="@Embed('assets/add-icon.png')" useHandCursor="true" buttonMode="true"/>
+		                    				</mx:HBox>
+		                    			</mx:VBox>
+				                        
+		                    		</mx:Component> 
+		                		</mx:itemRenderer> 
+							</mx:DataGridColumn>
+						</mx:columns>
+					</mx:DataGrid>
+				</mx:VBox>
+			</mx:HBox>
+			<!--<mx:HBox width="90%">
+				<mx:VBox width="30%">
+					<mx:Label fontWeight="bold" text="Strengths"/>
+					<mx:Text width="100%" mouseChildren="false" fontWeight="normal" text="@Resource(bundle='myResources', key='bestPracticeObserved')"/>	
+				</mx:VBox>
+				
+				<s:TextArea width="70%" height="60"  id="txtbest"/>
+			</mx:HBox>
+			
+			<mx:Spacer/>
+			<mx:Spacer/>
+			
+			<mx:HBox width="90%">
+				<mx:VBox width="30%">
+					<mx:Text width="100%" mouseChildren="false" fontWeight="bold" text="@Resource(bundle='myResources', key='areasForImprovement')"/>
+					<mx:Text width="100%" mouseChildren="false" text="@Resource(bundle='myResources', key='needForActionPlanning')"/>	
+				</mx:VBox>
+				
+				<s:TextArea width="70%" height="60"  id="txtAreas"/>
+			</mx:HBox>
+			<mx:Spacer/>-->
+			
+			<mx:HBox width="90%">
+				<mx:Label fontWeight="bold" text="@Resource(bundle='myResources', key='radarAssessment')" fontSize="13"/>
+			</mx:HBox>
+			
+			<mx:Spacer/>
+			
+			<mx:HBox width="90%">
+				<mx:Text width="30%" mouseChildren="false" fontWeight="bold" text="@Resource(bundle='myResources', key='approach')"/>
+				<mx:HBox width="70%">
+				<mx:TabNavigator borderStyle="solid" width="45%">
+						<mx:HBox id="Soundrational"  paddingLeft="5" paddingRight="5" label="@Resource(bundle='myResources', key='soundRational')"  horizontalScrollPolicy="off">
+							<mx:RadioButtonGroup id="rgp2" change="SoundRationalFn()"/>
+							<mx:RadioButton selected="true" label="@Resource(bundle='myResources', key='ne')" id="Appro1" group="{rgp2}" groupName="{rgp2}"/>
+							<mx:RadioButton label="@Resource(bundle='myResources', key='le')" id="Appro2" group="{rgp2}" groupName="{rgp2}"/>
+							<mx:RadioButton label="@Resource(bundle='myResources', key='e')" id="Appro3" group="{rgp2}" groupName="{rgp2}"/>
+							<mx:RadioButton label="@Resource(bundle='myResources', key='crle')" id="Appro4" group="{rgp2}" groupName="{rgp2}"/>
+							<mx:RadioButton label="@Resource(bundle='myResources', key='compe')" id="Appro5" group="{rgp2}" groupName="{rgp2}"/>
+						</mx:HBox>
+				</mx:TabNavigator>
+				
+				<mx:Spacer width="10%"/>
+				<mx:TabNavigator borderStyle="solid" width="45%">
+					<mx:HBox id="Integrated" paddingLeft="5" paddingRight="5" label="@Resource(bundle='myResources', key='integrated')"  horizontalScrollPolicy="off">
+						<mx:RadioButtonGroup id="rgp3" change="IntagratedFn()"/>
+						<mx:RadioButton selected="true" label="@Resource(bundle='myResources', key='ne')" id="Integrated1" group="{rgp3}" groupName="{rgp3}"/>
+						<mx:RadioButton label="@Resource(bundle='myResources', key='le')" id="Integrated2" group="{rgp3}" groupName="{rgp3}"/>
+						<mx:RadioButton label="@Resource(bundle='myResources', key='e')" id="Integrated3" group="{rgp3}" groupName="{rgp3}"/>
+						<mx:RadioButton label="@Resource(bundle='myResources', key='crle')" id="Integrated4" group="{rgp3}" groupName="{rgp3}"/>
+						<mx:RadioButton label="@Resource(bundle='myResources', key='compe')" id="Integrated5" group="{rgp3}" groupName="{rgp3}"/>
+					</mx:HBox>
+				</mx:TabNavigator>
+				</mx:HBox>
+				
+			</mx:HBox>
+			
+			<mx:Spacer />
+			
+			<mx:HBox width="90%" horizontalScrollPolicy="off">
+				<mx:Text width="30%" mouseChildren="false" fontWeight="bold" text="Deployment"/>
+				<mx:HBox width="70%">
+				
+				<mx:TabNavigator borderStyle="solid" width="45%">
+						<mx:HBox paddingLeft="5" paddingRight="5" id="Implemented" label="@Resource(bundle='myResources', key='implemented')" horizontalScrollPolicy="off">
+							<mx:RadioButtonGroup id="rgp4" change="ImplementedFn()"/>
+							<mx:RadioButton selected="true" label="@Resource(bundle='myResources', key='ne')" id="Deployment1" group="{rgp4}" groupName="{rgp4}"/>
+							<mx:RadioButton label="@Resource(bundle='myResources', key='le')" id="Deployment2" group="{rgp4}" groupName="{rgp4}"/>
+							<mx:RadioButton label="@Resource(bundle='myResources', key='e')" id="Deployment3" group="{rgp4}" groupName="{rgp4}"/>
+							<mx:RadioButton label="@Resource(bundle='myResources', key='crle')" id="Deployment4" group="{rgp4}" groupName="{rgp4}"/>
+							<mx:RadioButton label="@Resource(bundle='myResources', key='compe')" id="Deployment5" group="{rgp4}" groupName="{rgp4}"/>
+						</mx:HBox>
+				</mx:TabNavigator>
+				
+				<mx:Spacer  width="10%"/>
+				<mx:TabNavigator borderStyle="solid" width="45%">
+					<mx:HBox id="Systematic" paddingLeft="5" paddingRight="5" label="@Resource(bundle='myResources', key='systematic')"  horizontalScrollPolicy="off">
+						<mx:RadioButtonGroup id="rgp5" change="SystematicFn()"/>
+						<mx:RadioButton selected="true" label="@Resource(bundle='myResources', key='ne')" id="Systematic1" group="{rgp5}" groupName="{rgp5}"/>
+						<mx:RadioButton label="@Resource(bundle='myResources', key='le')" id="Systematic2" group="{rgp5}" groupName="{rgp5}"/>
+						<mx:RadioButton label="@Resource(bundle='myResources', key='e')" id="Systematic3" group="{rgp5}" groupName="{rgp5}"/>
+						<mx:RadioButton label="@Resource(bundle='myResources', key='crle')" id="Systematic4" group="{rgp5}" groupName="{rgp5}"/>
+						<mx:RadioButton label="@Resource(bundle='myResources', key='compe')" id="Systematic5" group="{rgp5}" groupName="{rgp5}"/>
+					</mx:HBox>
+				</mx:TabNavigator>
+				</mx:HBox>
+			</mx:HBox>
+			
+			<mx:Spacer height="5%"/>
+			<mx:Spacer height="5%"/>
+			<mx:Spacer height="5%"/>
+			
+			<mx:HBox width="90%">
+				<mx:Text width="30%" mouseChildren="false" fontWeight="bold" text="Assessment And Refinement"/>
+				
+				<mx:HBox width="70%">
+				<mx:VBox width="45%">
+					<mx:TabNavigator borderStyle="solid" width="100%">
+						<mx:HBox id="Measurement" paddingLeft="5" paddingRight="5" label="Measurement"  horizontalScrollPolicy="off">
+							<mx:RadioButtonGroup id="rgp6" change="MeasurementFn()"/>
+							<mx:RadioButton selected="true" label="@Resource(bundle='myResources', key='ne')" id="Measurement1" group="{rgp6}" groupName="{rgp6}"/>
+							<mx:RadioButton label="@Resource(bundle='myResources', key='le')" id="Measurement2" group="{rgp6}" groupName="{rgp6}"/>
+							<mx:RadioButton label="@Resource(bundle='myResources', key='e')" id="Measurement3" group="{rgp6}" groupName="{rgp6}"/>
+							<mx:RadioButton label="@Resource(bundle='myResources', key='crle')" id="Measurement4" group="{rgp6}" groupName="{rgp6}"/>
+							<mx:RadioButton label="@Resource(bundle='myResources', key='compe')" id="Measurement5" group="{rgp6}" groupName="{rgp6}"/>
+						</mx:HBox>
+					</mx:TabNavigator>
+					<mx:TabNavigator borderStyle="solid"  width="100%">
+						<mx:HBox id="Improvement" paddingLeft="5" paddingRight="5" label="@Resource(bundle='myResources', key='learningAndCreativity')"  horizontalScrollPolicy="off">
+							<mx:RadioButtonGroup id="rgp7" change="ImprovementFn()"/>
+							<mx:RadioButton selected="true" label="@Resource(bundle='myResources', key='ne')" id="Improvement1" group="{rgp7}" groupName="{rgp7}"/>
+							<mx:RadioButton label="@Resource(bundle='myResources', key='le')" id="Improvement2" group="{rgp7}" groupName="{rgp7}"/>
+							<mx:RadioButton label="@Resource(bundle='myResources', key='e')" id="Improvement3" group="{rgp7}" groupName="{rgp7}"/>
+							<mx:RadioButton label="@Resource(bundle='myResources', key='crle')" id="Improvement4" group="{rgp7}" groupName="{rgp7}"/>
+							<mx:RadioButton label="@Resource(bundle='myResources', key='compe')" id="Improvement5" group="{rgp7}" groupName="{rgp7}"/>
+						</mx:HBox>
+					</mx:TabNavigator>
+					<mx:TabNavigator borderStyle="solid"  width="100%">
+						<mx:HBox id="Learning" paddingLeft="5" paddingRight="5" label="@Resource(bundle='myResources', key='improvementAndInnovation')"  horizontalScrollPolicy="off">
+							<mx:RadioButtonGroup id="rgp8" change="LearningFn()"/>
+							<mx:RadioButton selected="true" label="@Resource(bundle='myResources', key='ne')" id="Learning1" group="{rgp8}" groupName="{rgp8}"/>
+							<mx:RadioButton label="@Resource(bundle='myResources', key='le')" id="Learning2" group="{rgp8}" groupName="{rgp8}"/>
+							<mx:RadioButton label="@Resource(bundle='myResources', key='e')" id="Learning3" group="{rgp8}" groupName="{rgp8}"/>
+							<mx:RadioButton label="@Resource(bundle='myResources', key='crle')" id="Learning4" group="{rgp8}" groupName="{rgp8}"/>
+							<mx:RadioButton label="@Resource(bundle='myResources', key='compe')" id="Learning5" group="{rgp8}" groupName="{rgp8}"/>
+						</mx:HBox>
+					</mx:TabNavigator>
+				</mx:VBox>
+				<mx:Spacer width="10%"/>
+				<mx:VBox width="45%">
+					<mx:HBox width="100%">
+						<mx:Label text="NE" fontWeight="bold"/>
+						<mx:Label text="@Resource(bundle='myResources', key='neExp')"/>
+					</mx:HBox>
+					<mx:HBox width="100%">
+						<mx:Label text="SE" fontWeight="bold"/>
+						<mx:Label text="@Resource(bundle='myResources', key='leExp')"/>
+					</mx:HBox>
+					<mx:HBox width="100%">
+						<mx:Label text="E" fontWeight="bold"/>
+						<mx:Label text="@Resource(bundle='myResources', key='eExp')"/>
+					</mx:HBox>
+					<mx:HBox width="100%">
+						<mx:Label text="ClrE" fontWeight="bold"/>
+						<mx:Label text="@Resource(bundle='myResources', key='crleExp')"/>
+					</mx:HBox>
+					<mx:HBox width="100%">
+						<mx:Label text="CompE" fontWeight="bold"/>
+						<mx:Label text="@Resource(bundle='myResources', key='compeExp')"/>
+					</mx:HBox>
+				</mx:VBox>
+				</mx:HBox>
+			</mx:HBox>
+			
+			
+			
+			<mx:Spacer/>
+			<mx:Spacer/>
+			
+			<mx:HBox width="90%">
+				<mx:Text width="30%" mouseChildren="false" fontWeight="bold" text="@Resource(bundle='myResources', key='suggestedSysScore')"/>
+				<mx:Text width="30%" mouseChildren="false" id="lblSysGenScore" text="@Resource(bundle='myResources', key='clearEvidence')"/>	
+			</mx:HBox>
+			
+			<mx:Spacer/>
+			<mx:Spacer/>
+			
+			<mx:HBox width="90%">
+				<mx:Text width="30%" mouseChildren="false" fontWeight="bold" text="@Resource(bundle='myResources', key='overAllScoreAwarded')"/>
+				<mx:TextInput width="60" id="txtScore" restrict="0-9/."/>	
+			</mx:HBox>
+			
+			<mx:Spacer/>
+			<mx:Spacer/>
+			<mx:VBox id="vboxFooter" width="90%">
+				<mx:HBox width="100%">
+					<mx:Text width="30%" mouseChildren="false" fontWeight="bold" text="@Resource(bundle='myResources', key='attachDocuments')"/>
+					<mx:Label width="70%" id="lblenableattach" textDecoration="underline" useHandCursor="true" buttonMode="true" color="blue" mouseChildren="false" text="@Resource(bundle='myResources', key='clickHereToAttachDocs')"/>	
+				</mx:HBox>
+			
+				<mx:Spacer/>
+				<mx:Spacer/>
+				
+				<mx:HBox width="100%">
+					<mx:Spacer width="30%"/>
+					<mx:Button useHandCursor="true" buttonMode="true" label="@Resource(bundle='myResources', key='save')" id="btnSave"/>
+					<mx:Button id="btnClose" useHandCursor="true" buttonMode="true"  label="@Resource(bundle='myResources', key='btncancel')"/>	
+				</mx:HBox>
+				<mx:HBox/>
+			</mx:VBox>
+				
+		</mx:VBox>
+		
+	</mx:VBox>
+<mx:Label id="critId" visible="false"/>
+<mx:Label id="enablerId" visible="false"/>
+</mx:Canvas>
+
+

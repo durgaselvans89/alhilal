@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Panel borderStyle="none" xmlns:mx="http://www.adobe.com/2006/mxml"
+	 width="100%" height="100%" creationComplete="init()" xmlns:com="src.com.selfassessment.view.*" verticalAlign="middle" horizontalAlign="center">
+	
+	<mx:Script>
+		<![CDATA[
+			public var txtBuilder:Login = new Login();
+			private function init():void{
+			}
+			/* public function backFn():void{
+				txtBuilder.close();
+			} */
+			
+		]]>
+	</mx:Script>
+	
+	<mx:VBox id="vbox3" width="100%" backgroundColor="White" height="100%" color="black" verticalAlign="middle" horizontalAlign="center" fontSize="10" fontFamily="Verdana">
+		
+		<mx:HBox verticalGap="0" width="100%" height="2%">
+			<mx:Spacer width="2%"/>
+			<mx:Text selectable="false" text="Benefits of Excellence Builder" textDecoration="underline" fontWeight="bold" fontSize="12"/>
+		</mx:HBox>
+		
+		<mx:HBox verticalGap="0" width="100%">
+			<mx:Spacer width="2%"/>
+			
+			<mx:VBox width="100%" height="30%">
+				<mx:Spacer width="10%"/>
+				<mx:Label fontSize="11" width="25%" text="    The methodology used in this software postulates that organisations are encouraged to:"/>
+				<mx:VBox width="100%" height="50%">
+					<mx:Spacer width="10%"/>
+					<mx:Label fontSize="11" width="25%" text="         - Make excellence-related issues an integral part of work."/>
+					<mx:Label fontSize="11" width="25%" text="         - Make the senior management team in charge of all excellence initiatives."/>
+					<mx:Label fontSize="11" width="25%" text="         - Use self-assessment as a method of understanding the strengths and areas for improvement of their organisation."/>
+				</mx:VBox>
+			</mx:VBox>
+			
+		</mx:HBox>
+		
+		<mx:HBox verticalGap="0" width="100%">
+			<mx:Spacer/>
+		</mx:HBox>
+		
+		<mx:HBox verticalGap="0" width="100%">
+			<mx:Spacer/>
+		</mx:HBox>
+		
+		<mx:HBox verticalGap="0" width="100%">
+			<mx:Spacer width="2%"/>
+			<mx:VBox width="100%" height="30%">
+				<mx:Spacer width="15%"/>
+				<mx:Label fontSize="11" width="25%" text="    The methodology used in this software postulates that organisations are encouraged to:"/>
+				<mx:VBox width="100%" height="50%">
+					<mx:Spacer width="10%"/>
+					<mx:Label fontSize="11" width="25%" text="         - Action plan, prioritise, assign responsibility and monitor the delivery progress of the improvement projects."/>
+					<mx:Label fontSize="11" width="25%" text="         - Establish a culture of regular reviews and organisational excellence."/>
+					<mx:Label fontSize="11" width="25%" text="         - Make Excellence the norm and a HABIT in your organization"/>
+				</mx:VBox>
+			</mx:VBox>
+		</mx:HBox>
+		
+		
+	</mx:VBox>
+</mx:Panel>

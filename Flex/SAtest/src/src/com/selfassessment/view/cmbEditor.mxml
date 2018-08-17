@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Box xmlns:mx="http://www.adobe.com/2006/mxml" width="100%"
+   height="100%" horizontalAlign="center">
+  <mx:Script>
+   <![CDATA[
+   				/* cmbData.push("Open");
+	    		cmbData.push("Pending");
+	    		cmbData.push("hold");
+	    		cmbData.push("Close"); */
+	    		
+     /* override public function set data(value:Object):void
+     {
+       super.data = value;
+       newValue = value.status;
+     } */
+   ]]>
+ </mx:Script>
+  <mx:Label id="lblnewValue"/>
+  <mx:ComboBox id="cmbStatus" 
+     change="{lblnewValue = (cmbStatus.selectedItem)}">
+   <mx:dataProvider>
+      <mx:Array>
+        <mx:String>Open</mx:String>
+        <mx:String>Pending</mx:String>
+        <mx:String>Hold</mx:String>
+        <mx:String>Close</mx:String>
+      </mx:Array>
+    </mx:dataProvider>
+  </mx:ComboBox>
+</mx:Box>

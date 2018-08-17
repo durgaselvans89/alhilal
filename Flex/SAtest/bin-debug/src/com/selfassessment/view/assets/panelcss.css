@@ -1,0 +1,27 @@
+/* CSS file */
+.PanelStyle {
+   borderStyle: solid;
+   roundedBottomCorners: true;
+   cornerRadius: 4;
+}
+
+.MainView
+{
+   backgroundColor: #7fceff;
+   backgroundGradientColors: #7fceff, #ffffff;
+   backgroundGradientAlphas: 0.48, 0.58;
+   themeColor: #7fceff;
+}
+.ApplyFontSize{
+	fontSize:11;
+	text-align:left;
+	horizontal-align:left;
+}
+
+.labelalignment{
+	fontWeight:bold;
+	fontSize:11;
+	text-align:left;
+	horizontal-align:left;
+}
+

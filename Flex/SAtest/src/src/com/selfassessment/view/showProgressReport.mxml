@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml"   y="{(Application.application.height/2)-(this.height/2)}"
+	 x="{(Application.application.width/2)-(this.width/2)}" creationComplete="init()" verticalScrollPolicy="off" horizontalScrollPolicy="off" width="{screen.width}" height="{screen.height}">
+
+
+	<mx:Script>
+		<![CDATA[
+			import src.com.selfassessment.controller.Components;
+			import com.boyzoid.PagableArrayCollection.PagableArrayCollection;
+			import mx.managers.CursorManager;
+			import mx.core.Application;
+			import mx.managers.PopUpManager;
+			import mx.controls.*;
+			import src.com.selfassessment.controller.TeamController;
+			
+			private function init():void{
+				if(Application.application.language=="en_US"){
+					mainVBox.styleName='ApplyFontSizeEn';
+				
+				}
+				else{
+					mainVBox.styleName='ApplyFontSizeAr';
+					
+				}
+			}
+			
+			private function onClose():void {
+				PopUpManager.removePopUp(this);
+			}
+			
+		]]>
+	</mx:Script>
+	
+	<mx:VBox id="mainVBox" borderStyle="solid" height="100%" verticalGap="0" borderThickness="3" shadowDistance="8" shadowDirection="right" dropShadowEnabled="true" dropShadowColor="#000000" borderColor="#636e83" width="100%" horizontalAlign="center" verticalAlign="top" backgroundColor="white">
+		<mx:Canvas width="100%" useHandCursor="true" buttonMode="true" mouseDown="{this.startDrag()}" mouseUp="{this.stopDrag()}" height="25" styleName="panel1filled"  borderSides="left,right,top" cornerRadius="3" borderStyle="none">
+			<mx:Label left="10" fontWeight="bold"  id="lblTitle" text="Progress report" color="#FFFFFF" fontSize="14"/>
+			<mx:Image toolTip="Close" right="2" top="2" source="@Embed('assets/close.png')" useHandCursor="true" buttonMode="true"  id="closepopupLink" click="onClose()"/>
+		</mx:Canvas>
+		
+			<mx:Spacer height="25"/>
+			<mx:VBox width="{screen.width-100}" height="{screen.height-80}" verticalScrollPolicy="off">
+			<mx:HBox width="100%" horizontalAlign="center" height="95%">
+				<mx:DataGrid wordWrap="true" maxHeight="510" variableRowHeight="true" horizontalGridLines="true" verticalGridLines="true" id="myDataGrid" width="95%" height="100%" allowMultipleSelection="false" draggableColumns="false">
+					<mx:columns>
+				        <mx:DataGridColumn headerWordWrap="true" headerText="Name" dataField="name" width="100">
+				       		<mx:itemRenderer>
+					        	<mx:Component>
+					        		<mx:Text text="{data.name}" paddingLeft="5"/>
+					        	</mx:Component>
+					        </mx:itemRenderer>
+				        </mx:DataGridColumn>
+				          <mx:DataGridColumn headerWordWrap="true" headerText="Date" dataField="createdAt" width="50">
+						<mx:itemRenderer>
+			            		<mx:Component>
+			            		<mx:Text paddingLeft="5" text="{data.createdAt}">
+			        			</mx:Text>
+			            		</mx:Component> 
+		        			</mx:itemRenderer> 
+						</mx:DataGridColumn>
+				        <mx:DataGridColumn wordWrap="true" headerWordWrap="true" headerText="Progress report" dataField="progressReport" width="200">
+				        	<mx:itemRenderer>
+			            		<mx:Component>
+			            		<mx:Text useHandCursor="true" text="{data.progressReport}" paddingLeft="5">
+			        			</mx:Text>
+			            		</mx:Component> 
+		        			</mx:itemRenderer> 
+				         
+				        </mx:DataGridColumn>
+				   </mx:columns>
+			</mx:DataGrid>  
+			
+			</mx:HBox>
+			
+			
+			</mx:VBox>
+			
+		
+		</mx:VBox>
+		
+			
+
+	
+</mx:Canvas>

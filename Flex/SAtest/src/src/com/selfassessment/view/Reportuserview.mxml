@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml"  styleName="Childpanelstyle"  
+	width="100%" height="100%" xmlns:com="src.com.selfassessment.view.*" horizontalAlign="center" verticalAlign="middle" horizontalGap="0">
+ 	<mx:Text text="Under Construction" fontWeight="bold" fontSize="16" />
+</mx:HBox>

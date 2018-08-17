@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="init()"  styleName="userContentStyle"  
+	width="100%" height="100%" xmlns:com="src.com.selfassessment.view.*" horizontalGap="0">
+ 
+	<mx:Style source="src/com/selfassessment/view/assets/Styles.css"/>	
+
+	<mx:Script>
+		<![CDATA[
+			import mx.core.Application;
+			import mx.containers.Panel;
+			import src.com.selfassessment.view.*;
+			import mx.controls.Alert;
+			import src.com.selfassessment.events.EventCriteriaConstants;
+			import mx.effects.*;
+			
+			public function init():void{
+				userview.currentState='';
+			}
+			
+			public function ContentPageChange(event:Event):void {
+				//Alert.show(event.type.toString());
+				var choosenChild:String = event.type;
+				
+				if(null != choosenChild){
+					Application.application.CurrentSelection = "Meeting -> "+menuitems.myTree.selectedItem.@label;		
+					if(choosenChild == 'MeetingSet'){
+						//Alert.show("Calling");
+						currentState = 'MeetingSet';
+						
+						meetingset.init();
+					}
+					else{
+						currentState = '';
+						userview.currentState='';
+						userview.init();
+					}
+				} 
+			}
+			
+		]]>
+	</mx:Script>
+	<mx:Fade id="Add" duration="1000"/>
+	
+		<mx:states>
+			<!--<mx:State name="Meetingview">
+				<mx:RemoveChild	target="{userview}"/>
+	    		<mx:AddChild relativeTo="{content}">
+	            	 <com:MeetingMenuTitle id="Meetingview" width="100%" height="100%"/>
+				</mx:AddChild>
+	    	</mx:State>-->
+	    	<mx:State name="MeetingSet">
+				<mx:RemoveChild	target="{userview}"/>
+	    		<mx:AddChild relativeTo="{content}">
+	            	 <com:Meetingset id="meetingset" width="100%" height="100%"/>
+				</mx:AddChild>
+	    	</mx:State>
+		</mx:states>
+		
+		<mx:transitions>
+	       <!--<mx:Transition toState="MeetingView">
+	            <mx:Fade target="{Meetingview}" alphaFrom="0" alphaTo="1" duration="900"/>
+	       </mx:Transition>-->
+	       <mx:Transition toState="*">
+	            <mx:Fade duration="900" alphaFrom="0" alphaTo="1" target="{userview}"/>
+	        </mx:Transition>
+	     </mx:transitions>
+		
+		<mx:Canvas id="menu" width="15%" height="100%" > 
+			<com:MeetingMenuTitle id="menuitems" width="100%" height="100%" MeetingView="ContentPageChange(event);" MeetingSet="ContentPageChange(event);"/>
+		</mx:Canvas>
+				
+		<mx:Canvas id="content" width="85%" height="100%" > 
+			<com:Meetinguserview id="userview" width="100%" height="100%" addedEffect="Add"/>
+		</mx:Canvas>
+		
+</mx:HBox>

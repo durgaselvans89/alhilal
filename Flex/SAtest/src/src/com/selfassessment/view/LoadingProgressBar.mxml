@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="400" height="300">
+<mx:VBox width="100%" height="100%" verticalAlign="middle" horizontalAlign="center">
+	
+<mx:ProgressBar id="progress" indeterminate="true" minimum="0" maximum="100" label="Loading">
+</mx:ProgressBar>
+</mx:VBox>
+</mx:Canvas>

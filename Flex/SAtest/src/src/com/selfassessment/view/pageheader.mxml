@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml" 
+	xmlns:components="com.selfassessment.view.*" creationComplete="init()" styleName="HeaderBGstyle" verticalAlign="middle">
+
+	<mx:Style source="src/com/selfassessment/view/assets/Styles.css"/>	
+ 	
+	<mx:Metadata>
+		[Event("Admin", type="com.selfassessment.events.AdminEvent")]
+		[Event("Excellence", type="com.selfassessment.events.ExcellenceEvent")]
+		[Event("Report", type="com.selfassessment.events.ReportEvent")]
+		[Event("Help", type="com.selfassessment.events.ReportEvent")]
+		[Event("ImprovementProjects", type="com.selfassessment.events.ReportEvent")]
+		[Event("Meeting", type="com.selfassessment.events.ReportEvent")]
+		[Event("GettingStarted", type="com.selfassessment.events.ReportEvent")]
+	</mx:Metadata>
+
+	<mx:Script>
+        <![CDATA[
+        	import src.com.selfassessment.controller.TeamController;
+        	import mx.managers.CursorManager;
+        	import src.com.selfassessment.controller.Controller;
+        	import mx.core.Application;
+        	import src.com.selfassessment.events.ExcellenceEvent;
+        	import src.com.selfassessment.events.AdminEvent;
+        	import src.com.selfassessment.events.ReportEvent;
+        	import src.com.selfassessment.controller.Components;
+        	
+        	//Header file included
+        	import mx.controls.Alert;
+            import mx.events.ListEvent;
+            
+            public var teamService:TeamController=new TeamController();
+
+			private function init():void{
+				//Alert.show(Application.application.IsExecutiveMember.toString());	
+				embededImage7.selected = true;
+			    embededImage4.selected = false;
+			    embededImage3.selected = false;
+	            embededImage2.selected = false;
+	            embededImage1.selected = false;
+	            embededImage5.selected = false;
+   				embededImage6.selected = false;
+   				
+            	dispatchEvent(new ReportEvent(ReportEvent.gettingstarted_select));
+            	
+            	
+				/* if(Application.application.IsExecutiveMember==1){
+	             	Admin.visible=true;
+             	}
+             	else{
+             		Admin.visible=false;
+             	} */
+             	
+             	
+             	/* teamService.chkProjRespExists(parseInt(Components.instance.session.userid),function(isExists:Number):void{
+             		if(Application.application.IsExecutiveMember==1 || isExists==1){
+             			embededImage5.visible=true;
+             		}
+             		else{
+             			embededImage5.visible=false;
+             		}
+             	}); */
+	             
+			}
+
+			//set image smoothing so image looks better when transformed.
+			private function smoothImage(ev:Event):void{
+                var bmp:Bitmap = ev.target.content as Bitmap;
+                bmp.smoothing = true;
+            }
+            
+            private function loadAdminModule(event:Event):void{
+            	//Alert.show("Calling");
+            	embededImage1.selected = true;
+            	embededImage2.selected = false;
+            	embededImage3.selected =false;
+            	embededImage4.selected =false;
+            	embededImage5.selected =false;
+            	embededImage6.selected = false;
+            	embededImage7.selected = false;
+            	//Alert.show("Calling");
+            	dispatchEvent(new AdminEvent(AdminEvent.admin_select));
+            	//dispatchEvent(new ReportEvent(ReportEvent.admin_select));
+            	//Alert.show(AdminEvent.admin_select.toString());
+            }
+            
+            private function loadgettingStartedModule(event:Event):void{
+            	embededImage7.selected = true;
+            	embededImage2.selected = false;
+            	embededImage3.selected =false;
+            	embededImage4.selected =false;
+            	embededImage5.selected =false;
+            	embededImage6.selected = false;
+            	embededImage1.selected = false;
+            	dispatchEvent(new ReportEvent(ReportEvent.gettingstarted_select));
+            }
+
+			private function loadExcellenceModule(event:Event):void{
+				embededImage2.selected = true;
+            	embededImage3.selected = false;
+            	embededImage1.selected =false;
+            	embededImage4.selected =false;
+            	embededImage5.selected =false;
+            	embededImage6.selected = false;
+				embededImage7.selected = false;
+            	dispatchEvent(new ExcellenceEvent(ExcellenceEvent.excellence_select));
+			}
+			
+			private function loadReportModule(event:Event):void{
+				embededImage3.selected = true;
+            	embededImage2.selected = false;
+            	embededImage1.selected =false;
+            	embededImage4.selected =false;
+            	embededImage5.selected =false;
+            	embededImage6.selected = false;
+				embededImage7.selected = false;
+            	dispatchEvent(new ReportEvent(ReportEvent.report_select));
+			}
+			
+			private function loadProjectModule(event:Event):void{
+				//Alert.show("project");
+				embededImage6.selected = false;
+				embededImage3.selected = false;
+            	embededImage2.selected = false;
+            	embededImage1.selected =false;
+            	embededImage4.selected =false;
+            	embededImage5.selected =true; 
+            	embededImage7.selected = false;
+            	
+				dispatchEvent(new ReportEvent(ReportEvent.projects_select));
+				
+			}
+			
+			public function HelpModule(event:MouseEvent):void{
+				embededImage4.selected = true;
+				embededImage3.selected =false;
+            	embededImage2.selected = false;
+            	embededImage1.selected =false;
+            	embededImage5.selected =false;
+            	embededImage6.selected = false;
+				embededImage7.selected = false;
+            	
+				dispatchEvent(new ReportEvent(ReportEvent.help_select));
+			}
+			
+			public function MeetingModule(event:MouseEvent):void{
+			    embededImage6.selected = true;
+			    embededImage4.selected = false;
+			    embededImage3.selected = false;
+	            embededImage2.selected = false;
+	            embededImage1.selected = false;
+	            embededImage5.selected = false;
+   				embededImage7.selected = false;
+            	
+   				dispatchEvent(new ReportEvent(ReportEvent.meeting_select));
+  			}
+
+        ]]>
+    </mx:Script>
+	
+		<mx:Spacer width="5%"/>  
+		
+		<mx:VBox width="5%" verticalAlign="middle" horizontalAlign="center" >
+		<mx:Text color="#FFFFFF" text="Excellence Builder" fontSize="24" mouseChildren="false" fontFamily="Verdana"/>
+		</mx:VBox>
+ 	
+ 		<mx:Spacer width="95%"/>
+	 	
+	 	<mx:VBox id="GettingStarted" width="5%" borderColor="0xACACAC" borderThickness="0" borderStyle="solid" horizontalAlign="center">
+	 		 <mx:Button toggle="true" buttonMode="true" id="embededImage7"  height="90%" skin="@Embed('assets/getready.png')" overSkin="@Embed('assets/getready_sel.png')" selectedDownSkin="@Embed('assets/getready_sel.png')" selectedUpSkin="@Embed('assets/getready_sel.png')" selectedOverSkin="@Embed('assets/getready_sel.png')" creationComplete="smoothImage(event);" toolTip="Getting Started" click="loadgettingStartedModule(event)"/> 
+	  	</mx:VBox>
+			 
+		<mx:VBox id="Meeting" width="5%" borderColor="0xACACAC" borderThickness="0" borderStyle="solid" horizontalAlign="center">
+	 		 <mx:Button toggle="true" buttonMode="true" id="embededImage6"  height="90%" skin="@Embed('assets/meeting.png')" overSkin="@Embed('assets/meeting_selected.png')" selectedDownSkin="@Embed('assets/meeting_selected.png')" selectedUpSkin="@Embed('assets/meeting_selected.png')" selectedOverSkin="@Embed('assets/meeting_selected.png')" creationComplete="smoothImage(event);" toolTip="Planning Excellence Meetings" click="MeetingModule(event)"/> 
+	  	</mx:VBox>
+		
+		<mx:VBox id="Excellence" width="5%" borderColor="0xACACAC" borderThickness="0" borderStyle="solid" horizontalAlign="center">
+	 	<mx:Button toggle="true" buttonMode="true" id="embededImage2" height="90%" skin="@Embed('assets/home.png')" overSkin="@Embed('assets/home_selected.png')" selectedDownSkin="@Embed('assets/home_selected.png')" selectedUpSkin="@Embed('assets/home_selected.png')" selectedOverSkin="@Embed('assets/home_selected.png')" creationComplete="smoothImage(event);" toolTip="Assessment" click="loadExcellenceModule(event)"/>
+		</mx:VBox>
+		
+		<mx:VBox id="Projects" width="5%" borderColor="0xACACAC" borderThickness="0" borderStyle="solid" horizontalAlign="center">
+		<mx:Button toggle="true" buttonMode="true" id="embededImage5"  height="90%" skin="@Embed('assets/project.png')" toolTip="Improvement Projects" click="loadProjectModule(event)" overSkin="@Embed('assets/project_selected.png')" selectedOverSkin="@Embed('assets/project_selected.png')" selectedDownSkin="@Embed('assets/project_selected.png')" selectedUpSkin="@Embed('assets/project_selected.png')"/> 
+		</mx:VBox>
+		
+		<mx:VBox id="Report" width="5%" borderColor="0xACACAC" borderThickness="0" borderStyle="solid" horizontalAlign="center">
+			<mx:Button toggle="true" buttonMode="true" id="embededImage3"  height="90%" skin="@Embed('assets/report.png')" overSkin="@Embed('assets/report_selected.png')" selectedDownSkin="@Embed('assets/report_selected.png')" selectedUpSkin="@Embed('assets/report_selected.png')" selectedOverSkin="@Embed('assets/report_selected.png')"  creationComplete="smoothImage(event);" toolTip="Reports" click="loadReportModule(event)"/> 
+		</mx:VBox>
+		
+		<mx:VBox id="Admin" width="5%" borderColor="0xACACAC" borderThickness="0" borderStyle="solid" horizontalAlign="center">
+	 		<mx:Button toggle="true" useHandCursor="true" buttonMode="true" id="embededImage1" height="90%" skin="@Embed('assets/admin.png')" overSkin="@Embed('assets/admin_selected.png')" selectedDownSkin="@Embed('assets/admin_selected.png')" selectedUpSkin="@Embed('assets/admin_selected.png')" selectedOverSkin="@Embed('assets/admin_selected.png')" creationComplete="smoothImage(event);" click="loadAdminModule(event)" toolTip="Admin"/>
+		</mx:VBox>
+		
+		<mx:VBox id="Help" width="5%" borderColor="0xACACAC" borderThickness="0" borderStyle="solid" horizontalAlign="center">
+			<mx:Button toggle="true" buttonMode="true" id="embededImage4"  height="90%" skin="@Embed('assets/help.png')" overSkin="@Embed('assets/help_selected.png')" selectedDownSkin="@Embed('assets/help_selected.png')" selectedUpSkin="@Embed('assets/help_selected.png')" selectedOverSkin="@Embed('assets/help_selected.png')"  creationComplete="smoothImage(event);" toolTip="Help" click="HelpModule(event)"/> 
+		</mx:VBox>
+			
+		<mx:Spacer />  
+	
+</mx:HBox>

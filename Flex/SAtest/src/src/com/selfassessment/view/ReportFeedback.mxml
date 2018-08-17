@@ -1,0 +1,358 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas styleName="Childpanelstyle"  xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="init()" width="100%" height="100%" horizontalScrollPolicy="off">
+
+<mx:Style source="src/com/selfassessment/view/assets/Styles.css"/>	
+
+<mx:Script>
+	<![CDATA[
+		import mx.collections.ArrayCollection;
+		import com.as3xls.xls.ExcelFile;
+		import com.as3xls.xls.Sheet;
+		import mx.core.Application;
+		import mx.controls.Alert;
+		import com.boyzoid.PagableArrayCollection.PagableArrayCollection;
+		
+		[Bindable]
+            private var fields:Array = new Array(); 
+           	private var sheet:Sheet;
+       		
+		public var myPageableArrCol:PagableArrayCollection=new PagableArrayCollection();
+		
+		private function init():void{
+			//lblAbbrev.text=resourceManager.getString('myResources','trdesc');
+			//Alert.show();
+			if(Application.application.language=="en_US"){
+				mainVBox.styleName='ApplyFontSizeEn';
+				myDataGridEnabler.setStyle('textAlign','left');
+				myDataGridResult.setStyle('textAlign','left');
+				//enablerHbox.styleName='ApplyFontSizeEn';
+				//resultHBox.styleName='ApplyFontSizeEn';
+				colHeader.setStyle('textAlign','left');
+				colFeedback.setStyle('textAlign','left');
+				colA.setStyle('textAlign','left');
+				colAR.setStyle('textAlign','left');
+				colD.setStyle('textAlign','left');
+				colScore.setStyle('textAlign','left');
+			}
+			else{
+				mainVBox.styleName='ApplyFontSizeAr';
+				myDataGridEnabler.setStyle('textAlign','right');
+				myDataGridResult.setStyle('textAlign','right');
+				//enablerHbox.styleName='ApplyFontSizeAr';
+				//resultHBox.styleName='ApplyFontSizeAr';
+				colHeader.setStyle('textAlign','right');
+				colFeedback.setStyle('textAlign','right');
+				colA.setStyle('textAlign','right');
+				colAR.setStyle('textAlign','right');
+				colD.setStyle('textAlign','right');
+				colScore.setStyle('textAlign','right');
+			}
+		}
+		public function settingHeight():void{
+			/* Alert.show(myDataGridResult.dataProvider.length.toString());
+			var tempArr:Array= new Array();
+			tempArr = myDataGridResult.dataProvider as Array;
+			
+			for(var i:int=0;i<tempArr.length;i++){
+				Alert.show(tempArr[i]["strength"].toString());
+				 if(tempArr[i]["strength"].toString().length >50 || tempArr[i]["areasforimprovement"].toString().length >50){
+					myDataGridResult.height = myDataGridResult.height + 300;
+					Alert.show(myDataGridResult.height.toString());
+				} 
+			} */
+		}
+		public var enablerRowCount:int;
+            
+		private function exportToExcel():void{
+				
+      		var index:int=0;
+			sheet = new Sheet();
+			
+          	fields = new Array();
+          	sheet.name="Enabler";
+          	var dataProviderEnablerCollection:ArrayCollection=new ArrayCollection(); 
+      		var dataProviderResultCollection:ArrayCollection=new ArrayCollection();
+      		var dataProviderEnablerAvgCollection:ArrayCollection=new ArrayCollection();   
+      		var dataProviderResultAvgCollection:ArrayCollection=new ArrayCollection();      
+			
+			var columns:Array=new Array();  
+			var initialCol:int;
+			var fieldheading:String;
+			
+			dataProviderEnablerCollection=new ArrayCollection();
+          	dataProviderEnablerCollection = myDataGridEnabler.dataProvider as ArrayCollection;  
+          	
+          	dataProviderResultCollection=new ArrayCollection();
+          	dataProviderResultCollection = myDataGridResult.dataProvider as ArrayCollection;  
+          	
+          	dataProviderEnablerAvgCollection=new ArrayCollection();
+          	dataProviderEnablerAvgCollection=enablerAvgDataGrid.dataProvider as ArrayCollection;
+          	
+          	dataProviderResultAvgCollection=new ArrayCollection();
+          	dataProviderResultAvgCollection=resultAvgDataGrid.dataProvider as ArrayCollection;
+          	
+           	enablerRowCount= dataProviderEnablerCollection.length;  
+           	columns = myDataGridEnabler.columns; 
+           	
+           	
+           	sheet.resize((dataProviderEnablerCollection.length + dataProviderResultCollection.length)+ 2,myDataGridResult.columnCount);
+           	//Enabler
+           	sheet.setCell(0, 0,"Enabler");
+           	
+           	var j:int = 1;  
+         	for(var i:int=0;i<columns.length;i++){
+         		if (columns[i]["dataField"].toString() != "prototype"){
+					fields.push(columns[i]["dataField"].toString());  
+               		sheet.setCell(1, j,columns[i]["headerText"].toString());
+               		
+				}	
+				j++;
+         	}
+         	
+        	for(var r:int=0; r < enablerRowCount; r++){  
+				var record:Object = dataProviderEnablerCollection.getItemAt(r);  
+                insertRecordInSheet(r+2,sheet,record);
+             
+			}
+         	//Result
+          
+			columns=new Array();  
+            var resultRowCount:int;
+            resultRowCount=dataProviderResultCollection.length;
+          	 
+			
+          
+           	columns = myDataGridResult.columns;  
+      	  
+  		 	
+  		 	fields=new Array();
+  		 	sheet.setCell(enablerRowCount+2, 0,"Result");
+  		 	
+  		 	j=1;
+         	for(var i:int=0;i<columns.length;i++){
+         		if (columns[i]["dataField"].toString() != "prototype"){
+					fields.push(columns[i]["dataField"].toString());  
+               		sheet.setCell(enablerRowCount+3, j,columns[i]["headerText"].toString());
+               		
+				}	
+				j++;
+         	}
+        	
+         	var rCount:int=enablerRowCount+4;
+        	for(var r:int=0; r < resultRowCount; r++){  
+				var record:Object = dataProviderResultCollection.getItemAt(r);  
+				
+                insertRecordInSheet(rCount+r,sheet,record);
+			}
+			//Enabler Avg
+			columns=new Array();  
+            var enblerAvgRowCount:int;
+            enblerAvgRowCount=dataProviderEnablerAvgCollection.length;
+          	 
+			
+          
+           	columns = enablerAvgDataGrid.columns;  
+			
+			
+			fields=new Array();
+  		 	sheet.setCell(enablerRowCount+resultRowCount+5, 0,"Average Score for the above attributes of the Enablers (1-5) is shown below");
+  		 	
+  		 	j=1;
+         	for(var i:int=0;i<columns.length;i++){
+         		if (columns[i]["dataField"].toString() != "prototype"){
+					fields.push(columns[i]["dataField"].toString());  
+               		sheet.setCell(enablerRowCount+resultRowCount+6, j,columns[i]["headerText"].toString());
+               		
+				}	
+				j++;
+         	}
+        	
+         	var rCount:int=enablerRowCount+resultRowCount+7;
+        	for(var r:int=0; r < enblerAvgRowCount; r++){  
+				var record:Object = dataProviderEnablerAvgCollection.getItemAt(r);  
+				
+                insertRecordInSheet(rCount+r,sheet,record);
+			}
+			//Result Avg
+			columns=new Array();  
+            var resultAvgRowCount:int;
+            resultAvgRowCount=dataProviderResultAvgCollection.length;
+          	 
+			columns = resultAvgDataGrid.columns;  
+			
+			
+			fields=new Array();
+  		 	sheet.setCell(enablerRowCount+resultRowCount+enblerAvgRowCount+8, 0,"Average Score for the above attributes of the Results (6-9) is shown below");
+  		 	
+  		 	j=1;
+         	for(var i:int=0;i<columns.length;i++){
+         		if (columns[i]["dataField"].toString() != "prototype"){
+					fields.push(columns[i]["dataField"].toString());  
+               		sheet.setCell(enablerRowCount+resultRowCount+enblerAvgRowCount+9, j,columns[i]["headerText"].toString());
+               		
+				}	
+				j++;
+         	}
+        	
+         	var rCount:int=enablerRowCount+resultRowCount+enblerAvgRowCount+10;
+        	for(var r:int=0; r < resultAvgRowCount; r++){  
+				var record:Object = dataProviderResultAvgCollection.getItemAt(r);  
+				
+                insertRecordInSheet(rCount+r,sheet,record);
+			}
+          	var xls:ExcelFile = new ExcelFile(); 
+          	xls.sheets.addItem(sheet); 
+ 		  	var bytes:ByteArray = xls.saveToByteArray();  
+          	var fr:FileReference=new FileReference();
+          	fr.save(bytes,"FeedbackReport.xls"); 
+		}
+		private function insertRecordInSheet(row:int,sheet:Sheet,record:Object):void{  
+         	var i:int = 1;  
+            for each(var field:String in fields){
+            	if (record[field] != null){
+            		sheet.setCell(row,i, record[field]);
+            	}
+            	i++;  
+            }
+            return;   
+		}
+		
+		
+	
+	]]>
+</mx:Script>
+
+		
+		<mx:VBox id="mainVBox"  width="100%" height="100%" horizontalAlign="center" horizontalScrollPolicy="off"> 
+			<mx:Spacer/>	
+			<mx:HBox width="95%">
+				<mx:Label text="Enabler criteria(1-5)" fontWeight="bold"/>
+				
+			</mx:HBox>
+			<mx:Spacer/>
+			<mx:VBox width="95%" verticalGap="0">
+				<mx:AdvancedDataGrid sortableColumns="false" variableRowHeight="true" wordWrap="true" styleName="ReportDataGridHeaderStyle" id="myDataGridEnabler" width="98%" showHeaders="true">
+				<mx:groupedColumns>
+					<mx:AdvancedDataGridColumnGroup id="colHeader">
+						<mx:AdvancedDataGridColumn width="60" headerWordWrap="true" headerText="@Resource(bundle='myResources', key='no')" dataField="criteriaShortDesc"/>
+						<mx:AdvancedDataGridColumn width="100" headerWordWrap="true" wordWrap="true"  headerText="@Resource(bundle='myResources', key='grid_approachTitle')" dataField="approachTitle"/>
+					</mx:AdvancedDataGridColumnGroup>
+					<mx:AdvancedDataGridColumnGroup  id="colFeedback" headerText="Feedback">
+						<mx:AdvancedDataGridColumn width="220" headerText="Strength" wordWrap="true" dataField="strength"/>
+						<mx:AdvancedDataGridColumn width="220" headerWordWrap="true" wordWrap="true" headerText="@Resource(bundle='myResources', key='grid_areaForImp')" dataField="areaforimprovement"/>
+					</mx:AdvancedDataGridColumnGroup>
+					<mx:AdvancedDataGridColumnGroup headerText="Score %">
+						<mx:AdvancedDataGridColumn id="colA" width="45" headerWordWrap="true" headerText="@Resource(bundle='myResources', key='a')" dataField="approachdesc"/>
+						<mx:AdvancedDataGridColumn id="colD" width="45" headerWordWrap="true" headerText="@Resource(bundle='myResources', key='d')" dataField="deployment"/>
+						<mx:AdvancedDataGridColumn id="colAR" width="60" headerWordWrap="true"  headerText="@Resource(bundle='myResources', key='aAndR')" dataField="assessmentandreview"/>
+						<mx:AdvancedDataGridColumn id="colScore" width="70" headerWordWrap="true"  headerText="Avg." dataField="score"/>
+					</mx:AdvancedDataGridColumnGroup>
+					
+				</mx:groupedColumns>
+			</mx:AdvancedDataGrid>
+			
+			</mx:VBox>
+			
+		    <mx:VBox width="95%">
+		    	<mx:HBox width="95%">
+					<mx:Label text="@Resource(bundle='myResources', key='notes')"  fontWeight="bold"/>
+				</mx:HBox>
+				 <mx:HBox width="95%">
+					<mx:Label  text="@Resource(bundle='myResources', key='notesDesc')"/>
+				</mx:HBox>
+				<mx:HBox width="95%">
+					<mx:Label  text="@Resource(bundle='myResources', key='missingApproachesCounted')"/>
+				</mx:HBox>
+		    </mx:VBox>
+		    
+			<mx:Spacer/>
+			<mx:HBox width="95%">
+				<mx:Label  text="@Resource(bundle='myResources', key='resultCriteria')" fontWeight="bold"/>
+				
+			</mx:HBox>
+			<mx:VBox width="95%"  verticalGap="0">
+				<mx:AdvancedDataGrid creationComplete="settingHeight()" sortableColumns="false" id="myDataGridResult" wordWrap="true" variableRowHeight="true" styleName="ReportDataGridHeaderStyle" width="98%" showHeaders="true">
+					<mx:groupedColumns>
+						<mx:AdvancedDataGridColumnGroup id="colResHeader">
+							 <mx:AdvancedDataGridColumn width="60" headerWordWrap="true" headerText="@Resource(bundle='myResources', key='no')" dataField="criteriaPartDesc"/>
+							  <mx:AdvancedDataGridColumn width="90" headerWordWrap="true" wordWrap="true" headerText="@Resource(bundle='myResources', key='resultsArea')" dataField="result_name"/>
+						</mx:AdvancedDataGridColumnGroup>
+						<mx:AdvancedDataGridColumnGroup headerText="Feedback"  id="colResFeedback">
+							 <mx:AdvancedDataGridColumn width="170" headerWordWrap="true" wordWrap="true" headerText="@Resource(bundle='myResources', key='strength')" dataField="strength"/>
+							  <mx:AdvancedDataGridColumn width="150" headerWordWrap="true" wordWrap="true" headerText="@Resource(bundle='myResources', key='areaImprovement')" dataField="areasforimprovement"/>
+						</mx:AdvancedDataGridColumnGroup>
+						<mx:AdvancedDataGridColumnGroup  headerText="Score %">
+							 <mx:AdvancedDataGridColumn width="50" headerWordWrap="true" id="colRel" headerText="R &#0038; U" dataField="relevance"/>
+							 <mx:AdvancedDataGridColumn width="50" headerWordWrap="true" id="colSeg" headerText="Perf" dataField="performance"/>
+							 <mx:AdvancedDataGridColumn id="colAvg" width="65" headerWordWrap="true"  headerText="Avg." dataField="score"/>
+						</mx:AdvancedDataGridColumnGroup>
+						</mx:groupedColumns>
+				</mx:AdvancedDataGrid>
+					
+			</mx:VBox>
+			<mx:VBox width="95%">
+				<mx:HBox width="95%">
+					<mx:Label text="@Resource(bundle='myResources', key='notes')"  fontWeight="bold"/>
+				</mx:HBox>
+				 <mx:HBox width="95%">
+					<mx:Label text="R &#0038; U = Relevance &#0038; Usability             Perf = Performance"/>
+				</mx:HBox>
+				<mx:HBox width="95%">
+					<mx:Label  text="@Resource(bundle='myResources', key='missingResultsCounted')"/>
+				</mx:HBox>
+				
+				</mx:VBox>
+			 <mx:Spacer/>
+		     <mx:HBox width="95%">
+		     	<mx:Label text="Average Score for the above attributes of the Enablers (1-5) is shown below"  fontWeight="bold"/>
+		     </mx:HBox>
+		     <mx:HBox width="95%" minHeight="130" height="130" maxHeight="130">
+		     	<mx:DataGrid id="enablerAvgDataGrid" height="100%" styleName="ReportDataGridHeaderStyle" wordWrap="true" resizableColumns="true" width="50%" allowMultipleSelection="false" variableRowHeight="true" draggableColumns="false">
+					<mx:columns>
+						<mx:DataGridColumn headerText="Attributes" dataField="attributes" width="120">
+							<mx:itemRenderer>
+								<mx:Component>
+									<mx:Text text="{data.attributes}" paddingLeft="5"/>
+								</mx:Component>
+							</mx:itemRenderer>
+						</mx:DataGridColumn>
+						<mx:DataGridColumn headerText="Average Score (%)" dataField="avg" width="200">
+							<mx:itemRenderer>
+								<mx:Component>
+									<mx:Text text="{data.avg}" paddingLeft="5"/>
+								</mx:Component>
+							</mx:itemRenderer>
+						</mx:DataGridColumn>
+					</mx:columns>
+			    </mx:DataGrid>
+		     </mx:HBox>
+		     <mx:HBox width="95%">
+		     	<mx:Label text="Average Score for the above attributes of the Results (6-9) is shown below"  fontWeight="bold"/>
+		     </mx:HBox>
+		     <mx:HBox width="95%" minHeight="100" height="100" maxHeight="100">
+		     	<mx:DataGrid id="resultAvgDataGrid" height="100%" styleName="ReportDataGridHeaderStyle" wordWrap="true" resizableColumns="true" width="50%" allowMultipleSelection="false" variableRowHeight="true" draggableColumns="false">
+					<mx:columns>
+						<mx:DataGridColumn headerText="Attributes" dataField="attributes" width="120">
+							<mx:itemRenderer>
+								<mx:Component>
+									<mx:Text text="{data.attributes}" paddingLeft="5"/>
+								</mx:Component>
+							</mx:itemRenderer>
+						</mx:DataGridColumn>
+						<mx:DataGridColumn headerText="Average Score (%)" dataField="avg" width="200">
+							<mx:itemRenderer>
+								<mx:Component>
+									<mx:Text text="{data.avg}" paddingLeft="5"/>
+								</mx:Component>
+							</mx:itemRenderer>
+						</mx:DataGridColumn>
+					</mx:columns>
+			    </mx:DataGrid>
+		     </mx:HBox>
+		    <mx:HBox width="90%" horizontalAlign="right">
+				<mx:Button id="btnExportToExcel" label="Export to Excel" click="exportToExcel()"/>
+			</mx:HBox>
+			 <mx:Spacer/>
+		</mx:VBox>
+	
+</mx:Canvas>

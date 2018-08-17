@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas styleName="Childpanelstyle" creationComplete="init()"  xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" horizontalScrollPolicy="off">
+
+<mx:Style source="src/com/selfassessment/view/assets/Styles.css"/>	
+
+<mx:Script>
+	<![CDATA[
+		import flashx.textLayout.formats.Float;
+		import mx.events.ListEvent;
+		import mx.core.Application;
+		import mx.controls.Alert;
+		import src.com.selfassessment.controller.TeamController;
+		
+		private function search():void{
+			var CriteriaService:TeamController = new TeamController();
+			CriteriaService.SelectSourceOfInformation(txtWord.text,function(resultArr:Array):void{
+				if(resultArr.length==0){
+					Alert.show("No records found");
+					
+				}
+				myDataGrid.dataProvider=resultArr;
+				myDataGrid.rowCount=resultArr.length+1;
+			});
+		}
+		
+		private function init():void{
+			if(Application.application.language=="en_US"){
+				myDataGrid.setStyle('textAlign','left');
+			}
+			else{
+				myDataGrid.setStyle('textAlign','right');	
+			}
+		}
+		private function exportToExcel():void{
+			if(myDataGrid.rowCount==0){
+				Alert.show("No Records found to export");
+				return;
+			}
+			var excelString:String=DataGridUtil.exportDGToClipboard(myDataGrid,false,false);
+			var fileRef:FileReference=new FileReference();
+			fileRef.save(excelString,"Source_of_information.xls");
+		}
+			
+	]]>
+</mx:Script>
+
+		
+		<mx:VBox id="mainVBox" fontSize="13"  width="100%" height="100%" horizontalAlign="center" horizontalScrollPolicy="off"> 
+			<mx:Spacer/>	
+			<mx:Spacer/>
+			<mx:HBox width="95%" horizontalAlign="center">
+			<mx:Spacer width="20%"/>
+				<mx:Label text="@Resource(bundle='myResources', key='searchByWord')"/>
+				<mx:TextInput id="txtWord" width="20%"/>
+				<mx:Button label="@Resource(bundle='myResources', key='search')" click="search()"/>
+			</mx:HBox>
+			<mx:Spacer/>
+			<mx:VBox width="95%" height="90%" fontSize="12" verticalGap="0">
+				<mx:DataGrid id="myDataGrid" height="90%" styleName="ReportDataGridHeaderStyle" wordWrap="true" resizableColumns="true" width="100%" allowMultipleSelection="false" variableRowHeight="true" draggableColumns="false">
+					<mx:columns>
+						<!--<mx:DataGridColumn  headerText="@Resource(bundle='myResources', key='number')" dataField="enablerassessmentid" width="100">
+							<mx:itemRenderer>
+								<mx:Component>
+									<mx:Text text="{data.enablerassessmentid}" paddingLeft="5"/>
+								</mx:Component>
+							</mx:itemRenderer>
+						</mx:DataGridColumn>-->
+						<mx:DataGridColumn headerText="@Resource(bundle='myResources', key='criterionPart')" dataField="criterionPartShortDescription" width="120">
+							<mx:itemRenderer>
+								<mx:Component>
+									<mx:Text text="{data.criterionPartShortDescription}" paddingLeft="5"/>
+								</mx:Component>
+							</mx:itemRenderer>
+						</mx:DataGridColumn>
+						<mx:DataGridColumn headerText="@Resource(bundle='myResources', key='title')" dataField="title" width="200">
+							<mx:itemRenderer>
+								<mx:Component>
+									<mx:Text text="{data.title}" paddingLeft="5"/>
+								</mx:Component>
+							</mx:itemRenderer>
+						</mx:DataGridColumn>
+						
+						<mx:DataGridColumn headerWordWrap="true" id="doc" wordWrap="true" headerText="@Resource(bundle='myResources', key='sourceOfInformation')" dataField="source">
+							
+							<mx:itemRenderer>
+								<mx:Component>
+									<mx:Text text="{data.source}" paddingLeft="5"/>
+								</mx:Component>
+							</mx:itemRenderer>
+						
+						</mx:DataGridColumn>
+						
+		        	</mx:columns>
+			    </mx:DataGrid>
+			    <mx:HBox width="{myDataGrid.width}" height="10%" verticalAlign="middle" horizontalAlign="right">
+			    	<mx:Button id="btnExportToExcel" label="Export To Excel" click="exportToExcel()"/>
+			    </mx:HBox>
+			 <mx:Spacer/>
+		</mx:VBox>
+		</mx:VBox>
+	
+</mx:Canvas>

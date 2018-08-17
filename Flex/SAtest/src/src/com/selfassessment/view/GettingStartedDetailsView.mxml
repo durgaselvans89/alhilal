@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml"  styleName="userContentStyle"  
+	width="100%" height="100%" xmlns:com="src.com.selfassessment.view.*" horizontalGap="0">
+ 
+	<mx:Style source="src/com/selfassessment/view/assets/Styles.css"/>	
+
+	<mx:Script>
+		<![CDATA[
+			import mx.core.Application;
+			import mx.containers.Panel;
+			import src.com.selfassessment.view.*;
+			import mx.controls.Alert;
+			import src.com.selfassessment.events.EventCriteriaConstants;
+			import mx.effects.*;
+			
+			
+		]]>
+	</mx:Script>
+
+				
+		<mx:Canvas id="content"  backgroundColor="#9B9B9B" width="100%" height="100%" > 
+			<mx:Image id="imageloader" source="@Embed(source='assets/gettingStarted.png')"/>
+		</mx:Canvas>
+		
+</mx:HBox>

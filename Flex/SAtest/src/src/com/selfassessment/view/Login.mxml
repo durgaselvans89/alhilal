@@ -1,0 +1,547 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Panel borderStyle="none" xmlns:mx="http://www.adobe.com/2006/mxml"
+	 width="100%" height="100%" creationComplete="init()" 
+	 xmlns:com="src.com.selfassessment.view.*" 
+	 xmlns:Box="src.com.selfassessment.view.assets.*"
+	 verticalAlign="middle" horizontalAlign="center"
+	 xmlns:flexlib="flexlib.controls.*">
+
+<mx:Style source="src/com/selfassessment/view/assets/Styles.css"/>	
+
+<mx:Metadata>
+		[Event("signin", type="com.selfassessment.events.LoginEvent")]	
+</mx:Metadata>
+
+<mx:Script>
+	<![CDATA[
+		import mx.managers.PopUpManager;
+		import src.com.selfassessment.events.EventCriteriaConstants;
+		import mx.core.Application;
+			import mx.managers.CursorManager;
+			import mx.controls.Alert;
+			import src.com.selfassessment.events.LoginEvent;
+			import mx.controls.*;
+			import src.com.selfassessment.controller.Components;
+			import src.com.selfassessment.controller.Controller;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+			//import flash.events.MouseEvent;
+		
+			import mx.events.ValidationResultEvent;
+			
+			
+			[Bindable]
+			[Embed(source="assets/one.png")]
+			
+			public var firstImage:Class;
+			
+			
+			private var LoginService:Controller = new Controller(); 
+			private var Varloginid:ValidationResultEvent;
+			private var Varpassword:ValidationResultEvent;
+			private var Loginid:String;
+			private var Password:String;
+			private var timer:uint;
+			
+			
+			private function init():void{
+				//txtloginid.setFocus();
+				//txtloginid.tabIndex=0;
+				//txtloginid.selectionBeginIndex=0;
+				txtbenifits.text = "The methodology used in this software postulates that organisations are encouraged to:"+"\n"+"- Make excellence-related issues an integral part of work."+"\n"+"- Make the senior management team in charge of all excellence initiatives."+"\n"+"Use self-assessment as a method of understanding the strengths and areas for improvement of their organisation.";
+			
+			//txtloginid.cursorManager.setCursor(
+		//		imgbox.setStyle('backgroundImage',firstImage);
+				//timer = setInterval(changeImage,2000);	
+			} 
+			private function changeImage():void{
+				//first.play();
+			//	imgbox.setStyle('backgroundImage',firstImage);
+				/* if(index == 2){
+					imgbox.setStyle('backgroundImage',firstImage);
+					index = 0;
+				}else if(index == 0){
+					imgbox.setStyle('backgroundImage',secondImage);
+					index++;
+				}else if(index == 1){
+					imgbox.setStyle('backgroundImage',thirdImage);
+					index++;
+				} */
+				//xby = imgbox.x;
+				//yby = imgbox.y;
+				//first.end();
+				//TweenLite.from(imgbox,2,{y = "-100",ease:Elastic.easeOut});
+			}
+			
+		public function clickEvent(event:Event):void {
+				
+				Varloginid = valloginid.validate();
+				 
+				if (Varloginid.type==ValidationResultEvent.VALID) {
+             	   
+             	   Loginid = txtloginid.text;
+             	   
+             		
+             	   Varpassword = valpassword.validate();
+					   
+             	   if (Varpassword.type==ValidationResultEvent.VALID) {
+             	 	  	Password = txtpassword.text;
+             	    }
+             	}
+             	
+             	if (Loginid == null || Password == null){
+             		
+             		//	Status.text = "User Name / Password is not in correct format";
+				}
+             	else {
+             		langSelection();
+             		CursorManager.setBusyCursor();
+             		LoginService=new Controller();
+					LoginService.validateLogin(Loginid,Password, function(): void {
+						Application.application.selectedLocation=parseInt(Components.instance.session.locationID.toString());
+					if (Components.instance.session.roleid != null)
+					{
+						LoginService=new Controller();
+				    	LoginService.GetLocationDetails(function (resultLocArray:Array):void{
+				    		Application.application.LocationArray=resultLocArray;
+				    		LoginService=new Controller();
+				        	CursorManager.setBusyCursor();
+							 LoginService.getExeRoles(function(resultexeRoleArr:Array):void{
+				             	for(var i:int=0;i<resultexeRoleArr.length;i++){
+				             		if(Components.instance.session.userid.toString()==resultexeRoleArr[i]["userid"].toString()){
+				             			Application.application.IsExecutiveMember=1;
+				             			break;
+				             		}
+				             	}
+				             	if(Application.application.IsExecutiveMember==1){
+				             		Application.application.CurrentSelection="Admin -> User";
+				             		
+				             	}
+				             	else{
+				             		Application.application.CurrentSelection="Assessment -> Project plan";
+				             	}
+				             	
+				             	CursorManager.removeAllCursors();
+				             	dispatchEvent(new LoginEvent(LoginEvent.sign_select));
+				             	Application.application.userName=Loginid;
+								Application.application.password=Password;
+				    		}); 
+				    	});
+						
+						
+					}
+					else
+					{
+						//Status.text = "User Credentials does not match";
+					}
+					CursorManager.removeAllCursors();
+				});
+				
+				}
+			}
+			
+			private function langSelection():void{
+				//Alert.show(rdoLang.selectedValue.toString());
+				resourceManager.localeChain=[ rdoLang.selectedValue ];
+				Application.application.language=resourceManager.localeChain.toString();
+				
+				//Alert.show(resourceManager.localeChain.toString());
+			}
+			
+			public function callExcellence(event:MouseEvent):void{
+				Application.application.flagValue = 1;
+				currentState = 'Excellence';
+				txtBuilder.initalTab();
+				txtBuilder.btnBack.addEventListener(MouseEvent.CLICK,close);
+			}
+			
+			public function callExcellenceBuilder(event:MouseEvent):void{
+				Application.application.flagValue = 2;
+				currentState = 'Excellence';
+				txtBuilder.initalTab();
+				txtBuilder.btnBack.addEventListener(MouseEvent.CLICK,close);
+			}
+			
+			public function callBenefits(event:MouseEvent):void{
+				Application.application.flagValue = 3;
+				currentState = 'Excellence';
+				txtBuilder.btnBack.addEventListener(MouseEvent.CLICK,close);
+				txtBuilder.initalTab();
+			
+			}
+			
+			public function close(event:MouseEvent):void{
+				currentState = '';
+        	}
+        	
+        	
+			public function changeurl(event:MouseEvent):void{
+				var url:URLRequest = new URLRequest("http://www.google.com");
+				navigateToURL(url,"_blank");			
+			}
+			private var forgotPwdPopUp:ForgotPassword;
+			private function forgotPassword():void{
+				forgotPwdPopUp=ForgotPassword(PopUpManager.createPopUp(this,ForgotPassword,true));
+			}
+			
+		]]>
+</mx:Script>
+
+<mx:states>
+	<mx:State name="Excellence">
+	<mx:RemoveChild	target="{loginbox}"/>
+		<mx:AddChild relativeTo="{boxValue}">
+			<com:TextBuilder id="txtBuilder" width="100%" height="100%"/>
+		</mx:AddChild>
+	</mx:State>
+</mx:states>
+<mx:Style>
+		.boxgradient{
+			fillColors: #444444, #000000;
+			fillAlphas: 0.1,1;
+		}
+</mx:Style>
+ 	
+<mx:Style source="src/com/selfassessment/view/assets/Styles.css"/>	
+<!--
+<mx:Box borderStyle="none" id="boxValue" width="100%" height="100%" 
+	fontSize="11" fontFamily="Verdana" verticalAlign="middle" horizontalAlign="center">
+	
+	<mx:Panel id="panelOne" width="70%" height="70%" borderColor="#6686AB" borderAlpha="1" cornerRadius="10">
+		
+		<mx:HBox verticalGap="2" width="100%" height="6%" horizontalAlign="center">
+			<mx:Text text="WELCOME TO EXCELLENCE BUILDER" fontSize="14" fontWeight="bold"/>
+		</mx:HBox>
+		
+		<mx:HBox verticalGap="0" width="100%" verticalAlign="middle" height="94%">
+			
+			<mx:VBox verticalGap="0" width="65%" height="100%">
+						
+				<mx:HBox verticalGap="0" width="100%" height="2%">
+					<mx:Spacer width="2%"/>
+					<mx:Text text="What is Excellence" textDecoration="underline" fontWeight="bold" fontSize="12"/>
+				</mx:HBox>
+					
+				<mx:HBox verticalGap="0" width="100%" height="18%">
+					<mx:Spacer width="2%"/>
+					<mx:TextArea selectable="false" fontSize="10" editable="false" borderStyle="none" width="100%" height="100%" wordWrap="true" text="Aristotle rightly said, “We are what we repeatedly do. Excellence, therefore, is not an act, but a habit.” Excellence is not a finite goal. It is an attitude that is continuous and has no end. It is not a destination, but a continuous journey."/>
+				</mx:HBox>
+				
+				<mx:HBox verticalGap="0" width="100%" height="1%" horizontalAlign="right">
+					<mx:Label useHandCursor="true" buttonMode="true" mouseChildren="false"  click="callExcellence(event)" fontWeight="bold" selectable="false" text="Read More" textDecoration="underline"/>
+				</mx:HBox>
+				
+				<mx:HBox verticalGap="0" width="100%" height="2%">
+					<mx:Spacer width="2%"/>
+					<mx:Text text="What is Excellence Builder" textDecoration="underline" fontWeight="bold" fontSize="12"/>
+				</mx:HBox>
+				
+				<mx:HBox verticalGap="0" width="100%" height="42%" >
+					<mx:Spacer width="2%"/>
+					<mx:TextArea selectable="false"  editable="false" borderStyle="none" width="98%" height="100%" wordWrap="true" text="An Internet application tool for self-assessment developed over years of experience and from interacting with award-winning organisations across the region. The application is aimed at helping organisations to work as a team to conduct self-assessment against the EFQM Excellence Model. This computer-aided self-assessment tool facilitates the habit of making senior management in control of improvement projects throughout the organisation."  fontSize="10"/>
+				</mx:HBox>
+				
+				<mx:HBox verticalGap="0" width="100%" height="1%" horizontalAlign="right">
+					<mx:Label useHandCursor="true" buttonMode="true" mouseChildren="false" selectable="false" fontWeight="bold" text="Read More" textDecoration="underline" click="callExcellenceBuilder(event)"/>
+				</mx:HBox>
+				 
+				<mx:HBox verticalGap="0" width="100%" height="2%">
+					<mx:Spacer width="2%"/>
+					<mx:Text text="Benefits of Excellence Builder" textDecoration="underline" fontWeight="bold" fontSize="12"/>
+				</mx:HBox>
+					
+				<mx:HBox verticalGap="0" width="100%" height="28%">
+					<mx:Spacer width="3%"/>
+					
+					<mx:VBox verticalGap="0" width="100%" height="20%">
+					
+						<mx:Text selectable="false" width="100%" text="The methodology used in this software postulates that organisations are encouraged to:"/>
+							
+							<mx:HBox width="100%" height="2%">
+								<mx:Spacer width="1%"/>
+								<mx:Text selectable="false" fontSize="10" text="- Make excellence-related issues an integral part of work."/>
+							</mx:HBox>
+							
+							<mx:HBox width="100%" height="2%">
+								<mx:Spacer width="1%"/>
+								<mx:Text selectable="false" fontSize="10" text="- Make the senior management team in charge of all excellence initiatives."/>
+							</mx:HBox>
+							
+							<mx:HBox width="100%" height="4%">
+								<mx:Spacer width="1%"/>
+								<mx:Text selectable="false" width="99%" fontSize="10" text="- Use self-assessment as a method of understanding the strengths and areas for improvement of their organisation."/>
+							</mx:HBox>
+							
+					</mx:VBox>
+				
+				</mx:HBox>
+				
+				<mx:HBox verticalGap="0" width="100%" height="1%" horizontalAlign="right">
+						<mx:Label useHandCursor="true" buttonMode="true" mouseChildren="false" selectable="false" fontWeight="bold" text="Read More" textDecoration="underline" click="callBenefits(event)"/>
+				</mx:HBox>
+				
+				<mx:HBox width="100%" height="4%"/>	
+				
+			</mx:VBox>
+
+			<mx:VBox verticalGap="0" width="35%" height="100%">
+				
+				<mx:VBox cornerRadius="10" width="100%" height="60%" 
+					verticalAlign="middle" backgroundColor="#EFF2F6" borderStyle="solid" verticalGap="5">
+					
+					<mx:Spacer  height="15%"/>
+					
+					
+					<mx:HBox width="100%"  height="15%" verticalAlign="top" defaultButton="{btnLogin}">
+						<mx:Spacer/>
+						<mx:Label fontWeight="bold" id="lblName" text="User Name " width="35%"></mx:Label>
+						<mx:HBox horizontalGap="0" width="65%">
+							<mx:TextInput text="" tabIndex="0" width="95%" id="txtloginid" maxChars="14" selectionBeginIndex="0"/>
+							<mx:Text text="*" mouseChildren="false" color="red"/>
+						</mx:HBox>
+					</mx:HBox>
+					
+					<mx:HBox width="100%" height="15%" verticalAlign="top" defaultButton="{btnLogin}">
+						<mx:Spacer/>
+						<mx:Label fontWeight="bold" id="lblPwd" text="Password"  width="{lblName.width}"></mx:Label>
+						<mx:HBox horizontalGap="0" width="65%">
+							<mx:TextInput text="" tabIndex="1" width="{txtloginid.width}" id="txtpassword" displayAsPassword="true" maxChars="14"/>
+							<mx:Text text="*" mouseChildren="false" color="red"/>
+						</mx:HBox>
+					</mx:HBox>
+					
+					<mx:HBox width="100%" height="15%" horizontalAlign="right">
+						<mx:Spacer width="45%"/>
+						<mx:RadioButtonGroup id="rdoLang"/>
+							<mx:RadioButton label="English" tabFocusEnabled="true"  value="en_US" group="{rdoLang}" selected="true" groupName="{rdoLang}"/>
+							<mx:RadioButton label="Arabic" tabFocusEnabled="true" value="ar_EG" group="{rdoLang}" groupName="{rdoLang}"/>
+							<mx:Spacer width="5%"/>
+					</mx:HBox>
+					
+					<mx:HBox width="100%" height="10%" horizontalAlign="right">
+						<mx:Spacer width="45%"/>
+						<mx:Button width="45%" id="btnLogin" tabIndex="3" label="Sign in" click="clickEvent(event)" fillAlphas="[1.0, 1.0]" fillColors="[#567E9A, #284261, #C5C7C8, #616465]" color="#ECF0F1"/>
+						<mx:Spacer width="10%"/>
+					</mx:HBox>
+					
+					<mx:Label id="Status" color="red" height="10%"/>
+					
+				</mx:VBox>
+				
+				<mx:VBox width="100%" height="2%"/>
+				
+				<mx:VBox width="100%" height="38%" fontSize="12" verticalCenter="0" verticalAlign="middle" horizontalAlign="center">
+					<mx:HBox width="100%">
+						<mx:Spacer width="1%"/>
+						<mx:Text text="Contact Us for a Demo" textDecoration="underline" fontWeight="bold" fontSize="12"/>
+					</mx:HBox>
+					<mx:HBox width="100%" fontSize="11" color="#97999a">
+						<mx:Spacer width="1%"/>
+						<mx:Text text="Syna Development"/>
+					</mx:HBox>
+					<mx:HBox width="100%"  fontSize="11" color="#97999a">
+						<mx:Spacer width="1%"/>
+						<mx:Text text="Hamarian Centre, 3rd Floor,"/>
+					</mx:HBox>
+					<mx:HBox width="100%"  fontSize="11" color="#97999a">
+						<mx:Spacer width="1%"/>
+						<mx:Text text="Dubai, UAE"/>
+					</mx:HBox>
+					
+					<mx:HBox width="100%"  fontSize="11" color="#97999a">
+						<mx:Spacer width="1%"/>
+						<mx:Text text="Tel:04 2626512"/>
+					</mx:HBox>
+					<mx:HBox width="100%"  fontSize="11" color="#97999a">
+						<mx:Spacer width="1%"/>
+						<mx:Text text="Fax:04 2964068"/>
+					</mx:HBox>
+					<mx:HBox width="100%"  fontSize="11" color="#97999a">
+						<mx:Spacer width="1%"/>
+						<mx:Text text="Email:Info@synadevelopment.com"/>
+					</mx:HBox>
+				</mx:VBox>
+				
+				<mx:VBox width="100%" height="5%"/>
+				
+			</mx:VBox>
+			
+			<mx:VBox verticalGap="0" width="1%" height="100%"/>
+		
+		</mx:HBox>
+	
+	</mx:Panel>
+	
+</mx:Box>
+	
+<mx:Box borderStyle="none" id="boxValue" width="100%" height="100%" fontFamily="Verdana" verticalAlign="middle" horizontalAlign="center">
+	<mx:Canvas width="904" height="484" id="loginbox">
+		<mx:VBox width="100%" height="100%"  borderColor="#316685" horizontalGap="0" verticalGap="0" borderThickness="2" borderStyle="solid">		
+			<mx:HBox id="fhbox" verticalAlign="middle" verticalGap="0" height="10%" width="100%" styleName="loginHeader">			
+				<mx:HBox width="69%" paddingLeft="10">
+					<mx:Text text="Excellence Builder" fontSize="18" fontWeight="bold" color="white"/>
+				</mx:HBox>			
+				<mx:HBox width="1%">				
+					<mx:Image source="@Embed('assets/loginbox_divider.png')"/>
+				</mx:HBox>
+				<mx:VBox width="20%" height="100%" verticalGap="1" paddingBottom="4" paddingTop="6">
+					<flexlib:PromptingTextInput prompt="Username"  height="45%" borderStyle="solid" borderColor="White"  id="txtloginid" width="100%" color="Black" text=""/>
+					<flexlib:PromptingTextInput displayAsPassword="true"  prompt="*******"  height="45%" borderStyle="solid" borderColor="White"  id="txtpassword" width="100%" color="Black" text=""/>
+				</mx:VBox>
+				<mx:VBox width="10%" height="100%" horizontalAlign="left" paddingLeft="3" verticalAlign="middle" paddingTop="2" verticalGap="0">
+					<mx:HBox verticalAlign="middle" paddingTop="5">						
+						<mx:Button id="btnLogin" skin="@Embed('assets/signin_button.png')" click="clickEvent(event)"/>
+						<mx:Spacer/>
+					</mx:HBox>	
+					<mx:HBox height="50%" horizontalGap="0">
+						<mx:Spacer/>
+						<mx:RadioButtonGroup id="rdoLang"/>
+						<mx:RadioButton label="English"  fontSize="9" fontThickness="1" fontWeight="bold" tabFocusEnabled="true"  value="en_US" group="{rdoLang}" selected="true" groupName="{rdoLang}"/>
+						<mx:RadioButton label="Arabic" fontSize="9" fontThickness="1" fontWeight="bold" tabFocusEnabled="true" value="ar_EG" group="{rdoLang}" groupName="{rdoLang}"/>
+					</mx:HBox>		
+				</mx:VBox>
+			</mx:HBox>
+			
+			<mx:Box id="imgbox" height="50%" width="100%" horizontalGap="0" verticalGap="0">
+				<mx:Image id="img" source = "@Embed('assets/1st.png')"/>
+			</mx:Box>
+			
+			<mx:HBox height="7%" width="100%" fontWeight="bold" verticalGap="0" styleName="loginSubheader" fontSize="12" color="white" verticalAlign="middle">
+				<mx:HBox width="33%" horizontalAlign="center">
+					<mx:Text text="What is Excellence"/>
+				</mx:HBox>
+				<mx:HBox width="33%" horizontalAlign="center">
+					<mx:Text text="What is Excellence Builder"/>
+				</mx:HBox>
+				<mx:HBox width="33%" horizontalAlign="center">
+					<mx:Text text="Benefits of Excellence Builder"/>
+				</mx:HBox>
+			</mx:HBox>	
+						
+			<mx:HBox height="25%" width="100%" color="#32608C" backgroundColor="#E5E9EB">
+				<mx:VBox width="33%" height="100%" horizontalAlign="center">
+					<mx:Text fontWeight="normal" fontSize="11" paddingLeft="5" width="100%" height="75%" textAlign="left" text="Aristotle rightly said, “We are what we repeatedly do. Excellence, therefore, is not an act, but a habit.” Excellence is not a finite goal. It is an attitude that is continuous and has no end. It is not a destination, but a continuous journey."/>
+					<mx:Label width="100%" textAlign="right" useHandCursor="true" buttonMode="true" color="#4577A5" mouseChildren="false"  click="callExcellence(event)" fontWeight="bold" selectable="false" text="Read More" textDecoration="underline" fontSize="11" height="15%"/>
+					<mx:Spacer height="5%"/>
+				</mx:VBox>
+				<mx:VRule strokeColor="#4A4243" width="0.5%" height="100%" />
+				<mx:VBox width="33%" height="100%" horizontalAlign="center">
+					<mx:Text fontWeight="normal" fontSize="11" width="100%" height="75%" textAlign="left" text="An Internet application tool for self-assessment developed over years of experience and from interacting with award-winning organisations across the region. The application is aimed at helping organisations to work as a team to conduct self-assessment against the EFQM Excellence Model. This computer-aided self-assessment tool facilitates the habit of making senior management in control of improvement projects throughout the organisation."/>
+					<mx:Label width="100%" textAlign="right" useHandCursor="true" buttonMode="true" color="#4577A5" mouseChildren="false" selectable="false" fontWeight="bold" text="Read More" textDecoration="underline" click="callExcellenceBuilder(event)" fontSize="11" height="15%"/>
+					<mx:Spacer height="5%"/>
+				</mx:VBox>
+				<mx:VRule strokeColor="#4A4243" width="0.5%" height="100%"/>
+				<mx:VBox width="33%" height="100%" horizontalAlign="center">
+					<mx:Text fontSize="11" fontWeight="normal" id="txtbenifits" width="100%" height="75%" textAlign="left" text=""/>
+					<mx:HBox horizontalAlign="right" width="100%">
+						<mx:Label width="100%" textAlign="right" useHandCursor="true" color="#4577A5" height="15%" buttonMode="true" mouseChildren="false" selectable="false" fontWeight="bold" text="Read More" textDecoration="underline" click="callBenefits(event)"  fontSize="11"/>
+					<mx:Spacer width="2%"/>						
+					</mx:HBox>
+					<mx:Spacer height="5%"/>
+				</mx:VBox>
+			</mx:HBox>	
+			<mx:HBox backgroundColor="black" height="3%" width="100%" fontSize="10" color="white">					
+				<mx:VBox width="60%" height="100%" verticalGap="0" horizontalGap="0">
+					<mx:HBox height="50%" verticalAlign="bottom">
+						<mx:Text text="Contact US" color="#5B9FE0" fontWeight="bold" paddingLeft="5"/>
+					</mx:HBox>
+					<mx:HBox height="50%" paddingLeft="5" verticalAlign="top" horizontalGap="2">
+						<mx:Text text="Syna Development ,Hamarian Centre , 3rd Floor ,Dubai , UAE"/>
+						<mx:Text text="Tel :" color="#5B9FE0" fontWeight="bold"/>
+						<mx:Text text="04 2626512"/>
+						<mx:Text text="Fax :" color="#5B9FE0" fontWeight="bold"/>				
+						<mx:Text text="04 2964068"/>
+					</mx:HBox>
+				</mx:VBox>			
+				<mx:HBox height="100%" width="40%" verticalAlign="bottom" horizontalAlign="right" horizontalGap="0">
+					<mx:Image source="@Embed('assets/message.png')" verticalAlign="middle"/>
+					<mx:Text text="Info@synadevelopment.com"/>					
+				</mx:HBox>
+			</mx:HBox>
+			<mx:Spacer/>
+		</mx:VBox>		
+	</mx:Canvas>
+</mx:Box>
+-->
+
+<mx:Box borderStyle="none" id="boxValue" width="100%" height="100%" fontFamily="Verdana" verticalAlign="middle" horizontalAlign="center">
+	<mx:Panel headerHeight="0" borderThicknessLeft="0" borderThicknessRight="0" borderThicknessTop="0" borderThicknessBottom="0" id="loginbox" width="940" height="560" backgroundImage="@Embed('assets/SA_bg.png')">
+		<mx:HBox width="100%" height="50" horizontalAlign="left" fontWeight="bold" fontSize="23" verticalAlign="middle">
+			<mx:Spacer width="2%"/>
+			<mx:Text text="Excellence" color="#5C8DD9"/>
+			<mx:Text text="Builder" color="#636363"/>
+		</mx:HBox>
+		<mx:HBox width="100%" height="274" horizontalAlign="center">
+			<mx:HBox width="96%" height="100%" horizontalCenter="1" borderColor="#727989" borderStyle="solid" backgroundImage="@Embed('assets/login_banner.png')" horizontalAlign="right" verticalAlign="bottom">
+				<!--<mx:Image source="@Embed('assets/content.png')" width="100%" height="100%"/>	-->			
+				<mx:Label text="Read More" paddingRight="10" paddingBottom="10" fontWeight="bold" fontSize="11" click="callExcellenceBuilder(event)" useHandCursor="true" buttonMode="true" mouseChildren="false" selectable="false"/>
+			</mx:HBox>
+		</mx:HBox>
+		<mx:Spacer/>		
+		<mx:HBox width="100%" height="190">
+			<mx:HBox width="1%"/>
+			<mx:VBox width="77%" height="100%">
+				<mx:HBox width="100%" height="5%" color="white" backgroundColor="#4D5769">
+					<mx:HBox width="50%" horizontalAlign="left" verticalAlign="middle">
+						<mx:Text text="What is Excellence" color="white" fontSize="12" fontWeight="bold"/>
+					</mx:HBox>
+					<mx:HBox width="50%" horizontalAlign="center" verticalAlign="middle">
+						<mx:Text text="Benefits of Excellence Builder" color="white" fontSize="12" fontWeight="bold"/>
+					</mx:HBox>
+				</mx:HBox>
+				<mx:HBox width="100%" height="95%">
+					<mx:VBox width="50%" height="100%" horizontalAlign="center" verticalAlign="top">
+						<mx:TextArea selectable="false" editable="false" id="txtAristatile" verticalScrollPolicy="off" borderStyle="none" backgroundAlpha="0" textAlign="left" height="50%" width="100%" paddingLeft="5" mouseChildren="false" fontSize="11">
+							<mx:htmlText>
+								<![CDATA[Aristotle rightly said,<b><font color="#5C8DD9"> “We are what we repeatedly do. Excellence, therefore, is not an act, but a habit.”</font></b> Excellence is not a finite goal. It is an attitude that is continuous and has no end. It is not a destination, but a continuous journey.
+								]]>
+							</mx:htmlText>
+						</mx:TextArea>
+						<mx:Label width="100%" textAlign="right" useHandCursor="true" buttonMode="true" color="#727989" mouseChildren="false" fontWeight="bold" selectable="false" text="Read More" fontSize="11" height="15%" click="callExcellence(event)"/>
+						<mx:Spacer height="35%"/>
+					</mx:VBox>
+					<mx:VRule strokeColor="#727989" width="0.5%" height="90%" />
+					<mx:VBox width="50%" height="100%" horizontalAlign="center">
+						<mx:Text  selectable="false"  fontSize="11" fontWeight="normal" id="txtbenifits" width="100%" height="50%" textAlign="left" text=""/>
+						<mx:Label width="100%" textAlign="right" useHandCursor="true" buttonMode="true" color="#727989" mouseChildren="false" selectable="false" fontWeight="bold" text="Read More" fontSize="11" height="15%" click="callBenefits(event)"/>
+						<mx:Spacer height="35%"/>
+					</mx:VBox>
+				</mx:HBox>
+			</mx:VBox>
+			<mx:Panel verticalAlign="middle" paddingLeft="15" paddingTop="10" borderThicknessBottom="0" borderThicknessLeft="0" borderThicknessRight="0" borderThicknessTop="0" headerHeight="0"  id="authbox" width="21%" height="100%" backgroundColor="#D5DAE2">
+				<mx:Text text="Username" fontSize="13"/>
+				<mx:TextInput id="txtloginid" height="15%" text=""/>
+				<mx:Text text="Password" fontSize="13"/>
+				<mx:TextInput id="txtpassword" displayAsPassword="true" enter="clickEvent(event)" height="15%" text=""/>
+				<mx:HBox horizontalGap="0" visible="false" includeInLayout="false">
+					<mx:RadioButtonGroup id="rdoLang"/>
+					<mx:RadioButton label="English"  fontSize="9" fontThickness="1" fontWeight="bold" tabFocusEnabled="true"  value="en_US" group="{rdoLang}" selected="true" groupName="{rdoLang}"/>
+					<mx:RadioButton label="Arabic" fontSize="9" fontThickness="1" fontWeight="bold" tabFocusEnabled="true" value="ar_EG" group="{rdoLang}" groupName="{rdoLang}"/>
+				</mx:HBox>	
+				<mx:Button id="btnLogin" skin="@Embed('assets/signin_button1.png')"  click="clickEvent(event)" useHandCursor="true" buttonMode="true" mouseChildren="false"/>
+				<mx:Text buttonMode="true" mouseChildren="false" text="Forgot your password?" click="forgotPassword()"/>
+			</mx:Panel>
+			<mx:HBox width="1%"/>
+		</mx:HBox>
+		<!--<mx:Spacer/>-->
+		<mx:HBox height="20" verticalAlign="middle" width="100%" color="white" backgroundColor="#4D5769" >
+			<mx:HBox width="60%" verticalAlign="middle">
+				<mx:Text text="Powered By :" fontWeight="bold" paddingLeft="5"/>
+				<mx:Text text="Syna Development"/>
+				<mx:Text text="Tel:" fontWeight="bold"/>
+				<mx:Text text="+971 4 262 6512" />
+			</mx:HBox>
+			<mx:HBox width="40%" horizontalAlign="right" verticalAlign="middle" horizontalGap="0">
+				<mx:Image source="@Embed('assets/message.png')"/>
+				<mx:Label text="info@synadevelopment.com" useHandCursor="true" buttonMode="true" mouseChildren="false" selectable="false" click="changeurl(event)"/>				
+			</mx:HBox>
+		</mx:HBox>
+	<!--	<mx:Spacer height="2"/>-->
+	</mx:Panel>		
+</mx:Box>
+	
+	
+<mx:StringValidator id="valloginid" source="{txtloginid}" property="text" minLength="3" maxLength="20" trigger="{txtloginid}" triggerEvent="textInput" />
+<mx:StringValidator id="valpassword" source="{txtpassword}" property="text" minLength="5" maxLength="15" trigger="{txtpassword}" triggerEvent="textInput" />
+
+</mx:Panel>

@@ -1,0 +1,345 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<mx:Panel styleName="Childpanelstyle" xmlns:mx="http://www.adobe.com/2006/mxml" 
+	width="100%" verticalScrollPolicy="off">
+
+<mx:Style source="src/com/selfassessment/view/assets/Styles.css"/>	
+
+	<mx:Script>
+    <![CDATA[
+    	import mx.core.Application;
+    	import com.boyzoid.PagableArrayCollection.PagableArrayCollection;
+    	import src.com.selfassessment.controller.TeamController;
+        import flash.events.TextEvent;
+        import mx.controls.Alert;
+        import src.com.selfassessment.events.GuideLinesEvent;
+        import src.com.selfassessment.events.CriteriaEvent;
+        
+        import mx.collections.ArrayCollection;
+        import mx.controls.*;
+        import src.com.selfassessment.view.*;
+		import src.com.selfassessment.events.UserEventConstants;
+		import flash.events.Event;
+ 		import flash.net.URLLoader;
+        import flash.net.URLRequest;
+        import flash.events.MouseEvent;
+		import flash.events.TextEvent;
+		import src.com.selfassessment.controller.Components;
+		import src.com.selfassessment.controller.Controller;
+		import src.com.selfassessment.controller.CustomerController;
+        import mx.controls.Alert;
+        import mx.managers.CursorManager;
+        import mx.managers.PopUpManager;
+        
+        [Bindable]
+        public var CriteriaService:TeamController = new TeamController();
+        
+        [Bindable]
+        public var myPageableArrCol:PagableArrayCollection = new PagableArrayCollection();
+        [Bindable]
+		public var criteriadesc:String;
+		[Bindable]
+		public var strEnterApproach:String;
+		[Bindable]
+		public var strApproach:String;
+		[Bindable]
+		public var strTitle:String;
+		[Bindable]
+		public var strDgcTitle:String;
+		[Bindable]
+		public var points:String; 
+		[Bindable]
+		public var relevancecritical:String;
+		
+		[Bindable]
+		public var approachtolink:String;
+		[Bindable]
+		public var other:String;
+		
+    	private var xmlLoader:URLLoader;
+    	private var myDataObject:Object;
+    	public var selectedNode:XML;
+    	public var criteriadata:Array;
+    	private var numChild:Number = 5;
+		public var alerttext:int;
+    	public var criteriaArray:Array=new Array();
+    	[Bindable]
+    	public var Tablebel:String = "";
+    	private function initializeHandler():void {
+
+ 			xmlLoader = new URLLoader();
+            xmlLoader.addEventListener(Event.COMPLETE, completeHandler);
+                        
+            var uri:URLRequest = new URLRequest("com/selfassessment/view/team.xml");
+			xmlLoader.load(uri);
+    	}
+    	
+    	private function completeHandler(event:Event):void {
+			trace( xmlLoader.data );
+    	}
+    	
+    	private function creationCompleteHandler(event:Event):void {
+			myDataObject = XML(xmlLoader.data);
+		}
+
+        public function linkHandler(event:Event):void {
+        	
+        	var popupwindow:GuidancePopup = GuidancePopup(PopUpManager.createPopUp(this,GuidancePopup,true));
+			popupwindow.height = 350;
+			popupwindow.width  = 750;
+			popupwindow.sourceOne.dataProvider=criteriaArray;
+			popupwindow.lblCritID.text = this.label.toString();
+			popupwindow.txtCriterionDesc.text=lblcriteriadesc.text;
+			
+			//Alert.show();
+        }
+        
+        /* public function clickEvent(evt:Event):void {
+        	dispatchEvent(new CriteriaEvent(CriteriaEvent.criteriaevent_select));
+        }
+         */
+		private function init():void {
+			
+			if(Application.application.language=="en_US"){
+				mainVBox.setStyle('textAlign','left');
+				myDataGrid.setStyle('textAlign','left');
+			}
+			else{
+				mainVBox.setStyle('textAlign','right');
+				myDataGrid.setStyle('textAlign','right');
+			}
+			CriteriaService.GetcriteriaList(function(criteriaArray:Array):void{
+				
+				CursorManager.removeBusyCursor();
+				
+				criteriadata = new Array();
+				var i:int = 0;
+				
+				criteriadata = criteriaArray;
+				
+			});
+			//}
+         }
+         private function showExample():void{
+         	 var url:URLRequest = new URLRequest(Application.application.serverPath+"/src/com/selfassessment/view/assets/Customer_Satisfaction_Results.xls");
+			navigateToURL(url,"_blank"); 	
+			/* var fileRef:FileReference=new FileReference();
+			//var index:int=Application.application.url.lastIndexOf("/");
+			var path:String=Application.application.serverPath.substring(0,index);
+			var request:URLRequest=new URLRequest(path+"/src/com/selfassessment/view/assets/Customer_Satisfaction_Results.xls");
+			fileRef.download(request,"Customer_Satisfaction_Results.xls"); */
+         }
+    ]]>
+	</mx:Script>
+
+	     
+<mx:VBox id="mainVBox" name="projectplan" width="100%" height="100%" styleName="ApplyFontSize" verticalScrollPolicy="off">
+	<mx:HBox width="98%" height="5%">
+		<mx:VBox width="80%" height="100%">
+			<mx:Spacer width="100%" height="100%"/>
+		</mx:VBox>
+		<mx:Label id="lblPoints" text="{points}"/>
+		<mx:Spacer width="2%"/>
+		<mx:Label text="@Resource(bundle='myResources', key='guidanceNotes')" selectable="true" useHandCursor="true" buttonMode="true" mouseChildren="false" color="#2e3c84" click="linkHandler(event);" textDecoration="underline"/>
+	</mx:HBox>
+	
+	<mx:HBox width="100%" height="7%">
+		<mx:Label text="@Resource(bundle='myResources', key='criterionPart')" fontSize="11" fontWeight="bold"/>
+		<mx:TextArea selectable="false" borderStyle="none" width="80%" editable="false" id="lblcriteriadesc" text="{criteriadesc}"/>
+	</mx:HBox>
+
+	<mx:HBox width="100%" height="2%">
+		<mx:Label text="@Resource(bundle='myResources', key='teamleader')" fontSize="11" fontWeight="bold"/>
+		<mx:Text id="txtOwner" mouseChildren="false"/>
+	</mx:HBox>
+
+	<mx:HBox width="100%" height="3%">
+		<mx:Label id="lblEnterApproach" text="{strEnterApproach}" color="#0b662f"/>
+	</mx:HBox>
+	
+	<mx:HBox width="100%" height="3%">
+		<mx:Label id="lblApproach" text="{strApproach}" color="#0b662f"/>
+	</mx:HBox>
+
+	<mx:HBox width="100%" height="2%">
+		<mx:Spacer width="100%" height="100%"/>
+	</mx:HBox>
+	
+	<mx:HBox width="100%" height="7%">
+		<mx:Label id="lblTitle" width="{lblDocs.width}" fontWeight="bold" text="{strTitle}"/>
+		<!--<mx:Spacer width="2%" height="100%"/>-->
+		
+		<mx:TextArea id="textArea" maxChars="500" text="" width="50%" height="20%"/>
+
+	</mx:HBox>
+	
+	<mx:HBox width="100%" height="5%">
+		<mx:Label width="{lblDocs.width}" text="@Resource(bundle='myResources', key='missing')" fontWeight="bold"/>
+		<!--<mx:Spacer width="23%"/>-->
+		
+		<mx:RadioButton id="rdbtn1" label="@Resource(bundle='myResources', key='yes')" />	
+		<mx:RadioButton id="rdbtn2" label="@Resource(bundle='myResources', key='no')" selected="true"/>
+	</mx:HBox>
+	
+	<mx:HBox width="100%" height="5%">
+		<mx:Label id="lblDocs" text="@Resource(bundle='myResources', key='attachDocs')" fontWeight="bold"/>
+		<!--<mx:VBox width="16%">
+			<mx:Spacer width="100%" height="100%"/>
+		</mx:VBox>-->
+		<mx:Label id="lblAttach" color="blue" useHandCursor="true" buttonMode="true" mouseChildren="false" textDecoration="underline"/>
+		<mx:Spacer width="20%"/>
+		<mx:Label id="lblSeeExample" text="See example" color="blue" useHandCursor="true" buttonMode="true" mouseChildren="false" textDecoration="underline" click="showExample()"/>
+	</mx:HBox>
+
+	<mx:HBox width="100%" height="5%">
+		<mx:Spacer width="{lblDocs.width}"/>
+		<mx:Button id="lblAdd" label="@Resource(bundle='myResources', key='add')" useHandCursor="true" buttonMode="true"/>
+		
+		
+	</mx:HBox>
+
+	<mx:HBox width="100%" height="2%">
+		<mx:Spacer width="100%" height="100%"/>
+	</mx:HBox>		
+
+	<mx:HBox id="search" label="@Resource(bundle='myResources', key='search')" width="98%" height="50%" >
+	
+		<mx:DataGrid useRollOver="true" id="myDataGrid" width="100%" height="100%" variableRowHeight="true" allowMultipleSelection="false" draggableColumns="false">
+			<mx:columns>
+		        <mx:DataGridColumn headerWordWrap="true" headerText="@Resource(bundle='myResources', key='part')" dataField="criteriaID" width="40">
+		        	<mx:itemRenderer>
+	            		<mx:Component>
+	            		<mx:Text paddingLeft="5" text="{data.criteriaID}">
+	        			</mx:Text>
+	            		</mx:Component> 
+        			</mx:itemRenderer> 
+		        </mx:DataGridColumn>
+		        
+		        <mx:DataGridColumn id="dgcTitle" headerWordWrap="true" headerText="{strDgcTitle}" dataField="approachTitle" width="100">
+		        	<mx:itemRenderer>
+	            		<mx:Component>
+	            		<mx:Text useHandCursor="true" paddingLeft="5" buttonMode="true" mouseChildren="false" selectable="true" color="#2e3c84" fontSharpness="12" textDecoration="underline">
+	        			</mx:Text>
+	            		</mx:Component> 
+        			</mx:itemRenderer> 
+		         
+		        </mx:DataGridColumn>
+		        
+		        <mx:DataGridColumn headerWordWrap="true" headerText="@Resource(bundle='myResources', key='missing')" dataField="missing" width="40">
+		        	<mx:itemRenderer>
+	            		<mx:Component>
+	            		<mx:Text paddingLeft="5" text="{data.missing}">
+	        			</mx:Text>
+	            		</mx:Component> 
+        			</mx:itemRenderer> 
+		        </mx:DataGridColumn>
+		        
+		        <mx:DataGridColumn headerWordWrap="true" headerText="@Resource(bundle='myResources', key='score')" dataField="score" width="40">
+		        	<mx:itemRenderer>
+	            		<mx:Component>
+	            		<mx:Text paddingLeft="5" text="{data.score}">
+	        			</mx:Text>
+	            		</mx:Component> 
+        			</mx:itemRenderer> 
+		        </mx:DataGridColumn>
+				
+				
+				
+				<mx:DataGridColumn headerWordWrap="true" headerText="{relevancecritical}" dataField="directrelavancetodelivering" width="70">
+					<mx:itemRenderer>
+	            		<mx:Component>
+	            		<mx:Text paddingLeft="5" text="{data.directrelavancetodelivering}">
+	        			</mx:Text>
+	            		</mx:Component> 
+        			</mx:itemRenderer>
+				</mx:DataGridColumn>
+				<mx:DataGridColumn headerWordWrap="true" headerText="@Resource(bundle='myResources', key='relevancecriteria')" dataField="relevancetothiscriterionpart" width="70">
+					<mx:itemRenderer>
+	            		<mx:Component>
+	            		<mx:Text paddingLeft="5" text="{data.relevancetothiscriterionpart}">
+	        			</mx:Text>
+	            		</mx:Component> 
+        			</mx:itemRenderer> 
+				</mx:DataGridColumn>
+				<mx:DataGridColumn headerWordWrap="true" headerText="{approachtolink}" dataField="approachtolink" width="70">
+					<mx:itemRenderer>
+	            		<mx:Component>
+	            		<mx:Text useHandCursor="true" focusOut="{data.approachtolink=this.text}" paddingLeft="5" buttonMode="true" mouseChildren="false" selectable="true" color="#2e3c84" fontSharpness="12" textDecoration="underline">
+	        			</mx:Text>
+	            		</mx:Component> 
+        			</mx:itemRenderer> 
+				</mx:DataGridColumn>
+				
+				<mx:DataGridColumn headerWordWrap="true" headerText="{other}" dataField="otherapproachlinkto" width="70">
+					<mx:itemRenderer>
+						<mx:Component>
+							<mx:Text paddingLeft="5" text="{data.otherapproachlinkto}"/>
+						</mx:Component>
+					</mx:itemRenderer>
+				</mx:DataGridColumn>
+				
+				<mx:DataGridColumn headerWordWrap="true" headerText="Doc" width="30">
+					<mx:itemRenderer>
+	            		<mx:Component>
+	            		<!--<mx:Text useHandCursor="true" text="@Resource(bundle='myResources', key='doc')" paddingLeft="5" buttonMode="true" mouseChildren="false" selectable="true" color="#2e3c84" fontSharpness="12" textDecoration="underline">
+	        			</mx:Text>-->
+	        			<mx:HBox horizontalAlign="center" verticalAlign="middle">
+							<mx:Image scaleContent="false" horizontalAlign="center" source="@Embed('assets/doc.png')" buttonMode="true" mouseChildren="false"/> 
+						</mx:HBox>
+	            		</mx:Component> 
+        			</mx:itemRenderer> 
+				</mx:DataGridColumn>
+				
+				<mx:DataGridColumn id="deleteCol" headerWordWrap="true" headerText="Del" dataField="deletes" textAlign="center" width="30">
+				<mx:itemRenderer>
+					<mx:Component> 
+						<mx:HBox horizontalAlign="center" verticalAlign="middle">
+							<mx:Image scaleContent="false" horizontalAlign="center" source="@Embed('assets/newdeleteicon.png')"/> 
+						</mx:HBox>
+					</mx:Component> 
+				</mx:itemRenderer> 
+				</mx:DataGridColumn>
+					<mx:DataGridColumn dataField="enablerID" width="0" visible="false">
+				</mx:DataGridColumn>
+				
+			</mx:columns>
+		       
+		</mx:DataGrid>  
+	    
+	</mx:HBox>
+	<mx:HBox width="100%" height="10%" horizontalAlign="center">
+		
+	
+	<mx:HBox width="80%" height="100%">
+  
+  <!--<mx:TextArea borderStyle="none" editable="false" wordWrap="true" width="25%" fontWeight="bold" mouseChildren="false" height="50" text="Overall sub-team score for {Tablebel}"/>-->
+  <mx:HBox width="30%" height="100%" horizontalGap="0">
+     <mx:TextArea wordWrap="true" width="100%"  height="100%" fontWeight="bold" editable="false" borderStyle="none" text="Overall sub-team score for {Tablebel}"/>
+    </mx:HBox>
+    
+  <mx:TextInput id="txtCritSave" width="1%" maxChars="2" restrict="0-9"/>
+  
+  <mx:Label width="1%" text="%"/>
+  
+  <mx:Button id="btnCritSave" label="@Resource(bundle='myResources', key='save')"/>
+  <mx:Spacer width="20"/>
+  <mx:HBox width="30%" horizontalGap="0">
+   <mx:Text fontWeight="bold" mouseChildren="false" width="75%" height="50" text="Overall system average score for {Tablebel}"/>
+   <mx:Text id="txtAverage"/>
+   <mx:Label text="%"/>
+  </mx:HBox>
+   <mx:Spacer width="20"/>
+  <mx:Text fontWeight="bold" text="No of Approaches : {myPageableArrCol.length}"/>
+     <!--<mx:Label width="3%" text="@Resource(bundle='myResources',key='jumpToPage')"/>
+     <mx:TextInput restrict="0-9" id="jumpPage" width="40" maxChars="2" />
+     <mx:Button width="2%" skin="@Embed('assets/go.png')" click="JumptoPage()" useHandCursor="true" buttonMode="true"/>
+  <mx:Button width="2%" skin="@Embed('assets/left arrow.png')" useHandCursor="true" buttonMode="true" id="btnPageDown" click="pageDown()" disabledSkin="@Embed('assets/disabledRight.png')"/>
+     <mx:Button width="2%" skin="@Embed('assets/right arrow.png')" useHandCursor="true" buttonMode="true" id="btnPageUp" click="pageUP()" disabledSkin="@Embed('assets/disabledLeft.png')"/>--> 
+
+ </mx:HBox>
+
+	</mx:HBox>
+</mx:VBox>
+	<mx:Label id="lblCritID" text="criteriaid" height="4" visible="true" color="red"/>
+		
+</mx:Panel>

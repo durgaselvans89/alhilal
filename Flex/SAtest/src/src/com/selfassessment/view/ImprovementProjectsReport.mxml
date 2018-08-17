@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas styleName="Childpanelstyle" creationComplete="init()"  xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" horizontalScrollPolicy="off">
+
+<mx:Style source="src/com/selfassessment/view/assets/Styles.css"/>	
+
+<mx:Script>
+	<![CDATA[
+		import com.as3xls.xls.ExcelFile;
+		import mx.collections.ArrayCollection;
+		import com.as3xls.xls.Sheet;
+		import flashx.textLayout.formats.Float;
+		import mx.events.ListEvent;
+		import mx.core.Application;
+		import mx.controls.Alert;
+		import src.com.selfassessment.controller.TeamController;
+		public var CriteriaService:TeamController=new TeamController();
+			
+		private function searchProjectDetails():void{
+   			CriteriaService=new TeamController();
+   			CriteriaService.SearchProjectReports(txtProjectTitle.text,txtStatus.text,function(resultArr:Array):void{
+   				myDataGrid.dataProvider=resultArr;
+	        	//myExpDataGrid.dataProvider=myDataGrid.dataProvider;
+	        	if(resultArr.length==0){
+	        		Alert.show(resourceManager.getString('myResources','recordsNotFound'));
+	        	}
+   			});
+   		}
+		
+		private function init():void{
+			if(Application.application.language=="en_US"){
+				myDataGrid.setStyle('textAlign','left');
+			}
+			else{
+				myDataGrid.setStyle('textAlign','right');	
+			}
+		}
+		 public var enablerRowCount:int;
+        [Bindable]
+        private var fields:Array = new Array(); 
+       	private var sheet:Sheet;
+		private function exportToExcel():void{
+				
+          		var index:int=0;
+				sheet = new Sheet();
+				
+	          	fields = new Array();
+	          	sheet.name="Enabler";
+	          	var projArrColl:ArrayCollection=new ArrayCollection(); 
+          		   
+				
+				var columns:Array=new Array();  
+				
+				var fieldheading:String;
+				
+				projArrColl=new ArrayCollection();
+	          	projArrColl = myDataGrid.dataProvider as ArrayCollection;  
+	          	
+	          
+	           	enablerRowCount= projArrColl.length;  
+	           	columns = myDataGrid.columns; 
+	           	
+	           sheet.resize((projArrColl.length)+ 2,myDataGrid.columnCount);
+	          // sheet.setCell(0, 0,"Enabler");
+	           	
+	           	var j:int = 0;  
+	         	for(var i:int=0;i<columns.length;i++){
+	         		if (columns[i]["dataField"].toString() != "prototype"){
+						fields.push(columns[i]["dataField"].toString());  
+	               		sheet.setCell(1, j,columns[i]["headerText"].toString());
+	               		
+					}	
+					j++;
+	         	}
+	         	
+	        	for(var r:int=0; r < enablerRowCount; r++){  
+					var record:Object = projArrColl.getItemAt(r);  
+	                insertRecordInSheet(r+2,sheet,record);
+				}
+	         	var xls:ExcelFile = new ExcelFile(); 
+	          	xls.sheets.addItem(sheet); 
+	 		  	var bytes:ByteArray = xls.saveToByteArray();  
+	          	var fr:FileReference=new FileReference();
+	          	fr.save(bytes,"Project.xls"); 
+		}
+		
+		
+		
+		  
+		private function insertRecordInSheet(row:int,sheet:Sheet,record:Object):void{  
+         	var i:int = 0;  
+            for each(var field:String in fields){
+            	if (record[field] != null){
+            		sheet.setCell(row,i, record[field]);
+            	}
+            	i++;  
+            }
+            return;   
+		}
+			
+	]]>
+</mx:Script>
+
+		
+		<mx:VBox id="mainVBox" fontSize="13"  width="100%" height="100%" horizontalAlign="center" horizontalScrollPolicy="off"> 
+			<mx:Spacer/>	
+			<mx:Spacer/>
+			<mx:HBox width="95%" horizontalAlign="center">
+			<mx:Spacer width="20%"/>
+					<mx:Label fontWeight="bold" name="lblProjectTitle" text="@Resource(bundle='myResources', key='projName')"/>
+		   			<mx:TextInput id="txtProjectTitle" width="20%"/>
+	    			
+					<mx:Label fontWeight="bold" name="lblProjectStatus" text="@Resource(bundle='myResources', key='status')"/>
+		   			<mx:TextInput id="txtStatus" width="20%"/>
+	    			<mx:Spacer width="2%"/>
+					<mx:Button label="@Resource(bundle='myResources', key='search')" name="btnsearch" toolTip="Search" click="searchProjectDetails()"/>
+			</mx:HBox>
+			<mx:Spacer/>
+			<mx:VBox width="95%" height="80%" fontSize="12" verticalGap="0">
+				<mx:DataGrid id="myDataGrid" styleName="ReportDataGridHeaderStyle" variableRowHeight="true" wordWrap="true" width="100%" height="100%"  allowMultipleSelection="true" draggableColumns="false">
+					<mx:columns>
+						<mx:DataGridColumn id="projectID" dataField="projectID" headerText="@Resource(bundle='myResources', key='projNo')" width="90">
+				        </mx:DataGridColumn>
+						<mx:DataGridColumn id="username" dataField="projectTitle" headerText="@Resource(bundle='myResources', key='projName')" width="150">
+						</mx:DataGridColumn>
+			        	
+				        <mx:DataGridColumn id="role" dataField="name" headerText="@Resource(bundle='myResources', key='responsibility')" width="150">
+				        </mx:DataGridColumn>
+				        
+				        <mx:DataGridColumn id="startDate" dataField="startDate" headerText="@Resource(bundle='myResources', key='startDate')" width="100">
+				        </mx:DataGridColumn>
+                	    
+				        <mx:DataGridColumn id="endDate" dataField="endDate" headerText="@Resource(bundle='myResources', key='endDate')" width="100">
+				        </mx:DataGridColumn>
+				          
+				        <mx:DataGridColumn id="status" dataField="status" headerText="@Resource(bundle='myResources', key='status')" width="110">
+				        </mx:DataGridColumn>
+				        
+					</mx:columns>
+			    </mx:DataGrid>
+			 <mx:Spacer height="2%"/>
+			 <mx:HBox width="100%" horizontalAlign="right">
+				<mx:Button id="btnExportToExcel" label="Export to Excel" click="exportToExcel()"/>
+			</mx:HBox>
+		</mx:VBox>
+		</mx:VBox>
+	
+</mx:Canvas>

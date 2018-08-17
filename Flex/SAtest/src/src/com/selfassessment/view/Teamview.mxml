@@ -1,0 +1,816 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas styleName="GeneralPanelStyle" xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:s="library://ns.adobe.com/flex/spark"
+	width="100%" height="100%" creationComplete="init()" verticalScrollPolicy="off" horizontalScrollPolicy="off">
+	
+	<mx:Model id="imagesrc" source="src/catalog.xml"/>
+
+	<mx:Style source="src/com/selfassessment/view/assets/Styles.css"/>	
+
+	<mx:Script>
+		<![CDATA[
+			import flashx.textLayout.elements.BreakElement;
+			import src.com.selfassessment.controller.Components;
+			import mx.core.Application;
+			import mx.resources.Locale;
+			import mx.collections.Sort;
+			import mx.collections.SortField;
+			import mx.events.CloseEvent;
+			import mx.events.IndexChangedEvent;
+			import mx.managers.CursorManager;
+			import src.com.selfassessment.model.TeamDO;
+			import mx.utils.StringUtil;
+			import com.boyzoid.PagableArrayCollection.PagableArrayCollection;
+			import mx.core.IFlexDisplayObject;
+			import mx.styles.StyleManager;
+			import mx.controls.PopUpButton;
+			import mx.collections.ArrayCollection;
+			import mx.managers.PopUpManager;
+			import mx.controls.Alert;
+			import src.com.selfassessment.events.*;
+			import mx.core.IFlexDisplayObject;
+			import flash.events.Event;
+			import mx.controls.DataGrid;
+			import mx.events.ListEvent;
+			import mx.collections.ArrayCollection;
+			import mx.containers.TitleWindow;
+			import mx.events.DataGridEvent;
+			import mx.collections.ArrayCollection;
+		    import src.com.selfassessment.events.DataGridBean;
+		    import src.com.selfassessment.controller.TeamController;
+		    
+		    public var popUpAlert:ShowAlert;
+			[Bindable]
+			public var allGames:ArrayCollection;
+			
+			[Bindable]
+			public var teamarray:Array = new Array();
+
+			[Bindable]
+			public var datatransfer:DataTranfer;
+			
+			[Bindable]
+			public var teamdetailsarray:Array = new Array();
+			
+			[Bindable]
+			public var CriteriaService:TeamController = new TeamController();
+	        
+	        [Bindable]
+			public var teamassessmentarray:Array = new Array();
+			
+			[Bindable]
+			public var teamLeaderArray:Array=new Array();
+			
+			[Bindable]
+        	public var myPageableArrCol:PagableArrayCollection = new PagableArrayCollection();
+        	private var selectedCriteria:ArrayCollection=new ArrayCollection()
+	        public var RowCount:Number = 0;
+			public function init():void {
+				 if(Application.application.language=="en_US"){
+					myDataGrid.setStyle('textAlign','left');
+					mainVBox.styleName = 'ApplyFontSizeEn';
+				}
+				else{
+					myDataGrid.setStyle('textAlign','right');
+					mainVBox.styleName = 'ApplyFontSizeAr';
+				}
+				if(Application.application.IsExecutiveMember==1){
+					myDataGrid.enabled=true;
+					btnedit.enabled=true;
+				}
+				else{
+					myDataGrid.enabled=false;
+					btnedit.enabled=false;
+				}
+				
+	        	RowCount =parseInt(((myDataGrid.height-25)/30).toString());
+	        	cmbLocation.dataProvider=Application.application.LocationArray;
+	        	CursorManager.setBusyCursor();
+	        	
+	        	CriteriaService.getUserName(Components.instance.session.locationID,function(userArray:Array):void{
+	        		if(userArray.length!=0){
+		        		teamassessmentarray = userArray;
+		        		cmbteamleader.dataProvider = teamassessmentarray;
+	        		}
+		        	else{
+		        		//Alert.show("Team leaders are not available under this location");
+		        		Alert.show(resourceManager.getString('myResources','teamLeadersNotAvailUnderLoc'));
+		        		cmbteamleader.dataProvider="";
+		        	}
+	        		CriteriaService.getTeamLeaderList(Components.instance.session.locationID,function(guidanceArray:Array):void{
+					teamLeaderArray[0]="All";
+					for(var i:int=0;i<guidanceArray.length;i++){
+								teamLeaderArray[i+1]=guidanceArray[i];
+						}
+					cmbTeamLeaderSearch.dataProvider = teamLeaderArray;
+					txtteamname.text="";
+					cmbTeamLeaderSearch.selectedIndex=0;
+					SearchTeam();
+				});
+			}); 
+				
+			}
+			public var tempArr:Array= new Array();
+			public function SearchTeam():void{
+				CursorManager.setBusyCursor();
+				var userID:int=0;
+				if(cmbTeamLeaderSearch.selectedLabel=="All"){
+					userID=0;
+				}
+				else{
+					userID=parseInt(cmbTeamLeaderSearch.selectedItem.userid);	
+				}
+				CriteriaService  = new TeamController();
+				CriteriaService.getTeamdtls(StringUtil.trim(txtteamname.text),userID,Components.instance.session.locationID,function(guidanceArray:Array):void{
+					teamdetailsarray = guidanceArray;
+					tempArr = new Array();
+					for(var i:int=0;i<guidanceArray.length;i++){
+						tempArr.push({Sno:i+1,teamid:guidanceArray[i]["teamid"],criterionpartid:guidanceArray[i]["criterionpartid"],teamname:guidanceArray[i]["teamname"],teamleadername:guidanceArray[i]["teamleadername"],location:guidanceArray[i]["location"]});
+					}
+					myPageableArrCol = new PagableArrayCollection(tempArr);
+					myPageableArrCol.itemsPerPage = RowCount;
+					myDataGrid.dataProvider = myPageableArrCol;
+				 	chkPage();
+					CursorManager.removeAllCursors();
+					if(tempArr.length==0){
+						Alert.show(resourceManager.getString('myResources','recordsNotFound'));
+					}
+				}); 
+			}
+			
+			
+			public function initHandler():void {
+	            StyleManager.loadStyleDeclarations("../images/panelcss.css", false);
+        	}
+        	
+        	public function CreateTeam():void{
+        		
+        		var teamname:String =  StringUtil.trim(txtTeamNamecreate.text);
+        		//var teamleader:String = StringUtil.trim(cmbteamleader.selectedLabel);
+        		var teamleader:String = cmbteamleader.selectedItem.userid;
+        		
+        		var teamdo:TeamDO = new TeamDO();
+        		if(btncreate.label == resourceManager.getString('myResources','btncreate')){
+	        		if(teamname!="" && teamleader!= "" && txtteamname.errorString==""){
+		        		
+		        		teamdo.teamname = teamname;
+		        		teamdo.teamowner = teamleader;
+		        		/* teamdo.location = cmbLocation.selectedLabel;
+		        		teamdo.locationID = parseInt(cmbLocation.selectedItem.LocationID); */
+		        		teamdo.location ="Dr Lway";
+		        		teamdo.locationID = 1;
+		        		CursorManager.setBusyCursor();
+		        		CriteriaService.createTeam(teamdo, function(guidanceArray:Number):void{
+		        			
+							if(guidanceArray == 1){
+								Alert.show(resourceManager.getString('myResources','teamCreatedSuccessfully'));
+								CriteriaService=new TeamController();
+								CriteriaService.getTeamLeaderList(Components.instance.session.locationID,function(guidanceArray:Array):void{
+									teamLeaderArray = new Array();
+									teamLeaderArray[0]="All";
+									for(var i:int=0;i<guidanceArray.length;i++){
+												teamLeaderArray[i+1]=guidanceArray[i];
+										}
+									cmbTeamLeaderSearch.dataProvider = teamLeaderArray;
+								});
+								SearchTeam();
+								teamCreatebox.visible = false;
+							}
+							else{
+								Alert.show(resourceManager.getString('myResources','teamAlreadyExists'));
+							}
+							CursorManager.removeAllCursors();
+						});
+	        		}
+        		}
+        		else{
+        			if(teamname!="" && teamleader!= ""){
+		        		teamdo.teamid = parseInt(myDataGrid.selectedItem.teamid);
+		        		teamdo.teamowner = teamleader;
+		        		teamdo.teamname = teamname;
+		        		//teamdo.location = cmbLocation.selectedLabel;
+		        		//teamdo.locationID = parseInt(cmbLocation.selectedItem.LocationID);
+		        		teamdo.location = "Dr Lway";
+		        		teamdo.locationID = 1;
+		        		CursorManager.setBusyCursor();
+		        		CriteriaService.UpdateTeam(teamdo, function(guidanceArray:Number):void{
+		        			
+							if(guidanceArray == 1){
+								//Alert.show("Team Updated Successfully");
+								Alert.show(resourceManager.getString('myResources','teamUpdatedSuccessfully'));
+								CriteriaService=new TeamController();
+								CriteriaService.getTeamLeaderList(Components.instance.session.locationID,function(guidanceArray:Array):void{
+									teamLeaderArray = new Array();
+									teamLeaderArray[0]="All";
+									for(var i:int=0;i<guidanceArray.length;i++){
+												teamLeaderArray[i+1]=guidanceArray[i];
+										}
+									cmbTeamLeaderSearch.dataProvider = teamLeaderArray;
+								});
+								SearchTeam();
+								teamCreatebox.visible = false;
+							}
+							
+							CursorManager.removeAllCursors();
+						});
+		        	}
+        		}
+        	}
+        	
+        public var popupwindow:AssignCriteria;
+        public var AssignRowCount:Number = 0;
+        public var AssignBool:Boolean = true;
+        public var AssignArr:Array = new Array();
+        public var AssignArrCol:ArrayCollection = new ArrayCollection();
+        public var AssignSelectedArr:ArrayCollection = new ArrayCollection();
+        public var AssignSelectedArrcol:ArrayCollection = new ArrayCollection();
+        public var OldTeamLeader:String ="";
+        public var dataProvider:*;
+    	
+    	public function CriteriaProject(event:ListEvent):void{
+			var txtStr:int = event.columnIndex;
+			//Alert.show(myDataGrid.selectedItem.location);
+			if(txtStr == 3){
+					//if(myDataGrid.selectedItem.criterionpartid==""){
+					AssignArr = new Array();
+					AssignArrCol = new ArrayCollection();
+					AssignSelectedArr = new ArrayCollection();
+					AssignSelectedArrcol = new ArrayCollection();
+					AssignBool = true;
+					var criterio:Array = new Array();
+					
+					criterio = myDataGrid.selectedItem.criterionpartid.toString().split(',');
+					popupwindow = AssignCriteria(PopUpManager.createPopUp(this,AssignCriteria,true));
+					AssignRowCount = parseInt(((popupwindow.myDataGrid.height-25)/30).toString());
+					popupwindow.txtTeamName.text = myDataGrid.selectedItem.teamname;
+					CriteriaService = new TeamController();
+					
+					CriteriaService.getCriterialPartList(function(guidanceArray:Array):void{
+						AssignArrCol = new ArrayCollection(guidanceArray);
+						
+						//Alert.show("before" + guidanceArray.length.toString());
+						
+						for(var j:int=0;j<guidanceArray.length;j++){
+							for(var k:int=0;k<criterio.length;k++){
+								if(guidanceArray[j]["criterionPartShortDescription"] == criterio[k]){
+										AssignSelectedArr.addItem({teamname:myDataGrid.selectedItem.teamname,teamid:myDataGrid.selectedItem.teamid,criteriaid:guidanceArray[j]["criterionPartID"],criterionPartID:guidanceArray[j]["criterionPartID"],criterionPartShortDescription:guidanceArray[j]["criterionPartShortDescription"],criterionPartDefinition:guidanceArray[j]["criterionPartDefinition"]});
+										AssignSelectedArrcol.addItem(guidanceArray[j]["criterionPartID"]);
+										//Alert.show("inside12"+ guidanceArray.length.toString());
+									
+										AssignArrCol.removeItemAt(j);
+										//Alert.show("inside"+ guidanceArray.length.toString());
+									
+									}
+								}
+						}
+						guidanceArray = null;
+						CriteriaService.getuniqueCriterialPartList(function(guidanceArray:Array):void{
+							//Alert.show("Asdf" + guidanceArray.length);
+							AssignArrCol = new ArrayCollection(guidanceArray);
+								
+						//Alert.show(guidanceArray.length.toString());
+						popupwindow.myPageableArrCol = new PagableArrayCollection(guidanceArray);
+						popupwindow.myPageableArrCol.itemsPerPage = guidanceArray.length;
+						popupwindow.myDataGrid.dataProvider = popupwindow.myPageableArrCol;
+						popupwindow.myDataGridSelected.dataProvider = AssignSelectedArr;
+						selectedCriteria=new ArrayCollection();
+						for(var index:int=0;index<AssignSelectedArr.length;index++){
+							selectedCriteria.addItem({criteriaID:AssignSelectedArr[index]["criteriaID"]});
+						}
+						//popupwindow.myDataGrid.addEventListener(ListEvent.ITEM_CLICK,AssignGrid);
+						
+						
+						popupwindow.btnClose.addEventListener(MouseEvent.CLICK,backScreen);
+						
+						popupwindow.btnUpdate.addEventListener(MouseEvent.CLICK,AssignGrid);
+						popupwindow.imgClose.addEventListener(MouseEvent.CLICK,backScreen);
+						popupwindow.btnAssign.addEventListener(MouseEvent.CLICK,AssignTeam);
+						popupwindow.btnRemove.addEventListener(MouseEvent.CLICK,AssignRemoveCriteria);
+					
+						
+						});
+					
+					});
+				//}
+			}
+			else if(txtStr==1){
+				dataProvider=cmbLocation.dataProvider;
+				var cmbIndex:int=0;
+				for(var i:int=0;i<dataProvider.length;i++){
+					if(dataProvider[i]["Location"]==myDataGrid.selectedItem.location){
+						cmbIndex=i;
+					}
+				}
+				cmbLocation.selectedIndex=cmbIndex;	
+				
+				dataProvider=cmbteamleader.dataProvider;
+				cmbIndex=0;
+				for(var i:int=0;i<dataProvider.length;i++){
+					if(dataProvider[i]["username"]==myDataGrid.selectedItem.teamleadername){
+						cmbIndex=i;
+					}
+				}
+				cmbteamleader.selectedIndex=cmbIndex;	
+				
+				teamCreatebox.visible=true;
+				txtTeamNamecreate.editable = true;
+				
+				//OldTeamLeader = myDataGrid.selectedItem.teamleadername;;
+				txtTeamNamecreate.text = myDataGrid.selectedItem.teamname;
+				//cmbteamleader.selectedItem.username = myDataGrid.selectedItem.teamleadername;	
+				btncreate.label = resourceManager.getString('myResources','update');
+			}
+			else if(txtStr == 4){
+				//Alert.show(resourceManager.getString('myResources','deleteTeamConfirmation'),"",Alert.YES|Alert.NO,this,DeleteAddLister);
+				popUpAlert = ShowAlert(PopUpManager.createPopUp(this,ShowAlert,true));
+				var vbox:VBox=new VBox();
+				popUpAlert.mainBox.addChild(vbox);
+				var alert:Alert=new Alert();
+				vbox.layoutDirection="ltr";
+				alert.layoutDirection="ltr";
+				alert=Alert.show(resourceManager.getString('myResources','deleteTeamConfirmation'),"",Alert.YES|Alert.NO,this,DeleteAddLister);
+				vbox.addChild(alert);
+			}
+    	}
+    	public var TempArr:Array = new Array();
+    	
+        
+        private function backScreen(event:MouseEvent):void{
+        	var isModify:Boolean=false;
+        	if(selectedCriteria.length!=AssignSelectedArr.length){
+        		isModify=true;
+        	}
+        	else{
+        		for(var i:int=0;i<selectedCriteria.length;i++){
+        			for(var j:int=0;j<AssignSelectedArr.length;j++){
+        				if(selectedCriteria[i]["criteriaID"]!=AssignSelectedArr[j]["criteriaID"]){
+        					isModify=true;
+        					break;
+        				}
+        			}
+        		}
+        	}
+        	if(isModify)
+        		Alert.show("Do you want to update the assigned criteria?","",Alert.YES|Alert.NO,this,backScreenconfirm);
+        	else
+        		PopUpManager.removePopUp(popupwindow);
+        }
+        
+        private function backScreenconfirm(event:CloseEvent):void{
+        	
+        	if(event.detail==Alert.YES){
+        		AssignTeam(event);
+        	}
+        	else {
+        		SearchTeam();
+				PopUpManager.removePopUp(popupwindow);
+        	}
+		}
+        
+		
+    	
+    	public function AssignGrid(event:MouseEvent):void{
+    		
+    		var selectedcount:int = new int();
+	    	selectedcount = popupwindow.myDataGrid.selectedItems.length;
+	    		
+	    	var selectedArray:Array = new Array();
+	    		
+	    	for(var i:int=0;i<selectedcount;i++){
+	    		//selectedArray[i] = popupwindow.myDataGrid.selectedItems[i].criterionPartID;
+	    		//Alert.show(popupwindow.myDataGrid.selectedItems[i].criterionPartID);
+	    		if(!(AssignSelectedArrcol.contains(popupwindow.myDataGrid.selectedItems[i].criterionPartID))){
+    				AssignSelectedArr.addItem({teamname:myDataGrid.selectedItem.teamname,teamid:myDataGrid.selectedItem.teamid,criteriaid:popupwindow.myDataGrid.selectedItems[i].criterionPartID,criterionPartID:popupwindow.myDataGrid.selectedItems[i].criterionPartID,criterionPartShortDescription:popupwindow.myDataGrid.selectedItems[i].criterionPartShortDescription,criterionPartDefinition:popupwindow.myDataGrid.selectedItems[i].criterionPartDefinition});
+    				AssignSelectedArrcol.addItem(popupwindow.myDataGrid.selectedItems[i].criterionPartID);
+    			
+    				
+    				//break;
+    			}
+	    	}	
+    		
+			popupwindow.myDataGridSelected.dataProvider =null;
+    		
+    		var dataSortField:SortField = new SortField();
+            dataSortField.name = "criterionPartID";
+            dataSortField.numeric = true;
+ 
+            /* Create the Sort object and add the SortField object created earlier to the array of fields to sort on. */
+            var numericDataSort:Sort = new Sort();
+          	numericDataSort.fields = [dataSortField];
+
+    		AssignSelectedArr.sort=numericDataSort;
+    		AssignSelectedArr.refresh();
+    		popupwindow.myDataGridSelected.dataProvider = AssignSelectedArr;
+    		              
+    		
+    		selectedArray = popupwindow.myDataGrid.selectedIndices;
+    		
+    		for(var i:int=0;i<selectedArray.length;i++){
+    			popupwindow.myPageableArrCol.removeItemAt(selectedArray[i]);
+    		}
+    		popupwindow.myDataGrid.dataProvider=popupwindow.myPageableArrCol;
+    		popupwindow.myPageableArrCol.refresh();
+    		
+    	}
+    	
+    	public function AssignRemoveCriteria(event:MouseEvent):void{
+    		if(popupwindow.myDataGridSelected.selectedItems.length!=0){
+	    		
+	    		//Alert.show(popupwindow.myDataGridSelected.selectedItems.length.toString());
+	    		
+	    		var selectedcount:int = new int();
+	    		selectedcount = popupwindow.myDataGridSelected.selectedItems.length;
+	    		
+	    		var selectedArray:Array = new Array();
+	    		
+	    		
+	    		for(var i:int=0;i<selectedcount;i++){
+	    			selectedArray[i] = popupwindow.myDataGridSelected.selectedItems[i].criterionPartID;
+	    			if(popupwindow.myPageableArrCol.length>0){
+	    				popupwindow.myPageableArrCol.addItemAt({criterionPartID:popupwindow.myDataGridSelected.selectedItems[i].criterionPartID,criterionPartShortDescription:popupwindow.myDataGridSelected.selectedItems[i].criterionPartShortDescription,criterionPartDefinition:popupwindow.myDataGridSelected.selectedItems[i].criterionPartDefinition},popupwindow.myPageableArrCol.length-1);
+	    			}
+	    			else{
+	    				popupwindow.myPageableArrCol.addItemAt({criterionPartID:popupwindow.myDataGridSelected.selectedItems[i].criterionPartID,criterionPartShortDescription:popupwindow.myDataGridSelected.selectedItems[i].criterionPartShortDescription,criterionPartDefinition:popupwindow.myDataGridSelected.selectedItems[i].criterionPartDefinition},0);
+	    			}
+	    		
+	    		}
+	    		
+	    		for(var i:int=0;i<selectedcount;i++){
+	    			
+	    			//Alert.show("test" + i.toString());
+	    			
+	    			AssignSelectedArr.refresh();
+	    			AssignSelectedArrcol.refresh();
+	    			
+	    			popupwindow.myPageableArrCol.itemsPerPage = popupwindow.myPageableArrCol.length+1;
+	    			popupwindow.myPageableArrCol.refresh();
+	    
+	    			var index:int = AssignSelectedArrcol.getItemIndex(selectedArray[i]);
+	    			
+	    			AssignSelectedArr.removeItemAt(index);
+	    			AssignSelectedArrcol.removeItemAt(index);
+	    			
+	    			//Alert.show("test" + i.toString());
+	    		}
+	    		
+	    		popupwindow.myDataGridSelected.dataProvider =null;
+	    		
+	    		var dataSortField:SortField = new SortField();
+                dataSortField.name = "criterionPartID";
+                dataSortField.numeric = true;
+ 
+                /* Create the Sort object and add the SortField object created earlier to the array of fields to sort on. */
+                var numericDataSort:Sort = new Sort();
+              	numericDataSort.fields = [dataSortField];
+                
+                popupwindow.myPageableArrCol.sort = numericDataSort;
+				popupwindow.myDataGridSelected.dataProvider = AssignSelectedArr;
+	    		popupwindow.myPageableArrCol.refresh();
+	    		//AssignTeam(event); 		
+    		}
+    		else{
+    			Alert.show(resourceManager.getString('myResources','selectCriteria'));
+    		}
+    	}
+    	
+    	public function DeleteAddLister(event:CloseEvent):void{
+			if (event.detail==Alert.YES){
+				RemoveTeam();
+			}
+			PopUpManager.removePopUp(popUpAlert);
+		}
+    	private var Permarr:Array=new Array();
+    	public var AssginTeam:TeamDO = new TeamDO();
+    	
+    	public function AssignTeam(event:Event):void{
+    		
+    		CriteriaService = new TeamController();
+    		Permarr = new Array();
+	   		for(var i:int = 0;i<AssignSelectedArr.length;i++){
+	    			AssginTeam = new TeamDO();
+	    			AssginTeam.teamid = parseInt(AssignSelectedArr[i]["teamid"].toString());
+	    			AssginTeam.criteriaid = parseInt(AssignSelectedArr[i]["criteriaid"].toString());
+	    			Permarr.push(AssginTeam);
+	    		}
+	    		CriteriaService = new TeamController();
+	    		CriteriaService.assignPartID(Permarr,parseInt(myDataGrid.selectedItem.teamid.toString()),function(guidanceArray:Number):void{
+        			if(guidanceArray == 1){
+						Alert.show(resourceManager.getString('myResources','criteriaAssignedSuccessfully'));
+					}
+					SearchTeam();
+					PopUpManager.removePopUp(popupwindow);
+				});
+	    }
+
+    	
+    	public function RemoveTeam():void{
+		
+    		CursorManager.setBusyCursor();
+    		CriteriaService = new TeamController();
+    		CriteriaService.removeTeam(parseInt(myDataGrid.selectedItem.teamid.toString()), function(guidanceArray:Number):void{
+        			
+					if(guidanceArray == 1){
+						//Alert.show("Team Deleted Successfully");
+						Alert.show(resourceManager.getString('myResources','teamDeletedSuccessfully'));
+						init();
+					}
+					else{
+						Alert.show("Team cannot be deleted");
+					}
+					CursorManager.removeAllCursors();
+					
+					
+			});
+    	}
+    	
+        public function RemoveCriteria():void{
+        	if(myDataGrid.selectedItems.length!=0){
+	        	CursorManager.setBusyCursor();
+	    		CriteriaService = new TeamController();
+	    		Permarr = new Array();
+	    		var arr:Array = new Array();
+	    		arr = myDataGrid.selectedItem.criterionpartid.toString().split(',');
+	    		var teamDo:TeamDO = new TeamDO();
+	    		
+	    		for(var i:int=0;i<arr.length;i++){
+	    			teamDo = new TeamDO();
+	    			teamDo.teamid = parseInt(myDataGrid.selectedItem.teamid.toString());
+	    			teamDo.criteriapartid = arr[i];
+	    			Permarr.push(teamDo);
+	    		}
+		    		CriteriaService.removeCriteria(Permarr, function(guidanceArray:Number):void{
+	        			if(guidanceArray == 1){
+									Alert.show(resourceManager.getString('myResources','teamDeletedSuccessfully'));
+						}
+						CursorManager.removeAllCursors();
+						init();
+					});
+				}
+				else{
+					Alert.show(resourceManager.getString('myResources','selectCriteria'));
+				}
+        }
+        
+        private function changeLocation():void{
+        	CriteriaService=new TeamController();
+        	CriteriaService.getUserName(parseInt(cmbLocation.selectedItem.LocationID),function(userArray:Array):void{
+        		if(userArray.length!=0){
+	        		teamassessmentarray = userArray;
+	        		cmbteamleader.dataProvider = teamassessmentarray;
+	        	}
+	        	else{
+	        		//Alert.show("Team leaders are not available under this location");
+	        		Alert.show(resourceManager.getString('myResources','teamLeadersNotAvailUnderLoc'));
+	        		cmbteamleader.dataProvider="";
+	        	}
+	        });
+        }
+        private function JumptoPage():void{
+        	if(jumpPage.text != ""  && Number(jumpPage.text) != 0  && jumpPage.enabled){
+			 	if(Number(jumpPage.text)>myPageableArrCol.pages){
+			 		Alert.show(resourceManager.getString('myResources','pageNotFound'));
+					jumpPage.text=myPageableArrCol.currentPage.toString();
+			 	}
+			 	else{
+	        		myPageableArrCol.currentPage = Number(jumpPage.text);
+	    		}
+    		}
+    		else{
+    			//Alert.show(resourceManager.getString('myResources','validNum'));
+    			if(jumpPage.enabled)
+    				Alert.show(resourceManager.getString('myResources','validNum'));
+    		}
+    		chkPage();
+    		
+        }
+         private function pageUP():void{
+		 	myPageableArrCol.pageUp();
+        	if(myPageableArrCol.currentPage==myPageableArrCol.pages){
+        		btnPageUp.enabled=false;
+        	}
+        	else{
+        		btnPageUp.enabled=true;
+        	}
+        	if(myPageableArrCol.currentPage>1){
+        		btnPageDown.enabled=true;
+        	}
+        	else{
+        		btnPageDown.enabled=false;
+        	}
+        }
+        private function pageDown():void{
+        	myPageableArrCol.pageDown();
+        	if(myPageableArrCol.currentPage==1){
+        		btnPageDown.enabled=false;
+        	}
+        	else{
+        		btnPageDown.enabled=true;
+        	}
+        	if(myPageableArrCol.currentPage==myPageableArrCol.pages){
+        		btnPageUp.enabled=false;
+        	}
+        	else{
+    			btnPageUp.enabled=true;
+        	}
+        }
+        public function chkPage():void{
+        	if(myPageableArrCol.currentPage==1){
+        		btnPageDown.enabled=false;
+        	}
+        	else{
+        		btnPageDown.enabled=true;
+        	}
+        	if(myPageableArrCol.currentPage==myPageableArrCol.pages){
+        		btnPageUp.enabled=false;
+        	}
+        	else{
+    			btnPageUp.enabled=true;
+        	}
+        	if(myPageableArrCol.currentPage==myPageableArrCol.pages){
+        		btnPageUp.enabled=false;
+        	}
+        	else{
+        		btnPageUp.enabled=true;
+        	}
+        	if(myPageableArrCol.currentPage>1){
+        		btnPageDown.enabled=true;
+        	}
+        	else{
+        		btnPageDown.enabled=false;
+        	}
+        	if(btnPageDown.enabled==false && btnPageUp.enabled==false){
+        		jumpPage.editable=false;
+        		jumpPage.enabled=false;
+        	}
+        	else{
+        		jumpPage.editable=true;
+        		jumpPage.enabled=true;
+        	}
+        }
+        private function cancel():void{
+        	teamCreatebox.visible=false;
+        }
+		]]>
+	</mx:Script>
+	
+
+	<mx:VBox id="mainVBox" name="topvbox" width="100%" height="100%" horizontalAlign="center" verticalAlign="middle">
+       
+		<mx:HBox height="2%">
+			<mx:Spacer width="100%" height="100%"/>
+		</mx:HBox>
+				
+		<mx:HBox width="85%" horizontalAlign="center">
+			
+			
+			<mx:Label fontWeight="bold"  text="@Resource(bundle='myResources', key='teamname')"/>
+			<mx:TextInput id="txtteamname" width="20%" maxChars="25" />
+			<mx:Spacer width="2%"/>
+
+   			<mx:Label fontWeight="bold"  text="@Resource(bundle='myResources', key='teamleader')"/>
+			<!--<mx:TextInput id="txtteamleader" width="20%"/>-->
+			<mx:Canvas id="canvasTeamLeader" width="25%" resize="{cmbTeamLeaderSearch.width=canvasTeamLeader.width}">
+				<mx:ComboBox id="cmbTeamLeaderSearch" dropdownWidth="175" labelField="username" data="userid"/>
+			</mx:Canvas>
+			
+			<mx:Spacer width="2%"/>
+
+			<mx:Button id="btnSearch" name="btnsearch" click="SearchTeam()" useHandCursor="true" buttonMode="true" label="@Resource(bundle='myResources', key='btnsearch')" />
+			
+		</mx:HBox>
+				
+		<mx:HBox width="100%" height="2%">
+			<mx:Spacer width="100%" height="100%"/>
+		</mx:HBox>
+			
+   		<mx:HBox width="100%" height="85%" horizontalAlign="center">
+   		
+   			<mx:VBox width="4%" height="100%">
+   				<mx:Spacer width="100%" height="100%"/>
+   			</mx:VBox>
+   			
+			<mx:DataGrid wordWrap="true" variableRowHeight="true" id="myDataGrid" width="90%" height="100%" itemClick="CriteriaProject(event)" allowMultipleSelection="true" draggableColumns="false"> 
+		      <mx:columns>
+		        <mx:DataGridColumn headerText="@Resource(bundle='myResources', key='sno')" dataField="Sno" width="40" editable="true">
+		        	<mx:itemRenderer>
+	            		<mx:Component>
+	            		<mx:Label paddingLeft="5" text="{data.Sno}">
+	        			</mx:Label>
+	            		</mx:Component> 
+        			</mx:itemRenderer> 
+		        </mx:DataGridColumn>
+		        
+				<mx:DataGridColumn headerText="@Resource(bundle='myResources', key='teamname')" dataField="teamname" width="150" editable="true">
+					<mx:itemRenderer>
+	            		<mx:Component>
+	            		<mx:Label useHandCursor="true" paddingLeft="5" buttonMode="true" mouseChildren="false" selectable="true" color="#2e3c84" fontSharpness="12" textDecoration="underline">
+	        			</mx:Label>
+	            		</mx:Component> 
+        			</mx:itemRenderer> 
+		        </mx:DataGridColumn>
+		        
+		        <mx:DataGridColumn headerText="@Resource(bundle='myResources', key='teamleader')" dataField="teamleadername" width="120" editable="true">
+		        	<mx:itemRenderer>
+	            		<mx:Component>
+	            		<mx:Label paddingLeft="5" text="{data.teamleadername}">
+	        			</mx:Label>
+	            		</mx:Component> 
+        			</mx:itemRenderer> 
+		        </mx:DataGridColumn>
+		        
+		        <mx:DataGridColumn wordWrap="true" headerText="@Resource(bundle='myResources', key='assignedcriteria')" dataField="criterionpartid" width="200" editable="true">
+		        	<mx:itemRenderer>
+	            		<mx:Component>
+	            		<mx:Text useHandCursor="true" paddingLeft="5" paddingRight="5" buttonMode="true" mouseChildren="false" selectable="true" color="#2e3c84" fontSharpness="12" textDecoration="underline"/>
+	            		</mx:Component> 
+        			</mx:itemRenderer> 
+		        </mx:DataGridColumn>
+		        
+		        <!--<mx:DataGridColumn headerText="@Resource(bundle='myResources', key='location')" dataField="location" width="100" editable="true">
+		        	<mx:itemRenderer>
+	            		<mx:Component>
+	            		<mx:Label paddingLeft="5" text="{data.location}">
+	        			</mx:Label>
+	            		</mx:Component> 
+        			</mx:itemRenderer> 
+		        </mx:DataGridColumn>
+-->		        
+		        <mx:DataGridColumn headerText="@Resource(bundle='myResources', key='delete')" dataField="deletes" width="35" editable="true">
+				<mx:itemRenderer>
+					<mx:Component> 
+						<mx:Image scaleContent="false" horizontalAlign="center" source="@Embed('assets/newdeleteicon.png')"/> 
+					</mx:Component> 
+				</mx:itemRenderer> 
+				</mx:DataGridColumn> 
+		      </mx:columns>
+		    </mx:DataGrid> 
+		    
+		    <mx:VBox width="3%" height="100%">
+   				<mx:Spacer width="100%" height="100%"/>
+   			</mx:VBox>
+		    
+		</mx:HBox>
+		
+		<mx:HBox width="60%" height="1%">
+  				<mx:Spacer width="100%" height="100%"/>
+      	</mx:HBox>
+       		
+		<mx:HBox width="88%" height="5%" horizontalAlign="right">
+			<mx:Button id="btnedit" useHandCursor="true" buttonMode="true" click="{teamCreatebox.visible=true;txtTeamNamecreate.text = '';txtTeamNamecreate.editable = true;cmbteamleader.selectedIndex = 0;btncreate.label = resourceManager.getString('myResources','btncreate');}" label="@Resource(bundle='myResources', key='createTeam')"/>
+			<!--<mx:Button name="btnremove" useHandCursor="true" buttonMode="true"  label="Remove" click="RemoveCriteria()"/>-->
+			<mx:Text x="532" y="28" text="Page {myPageableArrCol.currentPage} of {myPageableArrCol.pages}"/>
+   			<mx:Label text="@Resource(bundle='myResources',key='jumpToPage')"/>
+   			<mx:TextInput restrict="0-9" id="jumpPage" width="40" maxChars="2" />
+   			<mx:Button skin="@Embed('assets/go.png')" click="JumptoPage()" useHandCursor="true" buttonMode="true"/>
+			<mx:Button skin="@Embed('assets/left arrow.png')" useHandCursor="true" buttonMode="true" id="btnPageDown" click="pageDown()" disabledSkin="@Embed('assets/disabledRight.png')"/>
+			<mx:Button skin="@Embed('assets/right arrow.png')" useHandCursor="true" buttonMode="true" id="btnPageUp" click="pageUP()" disabledSkin="@Embed('assets/disabledLeft.png')"/>	
+
+		</mx:HBox>
+		
+		<mx:HBox width="60%" height="1%">
+  				<mx:Spacer width="100%" height="100%"/>
+      	</mx:HBox>
+		
+		<mx:VBox paddingLeft="10" width="100%">
+			
+			<mx:HBox  id="teamCreatebox" visible="false" width="100%">
+			
+				<mx:HBox width="0" height="0">
+					<mx:Label id="lblLocation" width="0" fontWeight="bold" text="@Resource(bundle='myResources', key='location')"/>
+					<mx:Canvas id="cmbCanvasLoc" width="0" resize="{cmbLocation.width=cmbCanvasLoc.width}">
+						<mx:ComboBox id="cmbLocation" width="100%" change="changeLocation()" labelField="Location" data="LocationID"  dropdownWidth="0"/>
+					</mx:Canvas>
+				</mx:HBox>
+				
+				
+				<mx:Label fontWeight="bold" width="9%" text="@Resource(bundle='myResources', key='teamleader')"/>
+				<mx:Canvas id="cmbCanvas" width="28%" resize="{cmbteamleader.width=cmbCanvas.width}">
+					<mx:ComboBox id="cmbteamleader" width="100%" labelField="username" data="userid" dropdownWidth="250"/>
+				</mx:Canvas>
+				
+				
+				<mx:Label fontWeight="bold" width="9%" text="@Resource(bundle='myResources', key='teamname')"/>
+				<mx:TextInput id="txtTeamNamecreate" width="28%" maxChars="25" />
+				
+				<mx:Button id="btncreate" width="9%" click="CreateTeam()" useHandCursor="true" buttonMode="true"/>
+				
+				<mx:Button id="btnCancel" width="9%" click="cancel()" useHandCursor="true" buttonMode="true" label="@Resource(bundle='myResources', key='btncancel')" />
+				
+			</mx:HBox>
+		
+			<mx:HBox width="60%" height="1%">
+  				<mx:Spacer width="100%" height="100%"/>
+      		</mx:HBox>
+			<!--<mx:HBox horizontalAlign="center" id="teamCreatebox2" visible="false">
+				<mx:Spacer width="{lblLocation.width}"/>
+				<mx:Button id="btncreate" click="CreateTeam()" useHandCursor="true" buttonMode="true" label="@Resource(bundle='myResources', key='btncreateTeam')" />
+				
+				<mx:Button id="btnCancel" useHandCursor="true" buttonMode="true" label="@Resource(bundle='myResources', key='btncancel')" />
+			</mx:HBox>-->
+		</mx:VBox>
+		
+
+       </mx:VBox>
+<mx:StringValidator id="valTeamNameCreate" source="{txtTeamNamecreate}" property="text" minLength="2" maxLength="25" required="true"  requiredFieldError="Team name is required"/>
+<mx:StringValidator id="valTeamNameSearch" source="{txtteamname}" property="text" minLength="2" maxLength="25" required="false"/>
+
+</mx:Canvas>

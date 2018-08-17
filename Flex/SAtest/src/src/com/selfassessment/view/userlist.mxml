@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:DataGridItemRenderer xmlns:mx="http://www.adobe.com/2006/mxml">
+<mx:Script>
+	<![CDATA[
+		import mx.core.Application;
+		private function init():void{
+			cmbUser.dataProvider=Application.application.userArrayList;
+		}
+	]]>
+</mx:Script>
+	<mx:ComboBox id="cmbUser" labelField="name"/>
+</mx:DataGridItemRenderer>

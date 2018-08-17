@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" backgroundColor="white"  y="{(Application.application.height/2)-(this.height/2)}"
+	 x="{(Application.application.width/2)-(this.width/2)}" horizontalScrollPolicy="off">
+	<mx:Script>
+		<![CDATA[
+			
+			import mx.controls.Alert;
+		
+			//Import header files
+			 import mx.core.Application;
+			import mx.managers.CursorManager;
+			import mx.managers.PopUpManager;
+			
+			
+		]]>
+	</mx:Script>
+	
+	<mx:VBox id="mainBox" />
+</mx:Canvas>

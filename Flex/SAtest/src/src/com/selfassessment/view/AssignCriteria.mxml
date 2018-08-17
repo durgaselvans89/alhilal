@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml"  xmlns:goldhold="goldhold.controls.*"  xmlns:s="library://ns.adobe.com/flex/spark"
+	   y="{(Application.application.height/2)-(this.height/2)}"
+	 x="{(Application.application.width/2)-(this.width/2)}" verticalScrollPolicy="off" horizontalScrollPolicy="off" width="{screen.width}" height="{screen.height}" creationComplete="init()">
+
+
+	<mx:Script>
+		<![CDATA[
+			import com.boyzoid.PagableArrayCollection.PagableArrayCollection;
+			import mx.managers.CursorManager;
+			import mx.core.Application;
+			import mx.managers.PopUpManager;
+			import mx.controls.*;
+			import src.com.selfassessment.controller.TeamController;
+			
+			[Bindable]
+			public var txtFromOutSide:String;
+			[Bindable]
+			public var txtvalue:int;
+			
+			[Bindable]
+        	public var CriteriaService:TeamController = new TeamController();
+			
+			[Bindable]
+			public var criteriaArray:Array = new Array();
+			
+			public function init():void {
+				
+			}
+			[Bindable]
+        	public var myPageableArrCol:PagableArrayCollection = new PagableArrayCollection();
+			private function onClose():void {
+				PopUpManager.removePopUp(this);
+			}
+			
+		]]>
+	</mx:Script>
+	
+	<mx:VBox borderStyle="solid" height="100%" verticalGap="0" borderThickness="3" shadowDistance="8" shadowDirection="right" dropShadowEnabled="true" dropShadowColor="#000000" borderColor="#636e83" width="100%" horizontalAlign="center" verticalAlign="top" styleName="ApplyFontSize" backgroundColor="white">
+		<mx:Canvas width="100%" useHandCursor="true" buttonMode="true" mouseDown="{this.startDrag()}" mouseUp="{this.stopDrag()}" height="25" styleName="panel1filled"  borderSides="left,right,top" cornerRadius="3" borderStyle="none">
+			<mx:Label left="10" fontWeight="bold"  id="lblTitle" text="@Resource(bundle='myResources', key='assignCriteria')" color="#FFFFFF" fontSize="14"/>
+			<mx:Image id="imgClose" toolTip="Close" right="2" top="2" source="@Embed('assets/close.png')" useHandCursor="true" buttonMode="true" />
+		</mx:Canvas>
+		
+		<mx:VBox horizontalAlign="center" width="{screen.width-100}" height="{screen.height-50}" verticalScrollPolicy="off"> 
+			<mx:Spacer/>	
+			<mx:Label fontWeight="bold" text="Available Criteria"/>
+			
+			<mx:HBox width="95%" height="40%">
+				<goldhold:CheckboxDataGrid wordWrap="true" variableRowHeight="true" id="myDataGrid" textAlign="left" width="100%" height="100%" allowMultipleSelection="true" draggableColumns="false">
+					<goldhold:columns>
+				        <mx:DataGridColumn headerText="@Resource(bundle='myResources', key='criteriaID')" width="100" dataField="criterionPartShortDescription">
+							<mx:itemRenderer>
+								<mx:Component>
+					            	<mx:Label />
+								</mx:Component> 
+							</mx:itemRenderer>				        
+						</mx:DataGridColumn>
+						
+				        <mx:DataGridColumn wordWrap="true" headerText="@Resource(bundle='myResources', key='criteriaDesc')" dataField="criterionPartDefinition" >
+										        
+						</mx:DataGridColumn>
+						<mx:DataGridColumn visible="false" width="0" wordWrap="true" headerText="@Resource(bundle='myResources', key='criteriaDesc')" dataField="criterionPartID" >
+										        
+						</mx:DataGridColumn>
+					</goldhold:columns>
+			    </goldhold:CheckboxDataGrid>
+			   </mx:HBox>
+   			<mx:Spacer/>
+			
+			 <mx:HBox width="95%" horizontalAlign="center" height="30">
+				<mx:Image id="btnUpdate"  source="@Embed('assets/down-arrow.png')" useHandCursor="true" buttonMode="true" />
+				<mx:Image id="btnRemove"  source="@Embed('assets/up-arrow.png')" useHandCursor="true" buttonMode="true" />
+			</mx:HBox>
+			
+			<mx:HBox width="95%" horizontalAlign="center">
+				<mx:Label fontWeight="bold" text="Assigned Criteria"/>
+				<mx:Label text="@Resource(bundle='myResources', key='toteamName')" fontWeight="bold"/>
+				<mx:Text id="txtTeamName" mouseChildren="false" /> 
+			</mx:HBox>
+			
+			<mx:HBox width="95%" height="40%">
+				<goldhold:CheckboxDataGrid wordWrap="true" variableRowHeight="true" id="myDataGridSelected" textAlign="left" width="100%" height="100%" allowMultipleSelection="true" draggableColumns="false">
+					<goldhold:columns>
+				        <mx:DataGridColumn headerText="@Resource(bundle='myResources', key='criteriaID')" width="100" dataField="criterionPartShortDescription">
+							<mx:itemRenderer>
+								<mx:Component>
+					            	<mx:Label />
+								</mx:Component> 
+							</mx:itemRenderer>				        
+						</mx:DataGridColumn>
+						
+				        <mx:DataGridColumn wordWrap="true" headerText="@Resource(bundle='myResources', key='criteriaDesc')" dataField="criterionPartDefinition" >
+						</mx:DataGridColumn>
+						
+						<mx:DataGridColumn wordWrap="true" visible="false" width="150" headerText="@Resource(bundle='myResources', key='assignedTo')" dataField="teamname" >
+						</mx:DataGridColumn>
+						
+						
+						<mx:DataGridColumn visible="false" width="0" wordWrap="true" headerText="@Resource(bundle='myResources', key='criteriaDesc')" dataField="criterionPartID" >
+										        
+						</mx:DataGridColumn>
+						
+				</goldhold:columns>
+			    </goldhold:CheckboxDataGrid>
+			</mx:HBox>
+			
+		    <mx:HBox width="95%" horizontalAlign="right" height="50">
+				<mx:Button id="btnAssign" label="@Resource(bundle='myResources', key='update')" useHandCursor="true" buttonMode="true" />
+				<mx:Button id="btnClose"  label="@Resource(bundle='myResources', key='btnclose')" useHandCursor="true" buttonMode="true" />
+				
+			</mx:HBox>
+		</mx:VBox>
+		
+	</mx:VBox>
+
+</mx:Canvas>
+
+

@@ -1,0 +1,602 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:VBox styleName="Childpanelstyle" xmlns:flexlib="http://code.google.com/p/flexlib/" xmlns:mx="http://www.adobe.com/2006/mxml" 
+	 width="100%" height="100%" xmlns:com="src.com.selfassessment.view.*" borderStyle="none">
+	 
+	<mx:Style source="src/com/selfassessment/view/assets/Styles.css"/>	
+		
+	<mx:Script>
+		<![CDATA[
+			import mx.collections.Sort;
+			import mx.collections.SortField;
+			import mx.controls.Text;
+			import mx.containers.HBox;
+			import src.com.selfassessment.events.EventCriteriaConstants;
+			import mx.controls.CheckBox;
+			import mx.events.ListEvent;
+			import com.google.maps.Color;
+			import mx.utils.ColorUtil;
+			import mx.utils.ObjectUtil;
+			import mx.events.CollectionEvent;
+			import mx.collections.ArrayCollection;
+			import src.com.selfassessment.model.ProjectDo;
+			import mx.managers.PopUpManager;
+			import mx.collections.GroupingField;
+			import mx.collections.Grouping;
+			import mx.collections.GroupingCollection;
+			import flexlib.controls.tabBarClasses.SuperTab;
+		
+			import mx.core.Application;
+			import mx.controls.Alert;
+			import com.boyzoid.PagableArrayCollection.PagableArrayCollection;
+			import mx.managers.CursorManager;
+			import src.com.selfassessment.controller.Components;
+			import src.com.selfassessment.controller.TeamController;
+			
+			public var criteriapartArr:Array = new Array();
+			public var criteriadata:Array = new Array();
+			public var CriteriaService:TeamController=new TeamController();
+			public var crit:ActionPlanCriteria = new ActionPlanCriteria();
+			private var numChild:Number = 0; 
+			public var resultArray:ArrayCollection=new ArrayCollection();
+			[Bindable]
+			public var myPageableArrCol:PagableArrayCollection=new PagableArrayCollection();
+			public var arrayColl:ArrayCollection=new ArrayCollection();
+			
+			public function init():void {
+				if(Application.application.language=="en_US"){
+	        		actionPlanVBox.styleName="ApplyFontSizeEn";
+	        		myDatagrid.setStyle('textAlign','left');
+	        	}
+	        	else{
+	        		actionPlanVBox.styleName="ApplyFontSizeAr";
+	        		myDatagrid.setStyle('textAlign','right');
+	        	}
+				bindData();
+			}
+			public var RowCount:Number = 0;
+			
+			[Bindable]
+        	public var myGrpColl:GroupingCollection = new GroupingCollection();
+        
+        	private var myGrp:Grouping = new Grouping(); 
+			private var strengthArr:ArrayCollection=new ArrayCollection();
+			private var afiArr:ArrayCollection=new ArrayCollection();
+			private function bindData():void{
+				CriteriaService=new TeamController();
+				CriteriaService.SelectAllApproaches(Application.application.selectedLocation,function(resultApproaches:Array):void{
+					//Alert.show(ObjectUtil.toString(resultApproaches));
+					//Alert.show("1"+"\n"+resultApproaches.length.toString());
+					
+					CriteriaService=new TeamController();
+					CriteriaService.getCriteriaList(parseInt(Components.instance.session.userid),parseInt(Components.instance.session.roleid),function(criteriaList:String):void{
+						criteriapartArr=criteriaList.split(',');
+						//Alert.show("2"+"\n"+criteriapartArr.length.toString());
+						
+						//Alert.show(criteriapartArr.toString());
+						
+						resultArray=new ArrayCollection();
+						//for(var i:int=0;i<criteriapartArr.length;i++){
+						
+							for(var j:int=0;j<resultApproaches.length;j++){
+								//if(criteriapartArr[i]==resultApproaches[j]["criteriaShortDesc"]){
+									
+									//strengthArr=resultApproaches[j]["strength"].toString().split(':@@:');
+									//afiArr=resultApproaches[j]["areaforimprovement"].toString().split(':@@:');
+									if(resultApproaches[j]["strengthLen"]!="0" || resultApproaches[j]["afiLen"]!="0"){
+										resultArray.addItem({criteriaapproach:resultApproaches[j]["criteriaShortDesc"] + ' (' + resultApproaches[j]["dummyEnablerID"] + ') -> ' + resultApproaches[j]["approachTitle"] , 
+										criteriaShortDesc:resultApproaches[j]["criteriaShortDesc"],
+										approachID:resultApproaches[j]["enablerID"],criteriaID:resultApproaches[j]["criteriaID"],
+										CriterionPartShortDescription:resultApproaches[j]["CriterionPartShortDescription"],
+										approachTitle:resultApproaches[j]["approachTitle"],
+										areaforimprovement:"",
+										afiID:"",
+										strength:"",
+										strengthID:"",
+										strengthLength:resultApproaches[j]["strengthLen"],
+										afiLength:resultApproaches[j]["afiLen"],
+										color:"blue",afiColor:Color.BLACK,strengthColor:Color.BLACK,strengthFlag:false,afiFlag:false,enabled:false,
+										strVisible:false,afiVisible:false});
+									}
+								//}
+							}
+						//}
+						//Alert.show(resultArray.length.toString());
+						callLater(bindStrength);
+						
+						
+					});
+					
+				});
+			}
+		private function bindStrength():void{
+			strengthArr=new ArrayCollection();
+			CriteriaService=new TeamController();
+			CriteriaService.selectStrength(0,"",function(resultStrengthArr:Array){
+				strengthArr=new ArrayCollection(resultStrengthArr);
+				var tempArr:Array=new Array;
+				//Alert.show("Str -       "+strengthArr.length+" - "+resultArray.length.toString());
+				for(var i:int=0;i<strengthArr.length;i++){
+					for(var j:int=0;j<resultArray.length;j++){
+						if(resultArray[j]["strengthLen"]!="0"){
+							if(strengthArr[i]["criterionPartID"]==resultArray[j]["criteriaID"] && strengthArr[i]["approachID"]==resultArray[j]["approachID"]){
+								if(resultArray[j]["strength"]==""){
+									resultArray[j]["strength"]=strengthArr[i]["strength"];
+									resultArray[j]["strengthID"]=strengthArr[i]["strengthID"];
+									resultArray[j]["strVisible"]=true;
+									break;
+								}
+								else{
+									tempArr.push({criteriaapproach:resultArray[j]["criteriaapproach"] , 
+										criteriaShortDesc:resultArray[j]["criteriaShortDesc"],
+										approachID:resultArray[j]["approachID"],criteriaID:resultArray[j]["criteriaID"],
+										CriterionPartShortDescription:resultArray[j]["CriterionPartShortDescription"],
+										approachTitle:resultArray[j]["approachTitle"],
+										areaforimprovement:"",
+										afiID:"",
+										strength:strengthArr[i]["strength"],
+										strengthID:strengthArr[i]["strengthID"],
+										strengthLength:resultArray[j]["strengthLength"],
+										afiLength:resultArray[j]["afiLength"],
+										color:"blue",afiColor:Color.BLACK,strengthColor:Color.BLACK,strengthFlag:false,afiFlag:false,enabled:false,
+										strVisible:true,afiVisible:false});
+									break;
+								}
+								
+							}
+						}
+						
+					}
+				}
+				for(var k:int=0;k<tempArr.length;k++){
+					resultArray.addItem(tempArr[k]);
+				}
+				callLater(bindAFI);	
+			});
+			
+		}
+		private function bindAFI():void{
+			afiArr=new ArrayCollection();
+			var afiIndex:int=0;
+			var prev_critID:String="";
+			CriteriaService=new TeamController();
+			
+			CriteriaService.selectAFI(0,"",function(resultAFIArr:Array){
+				afiArr=new ArrayCollection(resultAFIArr);
+				var tempArr:Array=new Array;
+				/////////////Alert.show("AFI -       "+afiArr.length+" - "+resultArray.length.toString());
+				for(var i:int=0;i<afiArr.length;i++){
+					if(prev_critID==""){
+						prev_critID=afiArr[i]["criterionPartID"];
+					} 
+					if(prev_critID!=afiArr[i]["criterionPartID"]){
+						afiIndex=0;
+					}
+					for(var j:int=0;j<resultArray.length;j++){
+						
+						if(resultArray[j]["afiLength"]!="0"){
+							
+							if(afiArr[i]["criterionPartID"]==resultArray[j]["criteriaID"] && afiArr[i]["approachID"]==resultArray[j]["approachID"]){
+								
+								if(parseInt(resultArray[j]["afiLength"].toString())<=parseInt(resultArray[j]["strengthLength"].toString())){
+									if(resultArray[j]["areaforimprovement"]==""){
+										resultArray[j]["areaforimprovement"]=afiArr[i]["afi"];
+										resultArray[j]["afiID"]=afiArr[i]["afiID"];
+										resultArray[j]["afiVisible"]=true;
+										//j=resultArray.length+1;
+										break;	
+									}
+								}else{
+									if(afiIndex<parseInt(resultArray[j]["strengthLength"].toString())){
+										if(resultArray[j]["areaforimprovement"]==""){
+											resultArray[j]["areaforimprovement"]=afiArr[i]["afi"];
+											resultArray[j]["afiID"]=afiArr[i]["afiID"];
+											resultArray[j]["afiVisible"]=true;
+											afiIndex++;
+											//j=resultArray.length+1;
+											break;	
+										}
+									}else{
+										tempArr.push({criteriaapproach:resultArray[j]["criteriaapproach"] , 
+													criteriaShortDesc:resultArray[j]["criteriaShortDesc"],
+													approachID:resultArray[j]["approachID"],criteriaID:resultArray[j]["criteriaID"],
+													CriterionPartShortDescription:resultArray[j]["CriterionPartShortDescription"],
+													approachTitle:resultArray[j]["approachTitle"],
+													areaforimprovement:afiArr[i]["afi"],
+													afiID:afiArr[i]["afiID"],
+													strength:"",
+													strengthID:"",
+													strengthLength:resultArray[j]["strengthLength"],
+													afiLength:resultArray[j]["afiLength"],
+													color:"blue",afiColor:Color.BLACK,strengthColor:Color.BLACK,strengthFlag:false,afiFlag:false,enabled:false,
+													strVisible:false,afiVisible:true});
+										//j=resultArray.length+1;
+										break;
+									}
+									
+								}
+								
+							}	
+						}
+					}
+				}
+				for(var k:int=0;k<tempArr.length;k++){
+					resultArray.addItem(tempArr[k]);
+				}
+				callLater(bindGridData);
+			});
+		}
+		private function bindGridData():void{
+			CriteriaService=new TeamController();
+			CriteriaService.SelectProjectApproachLinkDetails(function(resultApproachSelected:Array):void{
+			//	Alert.show("3"+"\n"+ObjectUtil.toString(resultApproachSelected));
+				for(var index:int=0;index<resultArray.length;index++){
+					for(var k:int=0;k<resultApproachSelected.length;k++){
+						if(resultApproachSelected[k]["criteriaID"]==resultArray[index]["criteriaID"]&& resultApproachSelected[k]["approachID"]==resultArray[index]["approachID"]){
+							if(resultApproachSelected[k]["strengthID"]==resultArray[index]["strengthID"]){
+								resultArray[index]["strengthColor"]=Color.BLUE;
+								resultArray[index]["strengthFlag"]=false;
+								resultArray[index]["enabled"]=true;
+							}
+							if(resultApproachSelected[k]["afiID"]==resultArray[index]["afiID"]){
+								resultArray[index]["afiColor"]=Color.BLUE;
+								resultArray[index]["afiFlag"]=false;
+								resultArray[index]["enabled"]=true;
+							}
+							if(resultApproachSelected[k]["strengthID"]==resultArray[index]["strengthID"] && resultApproachSelected[k]["afiID"]==resultArray[index]["afiID"]){
+								resultArray[index]["strengthColor"]=Color.BLUE;
+								resultArray[index]["strengthFlag"]=false;
+								resultArray[index]["afiColor"]=Color.BLUE;
+								resultArray[index]["afiFlag"]=false;
+								resultArray[index]["enabled"]=true;
+							}
+							else{
+								resultArray[index]["enabled"]=true;
+							}
+							
+						}
+					}
+					resultArray[index]["checkboxcolor"]="ABABAB";
+				
+				}
+				var strSort:SortField=new SortField();
+				strSort.descending=true;
+				strSort.name="strength";
+				strSort.numeric=false;
+				
+				var afiSort:SortField=new SortField();
+				afiSort.descending=true;
+				afiSort.name="areaforimprovement";
+				afiSort.numeric=false;
+				
+				var dataSort:Sort=new Sort();
+				dataSort.fields=[strSort,afiSort];
+				resultArray.sort=dataSort;
+				resultArray.refresh();
+					
+				
+				myPageableArrCol=new PagableArrayCollection(resultArray.toArray());
+				myGrpColl.source=resultArray;
+				myGrp.fields = [new GroupingField("criteriaapproach")];
+			
+				myGrpColl.grouping=myGrp;
+				myGrpColl.refresh();
+				myDatagrid.dataProvider=myGrpColl;
+			
+			});
+		}
+		public var popUpCreateProj:CreateProject;
+        public var selectedArr:Array=new Array();
+        
+        private function createProject():void{
+        	selectedArr=new Array();
+        	var projectFlag:int=0;
+        	for(var i:int=0;i<myPageableArrCol.length;i++){
+        		if(myPageableArrCol[i]["strengthFlag"] == true || myPageableArrCol[i]["afiFlag"] == true){
+        			projectFlag=1;
+        			if(myPageableArrCol[i]["strengthFlag"] == true && myPageableArrCol[i]["afiFlag"] == false){
+        				selectedArr.push({strength:myPageableArrCol[i]["strength"],approachID:myPageableArrCol[i]["criteriaShortDesc"].toString()+"("+myPageableArrCol[i]["approachID"]+")",criteriaID:"",areaforimprovement:""});
+        			}
+        			else if(myPageableArrCol[i]["strengthFlag"] == false && myPageableArrCol[i]["afiFlag"] == true){
+        				selectedArr.push({strength:"",approachID:"", criteriaID:myPageableArrCol[i]["criteriaShortDesc"].toString()+"("+myPageableArrCol[i]["approachID"]+")",areaforimprovement:myPageableArrCol[i]["areaforimprovement"]});
+        			
+        			}
+        			else if(myPageableArrCol[i]["strengthFlag"] == true && myPageableArrCol[i]["afiFlag"] == true){
+        				selectedArr.push({strength:myPageableArrCol[i]["strength"],approachID:myPageableArrCol[i]["criteriaShortDesc"].toString()+"("+myPageableArrCol[i]["approachID"]+")",criteriaID:"",areaforimprovement:""});
+        				selectedArr.push({strength:"",approachID:"", criteriaID:myPageableArrCol[i]["criteriaShortDesc"].toString()+"("+myPageableArrCol[i]["approachID"]+")",areaforimprovement:myPageableArrCol[i]["areaforimprovement"]});
+        			}
+        			/*
+        			else{
+        				selectedArr.push({strength:myPageableArrCol[i]["strength"],approachID:myPageableArrCol[i]["criteriaShortDesc"].toString()+"("+myPageableArrCol[i]["approachID"]+")",areaforimprovement:myPageableArrCol[i]["areaforimprovement"]});
+        			}*/
+        			
+        		}
+        	}
+        	if(projectFlag==1){
+        		//if(myDataGrid.selectedItem.strength!="" && myDataGrid.selectedItem.areaforimprovement!=""){
+        			popUpCreateProj = CreateProject(PopUpManager.createPopUp(this,CreateProject,true));
+		        	CriteriaService=new TeamController();
+		        	CriteriaService.SelectResponsibilityPersons(function(responsibilityArr:Array):void{
+		        		if(responsibilityArr.length!=0){
+		        			popUpCreateProj.rolename.dataProvider=responsibilityArr;
+		        		}
+		        	});
+		        	popUpCreateProj.btnAdd.addEventListener(MouseEvent.CLICK,saveProject);
+		        	//Alert.show(selectedArr.length.toString());
+		        	popUpCreateProj.myDataGrid.dataProvider=selectedArr;
+        			popUpCreateProj.myDataGrid1.dataProvider=selectedArr;
+	        }
+        	else{
+        		//Alert.show("Select atleast one approach to create a project");
+        		Alert.show(resourceManager.getString('myResources','selectAtleastaProj'));
+        	}
+        }
+        public var projectDo:ProjectDo=new ProjectDo();
+        
+        private function saveProject(event:MouseEvent):void{
+        	
+        	if(popUpCreateProj.txtProjTitle.text!="" && popUpCreateProj.dtfStartDate.text!="" &&
+	    		popUpCreateProj.dtfEndDate.text!="" && popUpCreateProj.txtDesc.text!=""){
+	    			
+	    			var calculation:int=popUpCreateProj.hsldrOrgStrategy.value+popUpCreateProj.hsldrCritrionPart.value+popUpCreateProj.hsldrEase.value;
+	    			
+	    			if(calculation <= 300){
+	    				if(popUpCreateProj.dtfEndDate.selectedDate>=popUpCreateProj.dtfStartDate.selectedDate){
+	    					projectDo=new ProjectDo();
+				        	projectDo.projectTitle=popUpCreateProj.txtProjTitle.text;
+				    		projectDo.responsibility=parseInt(popUpCreateProj.rolename.selectedItem.userID);
+				    		projectDo.startDate=popUpCreateProj.dtfStartDate.selectedDate.getFullYear()+"-"+(popUpCreateProj.dtfStartDate.selectedDate.getMonth()+1)+"-"+popUpCreateProj.dtfStartDate.selectedDate.getDate();
+				    		projectDo.endDate=popUpCreateProj.dtfEndDate.selectedDate.getFullYear()+"-"+(popUpCreateProj.dtfEndDate.selectedDate.getMonth()+1)+"-"+popUpCreateProj.dtfEndDate.selectedDate.getDate();
+				    		projectDo.description=popUpCreateProj.txtDesc.text;
+				    		projectDo.orgStrategy=popUpCreateProj.hsldrOrgStrategy.value;
+				    		projectDo.criterionPart=popUpCreateProj.hsldrCritrionPart.value;
+				    		projectDo.implementation=popUpCreateProj.hsldrEase.value;
+				    		projectDo.expectedBenefits = popUpCreateProj.txtFinancial.text;
+				    		projectDo.requiredResources = popUpCreateProj.txtResource.text;
+				    		projectDo.status="Waiting for approval";
+				    		projectDo.score=0;
+				    		CriteriaService=new TeamController();
+				    		CriteriaService.AddProject(projectDo,function(result:Number):void{
+				    			if(result>=0){
+				    				saveProjectApproachLink(result);
+				    			}
+				    			else if(result<0){
+				    				Alert.show(resourceManager.getString('myResources','selectedUserAlreadyAssigned'));
+				    			}
+				    			else{
+				    				//Alert.show("Project title already exists");
+				    				Alert.show(resourceManager.getString('myResources','projTitleAlreadyExists'));
+				    			}
+				    		});
+	    				}
+	    				else{
+	    					//Alert.show("Start date must be less than end date");
+	    					Alert.show(resourceManager.getString('myResources','startDateErrMsg'));
+	    				}
+	    				
+	    			}
+	    			else{
+	    			//	Alert.show("Score total must be equal to 100");
+	    				Alert.show(resourceManager.getString('myResources','scoreTotErrMsg'));
+	    			}
+		        	
+	    		}
+	    		else{
+	    			//Alert.show("Enter all details");
+	    			Alert.show(resourceManager.getString('myResources','enterAllDet'));
+	    		}
+	        	
+    	}
+        private function saveProjectApproachLink(projectID:int):void{
+        	var projectArray:Array=new Array();
+	    	//Alert.show(projectID.toString());
+	    	 for(var i:int=0;i<myPageableArrCol.length;i++){
+	    	 	
+	    	 	if(myPageableArrCol[i]["strengthFlag"] == true && myPageableArrCol[i]["afiFlag"] == false){
+	    	 		projectDo = new ProjectDo();
+		    		projectDo.projectID=projectID;
+		    		projectDo.approachID=parseInt(myPageableArrCol[i]["approachID"].toString());
+		    		projectDo.criteriaID=parseInt(myPageableArrCol[i]["criteriaID"].toString());
+		    		projectDo.DummyApproachID=myPageableArrCol[i]["criteriaapproach"].toString().split('->')[0];
+		    		projectDo.approachTitle=myPageableArrCol[i]["criteriaapproach"].toString().split('->')[1];
+		    		projectDo.title=myPageableArrCol[i]["strength"];
+		    		projectDo.type="Strength";
+		    		projectDo.strengthID=parseInt(myPageableArrCol[i]["strengthID"].toString());
+		    		projectDo.afiID=0;
+		    		projectArray.push(projectDo);
+		    		
+	    	 	}
+	    	 	else if(myPageableArrCol[i]["strengthFlag"] == false && myPageableArrCol[i]["afiFlag"] == true){
+	    	 		//Alert.show("2");
+		    		projectDo = new ProjectDo();
+		    		projectDo.projectID=projectID;
+		    		projectDo.approachID=parseInt(myPageableArrCol[i]["approachID"].toString());
+		    		projectDo.criteriaID=parseInt(myPageableArrCol[i]["criteriaID"].toString());
+		    		projectDo.DummyApproachID=myPageableArrCol[i]["criteriaapproach"].toString().split('->')[0];
+		    		projectDo.approachTitle=myPageableArrCol[i]["criteriaapproach"].toString().split('->')[1];
+		    		projectDo.title=myPageableArrCol[i]["areaforimprovement"];
+		    		projectDo.type="AFI";
+		    		projectDo.afiID=parseInt(myPageableArrCol[i]["afiID"].toString());
+		    		projectDo.strengthID=0;
+		    		projectArray.push(projectDo);
+	    	 	}
+	    	 	else if(myPageableArrCol[i]["strengthFlag"] == true && myPageableArrCol[i]["afiFlag"] == true){
+	    	 		//Alert.show("3");
+		    		projectDo = new ProjectDo();
+		    		projectDo.projectID=projectID;
+		    		projectDo.approachID=parseInt(myPageableArrCol[i]["approachID"].toString());
+		    		projectDo.criteriaID=parseInt(myPageableArrCol[i]["criteriaID"].toString());
+		    		projectDo.DummyApproachID=myPageableArrCol[i]["criteriaapproach"].toString().split('->')[0];
+		    		projectDo.approachTitle=myPageableArrCol[i]["criteriaapproach"].toString().split('->')[1];
+		    		projectDo.title=myPageableArrCol[i]["strength"];
+		    		projectDo.type="Strength";
+		    		projectDo.strengthID=parseInt(myPageableArrCol[i]["strengthID"].toString());
+		    		projectArray.push(projectDo);
+		    		
+		    		projectDo = new ProjectDo();
+		    		projectDo.projectID=projectID;
+		    		projectDo.approachID=parseInt(myPageableArrCol[i]["approachID"].toString());
+		    		projectDo.criteriaID=parseInt(myPageableArrCol[i]["criteriaID"].toString());
+		    		projectDo.DummyApproachID=myPageableArrCol[i]["criteriaapproach"].toString().split('->')[0];
+		    		projectDo.approachTitle=myPageableArrCol[i]["criteriaapproach"].toString().split('->')[1];
+		    		projectDo.afiID=parseInt(myPageableArrCol[i]["afiID"].toString());
+		    		projectDo.title=myPageableArrCol[i]["areaforimprovement"];
+		    		projectDo.type="AFI";
+		    		projectArray.push(projectDo);
+		    		//Alert.show(i.toString());
+	    	 	}
+	    	}
+	    	
+	    	CriteriaService=new TeamController();
+	    	CriteriaService.AddProjectApproachLinkDetails(projectArray,function(resultNum:Number):void{
+	    		if(resultNum!=0){
+	    		//	Alert.show("Project Added successfully");
+	    			Alert.show(resourceManager.getString('myResources','projAddedSucc'));
+	    			
+	    			popUpCreateProj.clearAll();
+	    			PopUpManager.removePopUp(popUpCreateProj);
+	    			CursorManager.removeBusyCursor();
+	    			bindData();
+	    			
+	    		}
+	    	});
+        }
+       /*  private function refreshGrid(event:ListEvent):void{
+        	for(var i:int=0;i<resultArray.length;i++){
+        		if(resultArray[i]["strengthFlag"]==true){
+        			resultArray[i]["strenghColor"]=Color.GRAY10;
+        		}
+        		else{
+        			resultArray[i]["strenghColor"]=Color.BLACK;
+        		}
+        		if(resultArray[i]["afiFlag"]==true){
+        			resultArray[i]["afiColor"]=Color.GRAY10;
+        		}
+        		else{
+        			resultArray[i]["afiColor"]=Color.BLACK;
+        		}
+        	}
+        } */
+      /*  private function onStrengthChange(event:Event):void{
+        	Alert.show("Calling");
+        } */  
+        public function colorChange(event:Event):void{
+        	/* var chkBox:CheckBox=event.currentTarget as CheckBox;
+        	var hbox:HBox=chkBox.parent as HBox;
+        	var txtBox:Text = hbox.getChildAt(1) as Text;
+        	if(chkBox.selected)
+        		txtBox.setStyle('color',Color.BLUE);
+        	else
+        		txtBox.setStyle('color',Color.BLACK);
+        	myPageableArrCol.refresh();
+        	for(var i:int=0;i<myPageableArrCol.length;i++){
+        		if(myPageableArrCol[i]["strengthFlag"]==true){
+        			myPageableArrCol[i]["strengthColor"]=Color.BLUE;
+        		}
+        		else{
+        			myPageableArrCol[i]["strengthColor"]=Color.BLACK;
+        		}
+        		if(myPageableArrCol[i]["afiFlag"]==true){
+        			myPageableArrCol[i]["afiColor"]=Color.BLUE;
+        		}
+        		else{
+        			myPageableArrCol[i]["afiColor"]=Color.BLACK;
+        		}
+        	}
+        	myPageableArrCol.refresh(); */
+        }
+		]]>
+	</mx:Script>
+	 <mx:Style>
+	 	.ReportDataGridHeaderStyle{
+			  use-roll-over:false;
+			 /*  header-colors:#98a0af,#636e83; */
+
+			  alternatingItemColors: #ffffff, #ffffff;
+			  header-sort-separator-skin: ClassReference("mx.skins.ProgrammaticSkin"); 
+			  /* theme-color:#98a0af,#636e83;  */
+	  	}
+	 </mx:Style>
+	
+	
+	<mx:VBox id="actionPlanVBox" width="100%" height="100%" verticalScrollPolicy="off">
+
+		<mx:Spacer height="2%"/>
+	
+		<!--<events:RowColorDataGrid useRollOver="false" rowColorFunction="calcRowColor" dataProvider="{myReadingArr}" id="ReadingGrid" width="100%" height="100%" textAlign="center" draggableColumns="false" >-->
+		<mx:HBox width="95%" height="90%" horizontalAlign="center">
+			<mx:Spacer width="5%"/>
+			 <mx:AdvancedDataGrid  styleName="ReportDataGridHeaderStyle"  wordWrap="true" variableRowHeight="true"
+			 	id="myDatagrid" width="100%" height="100%" folderClosedIcon="{null}" folderOpenIcon="{null}" defaultLeafIcon="{null}">        
+		      	<mx:columns>
+		      		<mx:AdvancedDataGridColumn  width="70" wordWrap="true" headerText="Approach" dataField="criteriaShortDesc"/>
+		       	 	<!--<mx:AdvancedDataGridColumn width="10" headerText="ApproachID" dataField="approachID">
+		       	 		<mx:itemRenderer>
+		        		<mx:Component>
+		        			<mx:Text depth="2" width="100%"  text="{data.approachID}" paddingLeft="5"/>
+		        		</mx:Component>
+		        	</mx:itemRenderer>
+		       	 	</mx:AdvancedDataGridColumn>
+		            <mx:AdvancedDataGridColumn width="40" id="colTitle" headerText="Title" dataField="approachTitle">
+		            	<mx:itemRenderer>
+		        		<mx:Component>
+		        			<mx:Text depth="2" width="100%"  text="{data.approachTitle}" paddingLeft="5"/>
+		        		</mx:Component>
+		        	</mx:itemRenderer>
+		            </mx:AdvancedDataGridColumn>-->
+		            <mx:AdvancedDataGridColumn id="strength" width="40" dataField="strength" wordWrap="true" headerText="Strength">
+		            	<mx:itemRenderer>
+						<mx:Component>
+							<mx:HBox width="100%" visible="{data.strVisible}" includeInLayout="{data.strVisible}" paddingLeft="5" horizontalScrollPolicy="off" verticalScrollPolicy="off">
+								<mx:CheckBox visible="{data.strVisible}" width="5%" depth="0" textAlign="left" click="{data.strengthFlag=!data.strengthFlag;}"  enabled="true" 
+			            			selected="{data.strengthFlag}" change="outerDocument.colorChange(event)">
+			            		</mx:CheckBox>
+			            		<mx:Text visible="{data.strVisible}" width="95%" text="{data.strength}"  color="{data.strengthColor}"/>
+							</mx:HBox>
+			            </mx:Component> 
+						</mx:itemRenderer>
+		            </mx:AdvancedDataGridColumn>
+		            <mx:AdvancedDataGridColumn width="40" headerText="Area for improvement" dataField="areaforimprovement">
+		            	<mx:itemRenderer>
+						<mx:Component>
+							<mx:HBox width="100%" visible="{data.afiVisible}" includeInLayout="{data.afiVisible}" paddingLeft="5" horizontalScrollPolicy="off" verticalScrollPolicy="off">
+								<mx:CheckBox width="5%" visible="{data.afiVisible}" depth="2" paddingLeft="5" color="{data.afiColor}" enabled="true" textAlign="left" click="{data.afiFlag=!data.afiFlag}" selected="{data.afiFlag}"  change="outerDocument.colorChange(event)"/>
+			            		<mx:Text width="95%" visible="{data.afiVisible}" text="{data.areaforimprovement}"  color="{data.afiColor}"/>
+			            	</mx:HBox>
+						</mx:Component> 
+					</mx:itemRenderer>	
+		            </mx:AdvancedDataGridColumn>
+		       </mx:columns>
+		    <!--    <mx:rendererProviders>
+					<mx:AdvancedDataGridRendererProvider
+					column="{strength}"
+				 	columnSpan="1"
+					depth="2"                        
+					renderer="mx.controls.checkBox"
+				/>
+				</mx:rendererProviders>
+			-->		        
+	  	 </mx:AdvancedDataGrid>
+		</mx:HBox>
+		
+	
+	<mx:HBox width="95%">
+		<mx:HBox width="100%">
+			<mx:Spacer width="5%"/>
+			<mx:Button useHandCursor="true" buttonMode="true" label="@Resource(bundle='myResources', key='createProj')" click="createProject()"/>
+		</mx:HBox>
+		
+		<!--<mx:HBox width="50%" horizontalAlign="right">
+			<mx:Text x="532" y="28" text="Page {myPageableArrCol.currentPage} of {myPageableArrCol.pages}"/>
+	   		<mx:Label text="@Resource(bundle='myResources',key='jumpToPage')"/>
+	   		<mx:TextInput restrict="0-9" id="jumpPage" width="40" maxChars="2" />
+	   		<mx:Button skin="@Embed('assets/go.png')" click="JumptoPage()" useHandCursor="true" buttonMode="true"/>
+			<mx:Button skin="@Embed('assets/left arrow.png')" useHandCursor="true" buttonMode="true" id="btnPageDown" click="pageDown()" disabledSkin="@Embed('assets/disabledRight.png')"/>
+    		<mx:Button skin="@Embed('assets/right arrow.png')" useHandCursor="true" buttonMode="true" id="btnPageUp" click="pageUP()" disabledSkin="@Embed('assets/disabledLeft.png')"/>	
+
+		</mx:HBox>-->
+		
+	</mx:HBox>
+	
+</mx:VBox>
+
+</mx:VBox>

@@ -1,0 +1,432 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml"  xmlns:goldhold="goldhold.controls.*" xmlns:s="library://ns.adobe.com/flex/spark"
+	   y="{(Application.application.height/2)-(this.height/2)}" maxHeight="450" maxWidth="550"
+	 x="{(Application.application.width/2)-(this.width/2)}" verticalScrollPolicy="off" horizontalScrollPolicy="off" width="550" height="450" creationComplete="init()">
+
+
+	<mx:Script>
+		<![CDATA[
+			import mx.events.CloseEvent;
+			import mx.events.ListEvent;
+			import src.com.selfassessment.model.ResultDocumentDO;
+			import src.com.selfassessment.model.EnablerDocumentDO;
+			
+			import mx.managers.CursorManager;
+			import mx.core.Application;
+			import mx.managers.PopUpManager;
+			import mx.controls.*;
+			import src.com.selfassessment.controller.TeamController;
+			
+			public var popUpAlert:ShowAlert;
+			[Bindable]
+			public var txtFromOutSide:String;
+			[Bindable]
+			public var txtvalue:int;
+			
+			[Bindable]
+        	public var CriteriaService:TeamController = new TeamController();
+        	
+			[Bindable]
+        	public var CriteriaServiceNew:TeamController = new TeamController();
+			
+			[Bindable]
+			public var criteriaArray:Array = new Array();
+			
+			
+    		/**
+     			* Define reference to the download ProgressBar component.
+     		*/
+    		private var pb:ProgressBar;
+			
+			[Bindable]
+			public var _refAddFiles:FileReferenceList;	
+			public var uploadFile:FileReference;
+			private var _refUploadFile:FileReference;
+			private var _arrUploadFiles:Array = new Array();
+			private var _numCurrentUpload:Number = 0;	
+			
+			public function init():void {
+				//Alert.show("Calling");
+				 if(Application.application.language=="en_US"){
+					mainVBox.styleName='ApplyFontSizeEn';
+					myDataGrid.setStyle('textAlign','left');
+				}
+				else{
+					mainVBox.styleName='ApplyFontSizeAr';
+					myDataGrid.setStyle('textAlign','right');
+				} 
+			}
+			
+			private function onClose():void {
+				PopUpManager.removePopUp(this);
+			}
+			
+			
+			public function AddBrowseFiles():void{
+				_refAddFiles = new FileReferenceList();
+				_refAddFiles.addEventListener(Event.SELECT, onSelectFile);
+				_refAddFiles.browse();
+			}
+			
+			private function onSelectFile(event:Event):void {
+				uploadFile = new FileReference();
+				var arrFoundList:Array = new Array();
+				//Alert.show("test\n"+_refAddFiles.fileList.length);
+				_arrUploadFiles = new Array();
+				// Get list of files from fileList, make list of files already on upload list
+				for (var i:Number = 0; i < _arrUploadFiles.length; i++) {
+					for (var j:Number = 0; j < _refAddFiles.fileList.length; j++) {
+						if (_arrUploadFiles[i].name == _refAddFiles.fileList[j].name) {
+							arrFoundList.push(_refAddFiles.fileList[j].name);
+							_refAddFiles.fileList.splice(j, 1);
+							j--;
+						}
+					}
+				}
+				if (_refAddFiles.fileList.length == 1) {				
+					for (var k:Number = 0; k < _refAddFiles.fileList.length; k++) {
+						txtFileName.text = _refAddFiles.fileList[k].name;
+						_arrUploadFiles.push({
+							name:_refAddFiles.fileList[k].name,
+							size:formatFileSize(_refAddFiles.fileList[k].size),
+							file:_refAddFiles.fileList[k]});
+							uploadFile = _refAddFiles.fileList[k];
+					}
+					
+					
+					//listFiles.dataProvider = _arrUploadFiles;
+					//listFiles.selectedIndex = _arrUploadFiles.length - 1;
+					
+					//scrollFiles();
+					//uploadCheck();
+				}	
+				else{
+					//Alert.show("Select only one file to upload");
+					Alert.show(resourceManager.getString('myResources','selctOneFile'));
+				}			
+				if (arrFoundList.length >= 1) {
+					Alert.show("The file(s): \n\n• " + arrFoundList.join("\n• ") + "\n\n...are already on the upload list. Please change the filename(s) or pick a different file.", "File(s) already on list");
+				}
+				
+			}
+			
+			// Called to format number to file size
+			private function formatFileSize(numSize:Number):String {
+				var strReturn:String;
+				numSize = Number(numSize / 1000);
+				strReturn = String(numSize.toFixed(1) + " KB");
+				if (numSize > 1000) {
+					numSize = numSize / 1000;
+					strReturn = String(numSize.toFixed(1) + " MB");
+					if (numSize > 1000) {
+						numSize = numSize / 1000;
+						strReturn = String(numSize.toFixed(1) + " GB");
+					}
+				}				
+				return strReturn;
+			}
+			
+			// Called to upload file based on current upload number
+			private function startUpload():void {
+				updateProgBar();
+				var request:URLRequest;
+				if(txtFileName.text !="" && txtFiledesc.text != ""){
+					if (_arrUploadFiles.length > 0) {
+						CursorManager.setBusyCursor();
+						var sendVars:URLVariables = new URLVariables();
+						sendVars.action = "upload";
+						var getClickedBox:String=Application.application.attachmentClick;
+						var fileStoragePath:String=Application.application.serverPath;
+						if(getClickedBox=="Enabler"){
+							request = new URLRequest(fileStoragePath + "/uploadnew.php");
+						}
+						else{
+							request = new URLRequest(fileStoragePath + "/uploadnewResult.php");
+						}
+						request.data = sendVars;
+					   request.method = URLRequestMethod.POST;
+					    
+					    _refUploadFile = new FileReference();
+					    _refUploadFile = uploadFile;
+					    _refUploadFile.addEventListener(ProgressEvent.PROGRESS, onUploadProgress);
+					   	_refUploadFile.addEventListener(Event.COMPLETE, onUploadComplete);
+					    _refUploadFile.addEventListener(IOErrorEvent.IO_ERROR, onUploadIoError);
+					  	_refUploadFile.addEventListener(SecurityErrorEvent.SECURITY_ERROR, onUploadSecurityError);
+					    _refUploadFile.upload(request, "file", false);
+					    
+					}
+					else{
+						//Alert.show("Error to load file");
+						Alert.show(resourceManager.getString('myResources','errorToLoadFile'));
+					}
+				}
+				else{
+					//Alert.show("Enter all the values");
+					Alert.show(resourceManager.getString('myResources','enterAllValues'));
+				}
+			}
+			
+			// Get upload progress
+			private function onUploadProgress(event:ProgressEvent):void {
+			//	Alert.show("iamger");
+				/*var numPerc:Number = Math.round((event.bytesLoaded / event.bytesTotal) * 100);
+				updateProgBar(numPerc);
+				var evt:ProgressEvent = new ProgressEvent("uploadProgress", false, false, event.bytesLoaded, event.bytesTotal);
+				dispatchEvent(evt);*/
+				
+			}
+			
+			// Update progBar
+			private function updateProgBar(numPerc:Number = 0):void {
+				var strLabel:String = (_numCurrentUpload + 1) + "/" + _arrUploadFiles.length;
+				strLabel = (_numCurrentUpload + 1 <= _arrUploadFiles.length && numPerc > 0 && numPerc < 100) ? numPerc + "% - " + strLabel : strLabel;
+				strLabel = (_numCurrentUpload + 1 == _arrUploadFiles.length && numPerc == 100) ? "Upload Complete - " + strLabel : strLabel;
+				strLabel = (_arrUploadFiles.length == 0) ? "" : strLabel;
+				
+				progressBar.label = strLabel;
+				progressBar.setProgress(numPerc, 100);
+				progressBar.visible = true;
+				progressBar.validateNow(); 
+			}
+			
+			//public var CriteriaService:TeamController = new TeamController();
+			// Called on upload complete
+			private function onUploadComplete(event:Event):void {
+				//Alert.show("Calling");
+				progressBar.visible = false;
+				_numCurrentUpload++;				
+				if (_numCurrentUpload < _arrUploadFiles.length) {
+					startUpload();
+				} else {
+					//enableUI();
+					//clearUpload();
+					dispatchEvent(new Event("uploadComplete"));
+				}
+				
+				CriteriaService = new TeamController();
+				CursorManager.setBusyCursor();
+				var enablerDoc:EnablerDocumentDO = new EnablerDocumentDO();
+				enablerDoc.enablerdocument = txtFileName.text;
+				enablerDoc.enablerdocumentdesc = txtFiledesc.text;
+				enablerDoc.enablerassessmentid = lblId.text;
+				
+				var resultDoc:ResultDocumentDO = new ResultDocumentDO();
+				resultDoc.resultdocument = txtFileName.text;
+				resultDoc.resultdocumentdesc = txtFiledesc.text;
+				resultDoc.resultassessmentid = lblId.text;
+				//Alert.show(lblId.text);
+				if(lblEnableResult.text == "Enabler"){
+					//PopUpManager.removePopUp(this);
+					CursorManager.setBusyCursor();
+					doc.dataField = "enablerdocument";
+					desc.dataField = "enablerdocumentdesc";
+					
+					CriteriaService.addEnablerDocument(enablerDoc,function(criteriaArray:Number):void{
+							if(criteriaArray ==1){
+								//Alert.show("File Uploaded Successfully");
+								Alert.show(resourceManager.getString('myResources','fileUploadSucc'));
+								txtFileName.text = "";
+								txtFiledesc.text = "";
+								CursorManager.setBusyCursor();
+								CriteriaServiceNew = new TeamController();
+								CriteriaServiceNew.selectEnablerDocument(lblId.text,function(criteriaArray:Array):void{
+									CursorManager.removeAllCursors();
+									myDataGrid.dataProvider = criteriaArray;
+									
+								});
+								
+								//PopUpManager.removePopUp(this);
+							}
+							else{
+								//Alert.show("File already exists");
+								Alert.show(resourceManager.getString('myResources','fileAlreadyExists'));
+							}
+							CursorManager.removeAllCursors();
+					});
+				}
+				else{
+					//PopUpManager.removePopUp(this);
+					CursorManager.setBusyCursor();
+					doc.dataField = "resultdocument";
+					desc.dataField = "resultdocumentdesc";
+					CriteriaService.addResultDocument(resultDoc,function(criteriaArray:Number):void{
+							if(criteriaArray ==1){
+								//Alert.show("File Uploaded Successfully");
+								Alert.show(resourceManager.getString('myResources','fileUploadSucc'));
+								txtFileName.text = "";
+								txtFiledesc.text = "";
+								
+								CursorManager.setBusyCursor();
+								CriteriaServiceNew = new TeamController();
+								CriteriaServiceNew.selectResultDocument(lblId.text,function(criteriaArray:Array):void{
+									CursorManager.removeAllCursors();
+									myDataGrid.dataProvider = criteriaArray;
+								});
+								//PopUpManager.removePopUp(this);
+							}
+							else{
+								//Alert.show("File already exists");
+								Alert.show(resourceManager.getString('myResources','fileAlreadyExists'));
+							}
+							CursorManager.removeAllCursors();
+					});
+				}
+				CursorManager.removeAllCursors();
+			}
+			
+			// Called on upload io error
+			private function onUploadIoError(event:IOErrorEvent):void {
+			
+				//clearUpload();
+				var evt:IOErrorEvent = new IOErrorEvent("uploadIoError", false, false, event.text);
+				dispatchEvent(evt);
+			}
+			
+			// Called on upload security error
+			private function onUploadSecurityError(event:SecurityErrorEvent):void {
+				//clearUpload();
+				var evt:SecurityErrorEvent = new SecurityErrorEvent("uploadSecurityError", false, false, event.text);
+				dispatchEvent(evt);
+			}
+			
+			
+			public function DeleteDocument(event:ListEvent):void{
+				if(event.columnIndex == 2){
+					CriteriaService = new TeamController();
+					if(lblEnableResult.text == "Enabler"){
+						//Alert.show(resourceManager.getString('myResources','deleteEnablerConfirmation'),"",Alert.YES|Alert.NO,this,DeleteEnabler);
+						popUpAlert = ShowAlert(PopUpManager.createPopUp(this,ShowAlert,true));
+						var vbox:VBox=new VBox();
+						popUpAlert.mainBox.addChild(vbox);
+						var alert:Alert=new Alert();
+						vbox.layoutDirection="ltr";
+						alert.layoutDirection="ltr";
+						alert=Alert.show(resourceManager.getString('myResources','deleteEnablerConfirmation'),"",Alert.YES|Alert.NO,this,DeleteEnabler);
+						vbox.addChild(alert);
+					}
+					else{
+						//Alert.show(resourceManager.getString('myResources','deleteResultConfirmation'),"",Alert.YES|Alert.NO,this,DeleteResult);
+						popUpAlert = ShowAlert(PopUpManager.createPopUp(this,ShowAlert,true));
+						var vbox:VBox=new VBox();
+						popUpAlert.mainBox.addChild(vbox);
+						var alert:Alert=new Alert();
+						vbox.layoutDirection="ltr";
+						alert.layoutDirection="ltr";
+						alert=Alert.show(resourceManager.getString('myResources','deleteResultConfirmation'),"",Alert.YES|Alert.NO,this,DeleteResult);
+						vbox.addChild(alert);
+						
+					}
+				}
+				if(event.columnIndex == 0){
+					
+					var documentPath:URLRequest;
+					var fileRetrievePath:String=Application.application.serverPath;
+					if(Application.application.attachmentClick=="Enabler"){
+						documentPath = new URLRequest(fileRetrievePath +"/Document/Enabler/" + myDataGrid.selectedItem.enablerdocument.toString());
+					}
+					else{
+						documentPath = new URLRequest(fileRetrievePath + "/Document/Result/" + myDataGrid.selectedItem.resultdocument.toString());
+					}
+        			navigateToURL(documentPath,"_blank");
+				}
+			}
+			
+			public function DeleteEnabler(event:CloseEvent):void{
+				if(event.detail == Alert.YES){
+					CursorManager.setBusyCursor();
+						CriteriaService.deleteEnablerDocument(parseInt(myDataGrid.selectedItem.enablerdocumentid),function(criteriaArray:Number):void{
+								if(criteriaArray ==1){
+									//Alert.show("File Deleted Successfully");
+									Alert.show(resourceManager.getString('myResources','fileDeletedSuccessfully'));
+									CursorManager.setBusyCursor();
+									CriteriaService = new TeamController();
+									CriteriaService.selectEnablerDocument(lblId.text,function(criteriaArray:Array):void{
+										CursorManager.removeAllCursors();
+										myDataGrid.dataProvider = criteriaArray;
+									});
+								}
+								CursorManager.removeAllCursors();
+						});
+				}
+				PopUpManager.removePopUp(popUpAlert);
+				
+			}
+			public function deleteFile():void{
+	
+			}
+			public function DeleteResult(event:CloseEvent):void{
+				if(event.detail == Alert.YES){
+					CursorManager.setBusyCursor();
+						CriteriaService.deleteResultDocument(parseInt(myDataGrid.selectedItem.resultassessmentid),function(criteriaArray:Number):void{
+								if(criteriaArray ==1){
+									
+									//Alert.show("File Deleted Successfully");
+									Alert.show(resourceManager.getString('myResources','fileDeletedSuccessfully'));
+									CursorManager.setBusyCursor();
+									CriteriaService = new TeamController();
+									CriteriaService.selectResultDocument(lblId.text,function(criteriaArray:Array):void{
+										CursorManager.removeAllCursors();
+										myDataGrid.dataProvider = criteriaArray;
+									});
+								}
+								CursorManager.removeAllCursors();
+						});
+				}
+				PopUpManager.removePopUp(popUpAlert);
+			}
+			
+		]]>
+	</mx:Script>
+	
+	<mx:VBox id="mainVBox" borderStyle="solid" height="100%" verticalGap="0" borderThickness="3" shadowDistance="8" shadowDirection="right" dropShadowEnabled="true" dropShadowColor="#000000" borderColor="#636e83" width="100%" horizontalAlign="center" verticalAlign="top" backgroundColor="white">
+		<mx:Canvas width="100%" useHandCursor="true" buttonMode="true" mouseDown="{this.startDrag()}" mouseUp="{this.stopDrag()}" height="25" styleName="panel1filled"  borderSides="left,right,top" cornerRadius="3" borderStyle="none">
+			<mx:Label left="10" fontWeight="bold"  id="lblTitle" color="#FFFFFF" fontSize="12"/>
+			<mx:Image toolTip="Close" right="2" top="2" source="@Embed('assets/close.png')" useHandCursor="true" buttonMode="true"  click="{PopUpManager.removePopUp(this);CursorManager.removeBusyCursor();}"/>
+		</mx:Canvas>
+		<mx:Spacer height="5%"/>
+		<mx:VBox horizontalScrollPolicy="off" horizontalAlign="center" width="95%" height="85%">
+			<mx:HBox width="100%">
+				<mx:Label fontWeight="bold" width="{lblDesc.width}" text="@Resource(bundle='myResources', key='fileName')"/>
+				<mx:TextInput width="65%" id="txtFileName" editable="false"/>
+				<mx:Button id="btnBrowse" label="@Resource(bundle='myResources', key='browse')" useHandCursor="true" buttonMode="true" click="AddBrowseFiles()"/>
+			</mx:HBox>
+			
+			<mx:HBox width="100%">
+				<mx:Label fontWeight="bold" id="lblDesc" text="@Resource(bundle='myResources', key='fileDesc')"/>
+				<s:TextArea width="78%" height="100" id="txtFiledesc" maxChars="450"/>
+			</mx:HBox>
+			<mx:HBox width="97%" horizontalAlign="right">
+				<mx:Button id="btnSave" label="@Resource(bundle='myResources', key='save')" useHandCursor="true" click="startUpload()" buttonMode="true"/>	
+			</mx:HBox>
+			<mx:ProgressBar id="progressBar" indeterminate="true"
+            visible="false" />
+            <mx:HBox width="100%" height="60%" maxHeight="180">
+            	<mx:DataGrid id="myDataGrid" verticalScrollPolicy="auto" width="100%" height="100%" variableRowHeight="true" wordWrap="true" itemClick="DeleteDocument(event)" resizableColumns="true"   allowMultipleSelection="false" draggableColumns="false">
+					<mx:columns>
+						<mx:DataGridColumn headerWordWrap="true" id="doc" wordWrap="true" headerText="@Resource(bundle='myResources', key='document')" width="120">
+						</mx:DataGridColumn>
+			        	
+				        <mx:DataGridColumn headerWordWrap="true" wordWrap="true" id="desc" headerText="@Resource(bundle='myResources', key='description')" width="120">
+				        </mx:DataGridColumn>
+				        
+				        <mx:DataGridColumn id="delCol" headerText="@Resource(bundle='myResources', key='delete')" dataField="delete" width="45">
+							<mx:itemRenderer>
+	                    		<mx:Component> 
+	                    			<mx:Image scaleContent="false" width="25" height="25"  horizontalAlign="center" source="@Embed('assets/newdeleteicon.png')" useHandCursor="true" buttonMode="true"/>
+	                    		</mx:Component> 
+	                		</mx:itemRenderer> 
+						</mx:DataGridColumn>
+						
+					</mx:columns>
+			    </mx:DataGrid>
+            </mx:HBox>
+			
+		</mx:VBox>
+			
+		
+	</mx:VBox>
+<mx:Label id="lblId" visible="false"/>
+<mx:Label id="lblEnableResult" visible="false"/>
+</mx:Canvas>
+
+

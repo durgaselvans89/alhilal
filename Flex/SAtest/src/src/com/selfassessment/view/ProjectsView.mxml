@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml"  styleName="userContentStyle" creationComplete="init()" 
+	width="100%" height="100%" xmlns:com="src.com.selfassessment.view.*" horizontalGap="0">
+
+	<mx:Script>
+		<![CDATA[
+			import src.com.selfassessment.controller.Components;
+			import mx.core.Application;
+			import mx.containers.Panel;
+			import src.com.selfassessment.view.*;
+			import mx.controls.Alert;
+			import src.com.selfassessment.events.EventCriteriaConstants;
+			import mx.effects.*;
+			
+			public function init():void{
+				Application.application.CurrentSelection = "Projects -> " +menuitems.myTree.selectedItem.@label;
+				
+			}
+			
+			public function ContentPageChange(event:Event):void {
+
+				var choosenChild:String = event.type;
+				
+				if(null != choosenChild){
+					Application.application.CurrentSelection = "Projects -> " +menuitems.myTree.selectedItem.@label;
+					content.activeEffects; 
+					if(Application.application.MainCont != 0){
+						
+						this.parent.height = Application.application.MainCont;
+						this.parent.parent.parent.height = this.parent.height+40;
+						//this.parent.parent.parent.parent.height = 
+						//this.parent.parent.parent main content
+					}
+					
+					if(choosenChild == 'ActionPlan'){
+						currentState='';
+						//mainActionPlanView.tabnavigator.selectedIndex = 0;
+						mainActionPlanView.init();
+					}
+					else if(choosenChild == 'ManageProjects'){
+						
+						//Alert.show("iamhere" + choosenChild );
+						currentState='ActionProjects';
+						actionPlanProjects.currentState='';
+						actionPlanProjects.init();
+						
+						
+						
+					}
+					else if(choosenChild == 'ActionProjects'){
+						
+						//Alert.show("ads");
+						currentState='ManageProjects';
+						setprojectPriority.currentState='';
+						setprojectPriority.init();
+						
+						if(Application.application.IsExecutiveMember==1){
+							//maintainProjects.chkColumn.visible=true;
+							setprojectPriority.btnUpdate.visible=true;
+						}
+						else{
+							//maintainProjects.chkColumn.visible=false;
+							setprojectPriority.btnUpdate.visible=false;
+						}
+					} 
+			}
+			}
+			
+		]]>
+	</mx:Script>
+	
+	<mx:Fade id="Add" duration="1000"/>
+	
+	<mx:states>
+		<mx:State name="ManageProjects">
+			<mx:RemoveChild	target="{mainActionPlanView}"/>
+    		<mx:AddChild relativeTo="{content}">
+            	 <com:setProjectPriority id="setprojectPriority" width="100%" height="100%"/>
+			</mx:AddChild>
+    	</mx:State>
+    	<mx:State name="ActionProjects">
+			<mx:RemoveChild	target="{mainActionPlanView}"/>
+    		<mx:AddChild relativeTo="{content}">
+            	 <com:ActionPlanProjects id="actionPlanProjects" width="100%" height="100%"/>
+			</mx:AddChild>
+    	</mx:State>
+	</mx:states>
+	
+	<mx:transitions>
+       <mx:Transition 
+                toState="ManageProjects">
+            <mx:Fade target="{setprojectPriority}" alphaFrom="0" alphaTo="1" duration="900"/>
+        </mx:Transition>
+        <mx:Transition 
+                toState="ActionProjects">
+            <mx:Fade target="{actionPlanProjects}" alphaFrom="0" alphaTo="1" duration="900"/>
+        </mx:Transition>
+        <mx:Transition 
+                toState="*">
+            <mx:Fade duration="900" alphaFrom="0" alphaTo="1" target="{mainActionPlanView}"/>
+        </mx:Transition>
+     </mx:transitions>
+	
+			<mx:Canvas id="menu" width="25%" height="100%" > 
+				<com:ProjectMenuTitle id="menuitems" width="100%" height="100%" 
+					ActionPlan="ContentPageChange(event);" ManageProjects="ContentPageChange(event);"
+					ActionProjects="ContentPageChange(event);"/>
+			</mx:Canvas>
+			
+			<mx:Canvas id="content" width="75%" height="100%" horizontalScrollPolicy="off"> 
+				<com:MainActionPlanView id="mainActionPlanView" width="100%" height="100%"/>
+			</mx:Canvas>
+			
+</mx:HBox>

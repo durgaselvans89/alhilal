@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml"  styleName="userContentStyle" creationComplete="init()" 
+	width="100%" height="100%" xmlns:com="src.com.selfassessment.view.*" horizontalGap="0">
+
+	<mx:Script>
+		<![CDATA[
+			import mx.managers.CursorManager;
+			import src.com.selfassessment.controller.Components;
+			import mx.core.Application;
+			import mx.containers.Panel;
+			import src.com.selfassessment.view.*;
+			import mx.controls.Alert;
+			import src.com.selfassessment.events.EventCriteriaConstants;
+			import mx.effects.*;
+			
+			public function init():void{
+				Application.application.CurrentSelection = resourceManager.getString('myResources','assessment')+menuitems.myTree.selectedItem.@label;
+			}
+			
+			public function ContentPageChange(event:Event):void {
+
+				var choosenChild:String = event.type;
+				
+				if(null != choosenChild){
+					Application.application.CurrentSelection =resourceManager.getString('myResources','assessment')+menuitems.myTree.selectedItem.@label;
+					content.activeEffects; 
+					if(Application.application.MainCont != 0){
+						
+						this.parent.height = Application.application.MainCont;
+						this.parent.parent.parent.height = this.parent.height+40;
+						//this.parent.parent.parent.parent.height = 
+						//this.parent.parent.parent main content
+					}
+					
+					if(choosenChild == 'ProjectPlan'){
+						currentState = '';
+						CursorManager.removeAllCursors();
+						//ProjectPlanView.AddSubBox.visible = false;
+					}
+					
+					else if(choosenChild == 'SubTeam'){
+						currentState = 'subteamassessmentview';
+						subteamassessmentview.tabNagivator.selectedIndex = 0;
+						subteamassessmentview.enabler.tabnavigator.selectedIndex = 0;
+						subteamassessmentview.results.tabnavigator.selectedIndex = 0;
+						/* if(Application.application.MainCont != 0){
+							this.parent.height = 650;
+							this.parent.parent.parent.height = 700; 
+						} */
+						subteamassessmentview.enabler.init();
+						//subteamassessmentview.results.init();
+						subteamassessmentview.SelectedCriteria = "Leadership";
+					}
+					else if(choosenChild == 'ExecutiveTeamReview'){
+						currentState= 'Executiveteamassessment';
+						executiveTeam.tabNagivator.selectedIndex = 0;
+						executiveTeam.enabler.tabnavigator.selectedIndex = 0;
+						executiveTeam.results.tabnavigator.selectedIndex = 0;
+						executiveTeam.init();
+					}
+				} 
+			}
+			
+		]]>
+	</mx:Script>
+	
+	<mx:Fade id="Add" duration="1000"/>
+	
+	<mx:states>
+		<mx:State name="subteamassessmentview">
+			<mx:RemoveChild	target="{ProjectPlanView}"/>
+    		<mx:AddChild relativeTo="{content}">
+            	 <com:subteamassessmentview id="subteamassessmentview" width="100%" height="100%"/>
+			</mx:AddChild>
+    	</mx:State>
+    	<mx:State name="Executiveteamassessment">
+			<mx:RemoveChild	target="{ProjectPlanView}"/>
+    		<mx:AddChild relativeTo="{content}">
+            	 <com:executiveteamassessmentview id="executiveTeam" width="100%" height="100%"/>
+			</mx:AddChild>
+    	</mx:State>
+    	<mx:State name="ActionPlan">
+			<mx:RemoveChild	target="{ProjectPlanView}"/>
+    		<mx:AddChild relativeTo="{content}">
+            	 <com:MainActionPlanView id="mainActionPlanView" width="100%" height="100%"/>
+			</mx:AddChild>
+    	</mx:State>
+    	<mx:State name="ManageProjects">
+			<mx:RemoveChild	target="{ProjectPlanView}"/>
+    		<mx:AddChild relativeTo="{content}">
+            	 <com:MaintainProjects id="maintainProjects" width="100%" height="100%"/>
+			</mx:AddChild>
+    	</mx:State>
+    	<mx:State name="ActionProjects">
+			<mx:RemoveChild	target="{ProjectPlanView}"/>
+    		<mx:AddChild relativeTo="{content}">
+            	 <com:ActionPlanProjects id="actionPlanProjects" width="100%" height="100%"/>
+			</mx:AddChild>
+    	</mx:State>
+	</mx:states>
+	
+	<mx:transitions>
+       <mx:Transition 
+                toState="subteamassessmentview">
+            <mx:Fade target="{subteamassessmentview}" alphaFrom="0" alphaTo="1" duration="900"/>
+        </mx:Transition>
+        <mx:Transition 
+                toState="Reportuserview">
+            <mx:Fade target="{Reportuserview}" alphaFrom="0" alphaTo="1" duration="900"/>
+        </mx:Transition>
+        <mx:Transition 
+                toState="*">
+            <mx:Fade duration="900" alphaFrom="0" alphaTo="1" target="{ProjectPlanView}"/>
+        </mx:Transition>
+     </mx:transitions>
+	
+			<mx:Canvas id="menu" width="19%" height="100%" > 
+				<com:menutitle id="menuitems" width="100%" height="100%" ExecutiveTeamReview="ContentPageChange(event);" 
+					ProjectPlan="ContentPageChange(event);" SubTeam="ContentPageChange(event);" 
+					ActionPlan="ContentPageChange(event);" ManageProjects="ContentPageChange(event);"
+					ActionProjects="ContentPageChange(event);"/>
+			</mx:Canvas>
+			
+			<mx:Canvas id="content" width="85%" height="100%" horizontalScrollPolicy="off"> 
+				<com:ProjectPlanView id="ProjectPlanView" width="100%" height="100%" addedEffect="Add"/>
+			</mx:Canvas>
+			
+</mx:HBox>

@@ -1,0 +1,358 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas styleName="Childpanelstyle"  xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" horizontalScrollPolicy="off">
+
+<mx:Style source="src/com/selfassessment/view/assets/Styles.css"/>	
+
+<mx:Script>
+	<![CDATA[
+		import mx.core.Application;
+		import mx.utils.ObjectUtil;
+		import mx.collections.ArrayCollection;
+		import com.as3xls.xls.ExcelFile;
+		import com.as3xls.xls.Sheet;
+		import mx.controls.Alert;
+		import com.boyzoid.PagableArrayCollection.PagableArrayCollection;
+		
+        private var fields:Array = new Array(); 
+       	private var sheet:Sheet;		
+		public var myPageableArrCol:PagableArrayCollection=new PagableArrayCollection();
+		
+		 public var enablerRowCount:int;  
+			private function exportToExcel():void{  
+          		var index:int=0;
+				sheet = new Sheet();  
+				fields = new Array();
+	          	//Enabler OverAll-Team Score
+	          	var dataEnablerOverAllScore:ArrayCollection=new ArrayCollection(); 
+          		var dataResultOverAllScore:ArrayCollection=new ArrayCollection();   
+				var dataEnablerTotalPoints:ArrayCollection=new ArrayCollection(); 
+          		var dataResultTotalPoints:ArrayCollection=new ArrayCollection();  
+          		
+				var columns:Array=new Array();  
+				
+				var fieldheading:String;
+				
+				dataEnablerOverAllScore=new ArrayCollection();
+	          	dataEnablerOverAllScore = myDataGridEnabler.dataProvider as ArrayCollection;  
+	          	
+	          	dataResultOverAllScore=new ArrayCollection();
+	          	dataResultOverAllScore = myDataGridResult.dataProvider as ArrayCollection; 
+	          	
+	          	dataEnablerTotalPoints=new ArrayCollection();
+	          	dataEnablerTotalPoints = Application.application.enablerTotPoints;  
+	          	
+	          	dataResultTotalPoints=new ArrayCollection();
+	          	dataResultTotalPoints = Application.application.resultTotPoints;   
+	          	 
+	          	
+	         	columns=new Array();
+	           	columns = myDataGridEnabler.columns; 
+	           	
+	        	sheet.resize((dataEnablerOverAllScore.length + dataResultOverAllScore.length + dataEnablerTotalPoints.length + dataResultTotalPoints.length)+8,myDataGridResult.columnCount);
+	           	sheet.setCell(0, 0,"Over All Sub-team Score");
+	           	sheet.setCell(1, 1,"Enabler");
+	           	var j:int = 2;  
+	         	for(var i:int=0;i<columns.length;i++){
+	         		if (columns[i]["dataField"].toString() != "prototype"){
+						fields.push(columns[i]["dataField"].toString());  
+	               		sheet.setCell(2, j,columns[i]["headerText"].toString());
+	               		
+					}	
+					j++;
+	         	}
+	         	//Alert.show(ObjectUtil.toString(dataEnablerOverAllScore));
+	        	for(var r:int=0; r <  dataEnablerOverAllScore.length; r++){  
+					var record:Object = dataEnablerOverAllScore.getItemAt(r);  
+	                insertRecordInSheet(r+3,sheet,record);
+				}
+	         
+	          	
+	          	//Result OverAll-Team Score
+	          	columns=new Array();  
+	           	columns = myDataGridResult.columns;  
+	      	  
+	  		 	
+	  		 	fields=new Array();
+	  		 	sheet.setCell(dataEnablerOverAllScore.length+4, 1,"Result");
+	  		 	
+	  		 	j=2;
+	         	for(var i:int=0;i<columns.length;i++){
+	         		if (columns[i]["dataField"].toString() != "prototype"){
+						fields.push(columns[i]["dataField"].toString());  
+	               		sheet.setCell(dataEnablerOverAllScore.length+5, j,columns[i]["headerText"].toString());
+	               		
+					}	
+					j++;
+	         	}
+	        	
+	         	var rCount:int=dataEnablerOverAllScore.length+6;
+	        	for(var r:int=0; r < dataResultOverAllScore.length; r++){  
+					var record:Object = dataResultOverAllScore.getItemAt(r);  
+					insertRecordInSheet(rCount+r,sheet,record);
+				}
+	     		
+	     		
+	     		//Enabler Total Points
+	     		
+     			columns=new Array();  
+	           	columns = myDataGridEnablerTotalPoints.columns;  
+	      	  
+	  		 	
+	  		 	fields=new Array();
+	  		 	sheet.setCell((dataEnablerOverAllScore.length+dataResultOverAllScore.length)+7, 0,"Total Points");
+	  		 	sheet.setCell((dataEnablerOverAllScore.length+dataResultOverAllScore.length)+8, 1,"Enabler");
+	  		 	
+	  		 	j=2;
+	         	for(var i:int=0;i<columns.length;i++){
+	         		if (columns[i]["dataField"].toString() != "prototype"){
+						fields.push(columns[i]["dataField"].toString());  
+	               		sheet.setCell((dataEnablerOverAllScore.length+dataResultOverAllScore.length)+9, j,columns[i]["headerText"].toString());
+	               		
+					}	
+					j++;
+	         	}
+	        	
+	         	var rCount:int=(dataEnablerOverAllScore.length+dataResultOverAllScore.length)+10;
+	         	//Alert.show(ObjectUtil.toString(dataEnablerTotalPoints));
+	        	for(var r:int=0; r < 5; r++){  
+					var record:Object = dataEnablerTotalPoints.getItemAt(r);  
+					insertRecordInSheet(rCount+r,sheet,record);
+				}
+				//Summation Row Enabler
+				/*
+				var enablerSubTeamScore:int=0;
+				var enablerFactor:int=0;
+				var enablerOverallPoints:int=0;
+				var enablerPointsAwarded:int=0;
+				for(var index:int=0;index<dataEnablerTotalPoints.length;index++){
+					enablerSubTeamScore = enablerSubTeamScore + parseInt(dataEnablerTotalPoints[index]["subTeamScore"]);
+					enablerFactor = enablerFactor + parseInt(dataEnablerTotalPoints[index]["factor"]);
+					enablerOverallPoints = enablerOverallPoints + parseInt(dataEnablerTotalPoints[index]["overallPoints"]);
+					enablerPointsAwarded = enablerPointsAwarded + parseInt(dataEnablerTotalPoints[index]["pointsAwarded"]);
+				}
+				 var enablerToTScoreArr:Array=new Array();
+				enablerToTScoreArr.push({subTeamScore:enablerSubTeamScore,factor:enablerFactor,
+	          				overallPoints:enablerOverallPoints,pointsAwarded:enablerPointsAwarded});
+	          		 */		
+	          		 						
+	          	sheet.setCell((dataEnablerOverAllScore.length+dataResultOverAllScore.length+5)+10, 2,"Total");
+	          	sheet.setCell((dataEnablerOverAllScore.length+dataResultOverAllScore.length+5)+10, 3,lblEnablerTotalScore.text);
+	          	sheet.setCell((dataEnablerOverAllScore.length+dataResultOverAllScore.length+5)+10, 4,lblEnablerDummy.text);
+	          	sheet.setCell((dataEnablerOverAllScore.length+dataResultOverAllScore.length+5)+10, 5,lblEnablerTotPoints.text);
+	          	sheet.setCell((dataEnablerOverAllScore.length+dataResultOverAllScore.length+5)+10, 6,lblEnablerTotMaxScore.text);
+	          	
+	        	
+	        	//Result Total Points
+	        	columns=new Array();  
+	           	columns = myDataGridResultTotalPoints.columns;  
+	      	  
+	  		 	
+	  		 	fields=new Array();
+	  		 	sheet.setCell((dataEnablerOverAllScore.length+dataResultOverAllScore.length+5)+11, 1,"Result");
+	  		 	
+	  		 	j=2;
+	         	for(var i:int=0;i<columns.length;i++){
+	         		if (columns[i]["dataField"].toString() != "prototype"){
+						fields.push(columns[i]["dataField"].toString());  
+	               		sheet.setCell((dataEnablerOverAllScore.length+dataResultOverAllScore.length+5)+12, j,columns[i]["headerText"].toString());
+	               		
+					}	
+					j++;
+	         	}
+	        	
+	         	var rCount:int=(dataEnablerOverAllScore.length+dataResultOverAllScore.length+5)+13;
+	        	for(var r:int=0; r < dataResultTotalPoints.length; r++){  
+					var record:Object = dataResultTotalPoints.getItemAt(r);  
+					insertRecordInSheet(rCount+r,sheet,record);
+				}																					
+	        	sheet.setCell((dataEnablerOverAllScore.length+dataResultOverAllScore.length+5+dataResultTotalPoints.length)+13,2,"Total");
+	        	sheet.setCell((dataEnablerOverAllScore.length+dataResultOverAllScore.length+5+dataResultTotalPoints.length)+13,3,lblResultTotalScore.text);
+	        	sheet.setCell((dataEnablerOverAllScore.length+dataResultOverAllScore.length+5+dataResultTotalPoints.length)+13,4,lblResultDummy.text);
+	        	sheet.setCell((dataEnablerOverAllScore.length+dataResultOverAllScore.length+5+dataResultTotalPoints.length)+13,5,lblResultTotPoints.text);
+	        	sheet.setCell((dataEnablerOverAllScore.length+dataResultOverAllScore.length+5+dataResultTotalPoints.length)+13,6,lblResultTotMaxScore.text);
+	        	
+	        	
+	          				
+	          	var xls:ExcelFile = new ExcelFile(); 
+	          	xls.sheets.addItem(sheet); 
+	          
+					          
+	 		  	var bytes:ByteArray = xls.saveToByteArray();  
+	          	var fr:FileReference=new FileReference();
+	          	//Alert.show(resultsheet.getCell(0,1).toString())
+	        	fr.save(bytes,"ScoreReport.xls"); 
+	        	
+	        	
+          	
+		}
+		
+		private function insertRecordInSheet(row:int,sheet:Sheet,record:Object):void{  
+         	var i:int = 2;  
+            for each(var field:String in fields){
+            	if (record[field] != null){
+            		sheet.setCell(row,i, record[field]);
+            	}
+            	i++;  
+            }
+            return;   
+		}
+	
+	]]>
+</mx:Script>
+
+		
+		<mx:VBox styleName="ApplyFontSize" paddingLeft="20"   width="100%" height="100%" horizontalScrollPolicy="off"> 
+			<mx:Spacer/>	
+			<mx:HBox width="95%">
+				<mx:Label text="@Resource(bundle='myResources', key='enablerCriteriaTitle')"  fontWeight="bold"/>
+				
+			</mx:HBox>
+			<mx:DataGrid sortableColumns="false" variableRowHeight="true" useRollOver="false" styleName="ReportDataGridHeaderStyle" wordWrap="true" id="myDataGridEnabler" textAlign="left" width="50%"  allowMultipleSelection="false" draggableColumns="false">
+				<mx:columns>
+			      <mx:DataGridColumn  headerText="@Resource(bundle='myResources', key='criterionPart')" dataField="criteriaShortPartDesc">
+					</mx:DataGridColumn>	
+			        <mx:DataGridColumn wordWrap="true"  headerText="@Resource(bundle='myResources', key='gridOverAllScore')" dataField="subTeamScore" >
+									        
+					</mx:DataGridColumn>
+					
+				</mx:columns>
+		    </mx:DataGrid>
+		    <mx:Spacer/>
+		    <mx:HBox width="95%">
+				<mx:Label  text="@Resource(bundle='myResources', key='resultCriteriaTitle')"  fontWeight="bold"/>
+				
+			</mx:HBox>
+			<mx:DataGrid sortableColumns="false" variableRowHeight="true" useRollOver="false" styleName="ReportDataGridHeaderStyle" wordWrap="true" id="myDataGridResult" textAlign="left" width="50%"  allowMultipleSelection="false" draggableColumns="false">
+				<mx:columns>
+			      <mx:DataGridColumn headerText="@Resource(bundle='myResources', key='criterionPart')" dataField="criteriaShortPartDesc">
+					</mx:DataGridColumn>	
+			        <mx:DataGridColumn wordWrap="true" headerText="@Resource(bundle='myResources', key='gridOverAllScore')" dataField="subTeamScore" >
+									        
+					</mx:DataGridColumn>
+					
+				</mx:columns>
+		    </mx:DataGrid>
+		    <mx:Spacer/>
+		   <mx:HBox width="80%">
+				<mx:Label text="@Resource(bundle='myResources', key='calcOfTotalPoints')"  fontWeight="bold"/>
+				
+			</mx:HBox>
+			 <mx:HBox width="95%">
+				<mx:Label text="@Resource(bundle='myResources', key='enablerComTitle')"  fontWeight="bold"/>
+			</mx:HBox>
+		   <mx:VBox width="95%" verticalGap="0">
+		    	<mx:DataGrid variableRowHeight="true" sortableColumns="false" useRollOver="false"  styleName="ReportDataGridHeaderStyle" wordWrap="true" id="myDataGridEnablerTotalPoints" textAlign="left" width="95%"  allowMultipleSelection="false" draggableColumns="false">
+				<mx:columns>
+			        <mx:DataGridColumn wordWrap="true" headerText="@Resource(bundle='myResources', key='criteria')" id="colEnablerCriteria" dataField="criteriaShortPartDesc">
+			        	<mx:itemRenderer>
+			       			<mx:Component>
+			       				<mx:Text paddingLeft="5" text="{data.criteriaShortPartDesc}"/>
+			       			</mx:Component>
+			       		</mx:itemRenderer>
+			        </mx:DataGridColumn>
+					<mx:DataGridColumn wordWrap="true" id="colEnablerScore" headerText="@Resource(bundle='myResources', key='overAllTeamScore')" dataField="subTeamScore" />
+					<mx:DataGridColumn wordWrap="true" id="colEnablerFactor" headerText="@Resource(bundle='myResources', key='multiplyingFactor')" dataField="factor"/>
+					 <mx:DataGridColumn wordWrap="true" id="colEnablerPoints"  headerText="Overall team score (Points)" dataField="overallPoints"/>
+					 <mx:DataGridColumn wordWrap="true" id="colEnablerMaxPts" headerText="@Resource(bundle='myResources', key='maxPossibleScore')" dataField="pointsAwarded"/>
+					
+				</mx:columns>
+			    </mx:DataGrid>
+			     <mx:HBox width="95%" horizontalGap="0" fontWeight="bold">
+					<mx:Label id="lblEnablerPointsHeader" text="@Resource(bundle='myResources', key='totalPoints')"/>
+					<mx:Label id="lblEnablerTotalScore" width="20%" visible="false"/>
+					<mx:Label paddingLeft="5" id="lblEnablerDummy" width="20%"/>
+					<mx:Label paddingLeft="5" id="lblEnablerTotPoints" width="20%"/>
+					<mx:Label paddingLeft="5" id="lblEnablerTotMaxScore" width="20%"/>
+				</mx:HBox>
+				<mx:Spacer/>
+				<!--<mx:HBox width="95%" horizontalGap="0" fontWeight="bold">
+					<mx:Label id="lblEnablerCharts" text="Enabler Charts"/>
+				</mx:HBox>
+				<mx:Spacer/>
+				<mx:ColumnChart id="enablerChart" width="650" showDataTips="true">
+				 	<mx:horizontalAxis>
+           				<mx:CategoryAxis 
+                			id="enablerCategory"
+                			categoryField="criteriaShortPartDesc"
+           				/>
+		        	</mx:horizontalAxis>
+		        	<mx:series>
+           				<mx:ColumnSeries 
+                			xField="criteriaShortPartDesc" 
+                			yField="pointsAwarded" 
+                			displayName="Max Possible Score"
+           				/>
+           				<mx:ColumnSeries 
+                			xField="criteriaShortPartDesc" 
+                			yField="overallPoints" 
+                			displayName="Sub Team Points"
+           				/>
+        			</mx:series>	
+				</mx:ColumnChart> -->
+				
+		    </mx:VBox>
+			
+		      <mx:HBox width="95%">
+				<mx:Label  text="@Resource(bundle='myResources', key='resultComTitle')"  fontWeight="bold"/>
+				
+			</mx:HBox>
+		   <mx:VBox width="95%" verticalGap="0">
+		    	<mx:DataGrid sortableColumns="false" useRollOver="false" styleName="ReportDataGridHeaderStyle" wordWrap="true" id="myDataGridResultTotalPoints" textAlign="left" width="95%"  allowMultipleSelection="false" draggableColumns="false">
+				<mx:columns>
+			       <mx:DataGridColumn wordWrap="true" id="colResultHeader" headerText="@Resource(bundle='myResources', key='criteria')" dataField="criteriaShortPartDesc">
+			       		<mx:itemRenderer>
+			       			<mx:Component>
+			       				<mx:Text paddingLeft="5" text="{data.criteriaShortPartDesc}"/>
+			       			</mx:Component>
+			       		</mx:itemRenderer>
+			       </mx:DataGridColumn>
+					<mx:DataGridColumn id="colResultTotalScore" wordWrap="true" headerText="@Resource(bundle='myResources', key='overAllTeamScore')" dataField="subTeamScore" />
+					<mx:DataGridColumn  id="colResultFactor" wordWrap="true" headerText="@Resource(bundle='myResources', key='multiplyingFactor')" dataField="factor"/>
+					 <mx:DataGridColumn  id="colResultTotPoints"  wordWrap="true" headerText="Overall team score (Points)" dataField="overallPoints"/>
+					 <mx:DataGridColumn id="colResultTotMaxScore" wordWrap="true" headerText="@Resource(bundle='myResources', key='maxPossibleScore')" dataField="pointsAwarded"/>
+					
+				</mx:columns>
+			    </mx:DataGrid>
+			     <mx:HBox width="95%" horizontalGap="0" fontWeight="bold">
+					<mx:Label id="lblResultHeader" text="@Resource(bundle='myResources', key='totalPoints')"/>
+					<mx:Label paddingLeft="5"  id="lblResultTotalScore" width="20%"  visible="false"/>
+					<mx:Label  id="lblResultDummy" width="20%"/>
+					<mx:Label paddingLeft="5"  id="lblResultTotPoints" width="20%"/>
+					<mx:Label paddingLeft="5"  id="lblResultTotMaxScore" width="20%"/>
+				</mx:HBox>
+		    </mx:VBox>
+			<mx:Spacer/>
+				<mx:HBox width="95%" horizontalGap="0" fontWeight="bold">
+					<mx:Label id="lblResultCharts" text="Charts"/>
+				</mx:HBox>
+				<mx:ColumnChart width="100%" id="resultChart" showDataTips="true">
+				 	<mx:horizontalAxis>
+           				<mx:CategoryAxis 
+                			id="resultCategory"
+                			categoryField="criteriaShortPartDesc"
+           				/>
+		        	</mx:horizontalAxis>
+		        	<mx:series>
+           				<mx:ColumnSeries 
+                			xField="criteriaShortPartDesc" 
+                			yField="pointsAwarded" 
+                			displayName="Max Possible Score"
+                			
+           				/>
+           				<mx:ColumnSeries 
+                			xField="criteriaShortPartDesc" 
+                			yField="overallPoints" 
+                			displayName="Sub Team Points"
+           				/>
+        			</mx:series>	
+				</mx:ColumnChart> 
+			
+		    <mx:HBox width="95%" horizontalAlign="right">
+				<mx:Button id="btnExportToExcel" label="Export to Excel" click="exportToExcel()"/>
+				
+			</mx:HBox>
+			 <mx:Spacer/>
+		    
+		</mx:VBox>
+	
+</mx:Canvas>

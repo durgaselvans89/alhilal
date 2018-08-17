@@ -1,0 +1,280 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml"  xmlns:s="library://ns.adobe.com/flex/spark"
+	borderStyle="none" width="100%" height="100%" includeInLayout="false" styleName="ApplyFontSize" 
+	creationComplete="init()" horizontalScrollPolicy="off" verticalScrollPolicy="off">
+	
+	<mx:Style source="src/com/selfassessment/view/assets/Styles.css"/>	
+	
+	<mx:Script>
+		<![CDATA[
+			import mx.containers.HBox;
+			import src.com.selfassessment.model.ProjectDo;
+			import mx.containers.Panel;
+			import mx.core.Application;
+			import src.com.selfassessment.model.TeamDO;
+			import com.boyzoid.PagableArrayCollection.PagableArrayCollection;
+			import mx.managers.CursorManager;
+			import mx.managers.PopUpManager;
+			import src.com.selfassessment.controller.TeamController;
+			import mx.controls.Alert;
+			public var oldHeight:Number=0;
+			public var oldPanelHeight:Number=0;
+			public var mainProj:MaintainProjects=new MaintainProjects;
+			public var teamName:String;
+			public function init():void{
+				if(Application.application.language=="en_US"){
+					mainVBox.styleName='ApplyFontSizeEn';
+				}
+				else{
+					mainVBox.styleName='ApplyFontSizeAr';
+				}
+				this.parent.parent.parent.parent.parent.parent.parent.height=477;
+				//oldPanelHeight=this.parent.parent.parent.parent.parent.parent.parent.height;
+				//Alert.show(oldPanelHeight.toString());
+				//mainProj=this.parent.parent as MaintainProjects;
+				/* if(hBoxReport.visible==true){
+        			hBoxReport.height=150;
+        			var panelMain:Panel=this.parent.parent.parent.parent.parent.parent.parent as Panel;
+        			panelMain.height=430+170; 
+        		}
+        		else{
+        			hBoxReport.height=0;
+        			this.parent.parent.parent.parent.parent.parent.parent.height=477;
+        		} */
+			} 
+			public var CriteriaService:TeamController=new TeamController();
+			public var popupwindow:AssignProjectTeamMember;
+    		public function AssingTeamMemb():void{
+    			 CriteriaService  = new TeamController();
+    			 CursorManager.setBusyCursor();
+    			 popupwindow = AssignProjectTeamMember(PopUpManager.createPopUp(this,AssignProjectTeamMember,true));
+    			 popupwindow.txtTeamName.text=teamName;
+    			 popupwindow.btnAssign.addEventListener(MouseEvent.CLICK,AssignTeamMemberFn);
+					CriteriaService.selectProjectTeamMember(parseInt(lblProjectID.text),function(guidanceArray:Array):void{
+						
+						if(guidanceArray.length ==0){
+							Alert.show(resourceManager.getString('myResources','recordsNotFound'));
+						}
+						popupwindow.myPageableArrCol = new PagableArrayCollection(guidanceArray);
+						popupwindow.myPageableArrCol.itemsPerPage = 10;
+						popupwindow.chkPage();
+						popupwindow.myDataGrid.dataProvider = popupwindow.myPageableArrCol;
+						/* for(var i:int=0;i<popupwindow.myPageableArrCol.length;i++){
+	    					if(popupwindow.myPageableArrCol[i]["flag"]==true){
+	    						
+	    					}
+    					} */
+    		
+						CursorManager.removeAllCursors();
+					}); 
+    			
+    			//popupwindow.txtTeamName.text = cmbteamname.selectedLabel;
+    			
+    		}
+    		
+    		
+    		public var PermArr:Array = new Array();
+    		public var projectDO:ProjectDo=new ProjectDo();
+    		public function AssignTeamMemberFn(event:MouseEvent):void{
+    			var projArray:Array=new Array();
+    			var projFlag:int=0;
+    			if(popupwindow.txtTeamName.text!=""){
+    				for(var i:int=0;i<popupwindow.myPageableArrCol.length;i++){
+    					if(popupwindow.myPageableArrCol[i]["flag"]==true){
+    						projectDO=new ProjectDo();
+    						projectDO.userID=parseInt(popupwindow.myPageableArrCol[i]["userid"]);
+    						projArray.push(projectDO);
+    						projFlag=1;
+    					}
+    				}
+    				
+    				 CriteriaService  = new TeamController();
+    				 CriteriaService.updateProjectTeamMembers(projArray,parseInt(lblProjectID.text),popupwindow.txtTeamName.text,function(resultNum:Number):void{
+    				 	//Alert.show(resultNum+"\n"+projFlag);
+    				 	if(resultNum!=0 && projFlag==1){
+    				 		Alert.show(resourceManager.getString('myResources','teamMemAssignedSucc'));
+    				 		CriteriaService.selectProjectTeamMember(parseInt(lblProjectID.text),function(guidanceArray:Array):void{
+						
+								if(guidanceArray.length ==0){
+									Alert.show(resourceManager.getString('myResources','recordsNotFound'));
+								}
+								popupwindow.myPageableArrCol = new PagableArrayCollection(guidanceArray);
+								popupwindow.myPageableArrCol.itemsPerPage = 10;
+								popupwindow.myDataGrid.dataProvider = popupwindow.myPageableArrCol;
+								popupwindow.chkPage();
+								CursorManager.removeAllCursors();
+								
+							}); 
+    				 	}
+    				 	else if(resultNum!=0 && projFlag==0){
+    				 		CriteriaService.selectProjectTeamMember(parseInt(lblProjectID.text),function(guidanceArray:Array):void{
+						
+								if(guidanceArray.length ==0){
+									Alert.show(resourceManager.getString('myResources','recordsNotFound'));
+								}
+								popupwindow.myPageableArrCol = new PagableArrayCollection(guidanceArray);
+								popupwindow.myPageableArrCol.itemsPerPage = 10;
+								popupwindow.myDataGrid.dataProvider = popupwindow.myPageableArrCol;
+								popupwindow.chkPage();
+								CursorManager.removeAllCursors();
+							}); 
+    				 	}
+    				 	else if(resultNum==-1){
+    				 		//Alert.show("Team name already exists");
+    				 		Alert.show(resourceManager.getString('myResources','teamAlreadyExists'));
+    				 	}
+    				 });
+    				
+    			}
+    			else{
+    				//Alert.show("Enter team name");
+    				Alert.show(resourceManager.getString('myResources','enterTeamName'));
+    			}
+    			
+    		}
+    		
+    		public var popupAttach:AttachmentView;
+    		public function AttachFile(event:MouseEvent):void{
+			popupAttach = AttachmentView(PopUpManager.createPopUp(this,AttachmentView,true));
+			
+			CriteriaService = new TeamController();
+			var vbox:VBox = new VBox();
+			vbox = this.parent as VBox;
+			if(vbox.id.toString() == "boxResults"){
+				popupAttach.lblEnableResult.text = "Result";
+				Application.application.attachmentClick="Result";
+				CursorManager.setBusyCursor();
+				popupAttach.doc.dataField = "resultdocument";
+				popupAttach.desc.dataField = "resultdocumentdesc";
+				CriteriaService.selectResultDocument("0",function(criteriaArray:Array):void{
+					CursorManager.removeAllCursors();
+					popupAttach.myDataGrid.dataProvider = criteriaArray;
+				});
+			}
+			else{
+				popupAttach.lblEnableResult.text = "Enabler";
+				Application.application.attachmentClick="Enabler";
+				popupAttach.doc.dataField = "enablerdocument";
+				popupAttach.desc.dataField = "enablerdocumentdesc";
+				CursorManager.setBusyCursor();
+				CriteriaService.selectEnablerDocument("0",function(criteriaArray:Array):void{
+					CursorManager.removeAllCursors();
+					popupAttach.myDataGrid.dataProvider = criteriaArray;
+				});
+			}
+			//popupAttach.lblId.text = tabnavigator.selectedChild.label;
+			
+		} 
+		]]>
+	</mx:Script>
+	
+	<mx:VBox id="mainVBox" width="100%" height="100%"  verticalGap="0" verticalAlign="top" horizontalAlign="center">
+		
+		<mx:Spacer height="3%"/>
+		
+		<mx:HBox width="85%" height="5%" horizontalAlign="center" horizontalGap="0">
+			<mx:HBox width="100%" horizontalAlign="right">
+				<mx:Label text="@Resource(bundle='myResources', key='btnassign')" click="AssingTeamMemb()" useHandCursor="true" mouseChildren="false" color="blue" textDecoration="underline" buttonMode="true"/>
+			</mx:HBox>
+		</mx:HBox>
+		
+		<mx:HBox width="100%" height="25%" horizontalAlign="center" horizontalGap="0">
+			<mx:Spacer width="5%"/>
+			<mx:Form width="50%" horizontalScrollPolicy="off">
+				<mx:FormItem width="100%" fontWeight="bold" label="@Resource(bundle='myResources', key='projName')">
+					<mx:HBox width="100%">
+						<s:TextInput tabIndex="0" fontWeight="normal" id="txtprojecttitle" width="80%" />
+					</mx:HBox>
+				</mx:FormItem>
+				<mx:FormItem width="100%" fontWeight="bold" label="@Resource(bundle='myResources', key='expectedStartDate')">
+					<mx:HBox width="100%">
+					<mx:DateField fontWeight="normal" selectableRange="{{rangeStart : new Date()}}" tabIndex="3" id="dtfStartDate" yearNavigationEnabled="true" formatString="DD-MM-YYYY"/>
+					</mx:HBox>
+				</mx:FormItem>		
+			</mx:Form>
+			<mx:Form width="50%" horizontalScrollPolicy="off">
+				<mx:FormItem width="100%" fontWeight="bold" label="@Resource(bundle='myResources', key='responsibility')">
+					<mx:Canvas id="canvasRole" width="70%" resize="{rolename.width=canvasRole.width}" >
+						<mx:ComboBox fontWeight="normal"  width="100%" dropdownWidth="200" tabIndex="2" id="rolename" labelField="userName" data="userID"/>
+					</mx:Canvas>
+				</mx:FormItem>
+				<mx:FormItem width="100%" fontWeight="bold" label="@Resource(bundle='myResources', key='expectedEndDate')" horizontalAlign="left">
+					<mx:DateField fontWeight="normal" selectableRange="{{rangeStart : new Date()}}" tabIndex="3" id="dtfEndDate" yearNavigationEnabled="true" formatString="DD-MM-YYYY"/>
+				</mx:FormItem>
+			</mx:Form>
+		</mx:HBox>
+		
+		<mx:HBox width="100%" height="40%" horizontalAlign="center" horizontalGap="0" >
+			<mx:Spacer width="12%"/>
+			<mx:Form width="100%" height="100%" horizontalScrollPolicy="off">
+				<mx:FormItem width="100%" fontWeight="bold" label="@Resource(bundle='myResources', key='description')">
+					<s:TextArea fontWeight="normal" tabIndex="2" id="txtDesc" width="90%" height="100" maxChars="1000"/>
+				</mx:FormItem>
+			</mx:Form>
+		</mx:HBox>
+			
+		<mx:Box width="100%" height="30%" id="hBoxReport" horizontalGap="0">
+			<mx:HBox width="100%" horizontalAlign="center" horizontalGap="0">
+				<mx:Spacer width="1%"/>
+				<mx:Form width="98%" height="30%" horizontalScrollPolicy="off">
+					<mx:FormItem width="100%" fontWeight="bold" label="@Resource(bundle='myResources', key='enterProgressReport')">
+						<s:TextArea tabIndex="2" fontWeight="normal" id="txtProgressReport" width="91%" height="70" maxChars="1000"/>
+					</mx:FormItem>
+				</mx:Form>
+			</mx:HBox>
+			<mx:HBox width="100%" height="70%" horizontalAlign="right">
+				<mx:Label mouseChildren="false" id="lblShowProgressReport" useHandCursor="true" color="blue" buttonMode="true" textDecoration="underline" text="Progress report Log details"/>
+			</mx:HBox>
+		</mx:Box>
+		
+			<!--<mx:Spacer height="5%"/>-->
+		<mx:HBox width="0" height="0" horizontalAlign="center" horizontalGap="0">
+			<mx:VBox width="20%" horizontalAlign="right">
+				<mx:Text fontWeight="bold" width="170"   text="@Resource(bundle='myResources', key='impact')"/>
+			</mx:VBox>	
+			<mx:HBox width="80%">
+				<mx:Spacer width="1%"/>
+				<mx:HSlider slideDuration="300" width="88%" labelOffset="1" value="50" useHandCursor="true" buttonMode="true" id="hsldrOrgStrategy" showDataTip="true" snapInterval="5" showTrackHighlight="true" labels="[0,10,20,30,40,50,60,70,80,90,100]" minimum="0" maximum="100"/>
+			</mx:HBox>	
+		</mx:HBox>
+		
+		<!--<mx:Spacer height="10"/>
+		<mx:Spacer/>-->
+		
+		<mx:HBox width="0" height="0" horizontalAlign="center" horizontalGap="0">
+			<mx:VBox width="20%" horizontalAlign="right">
+				<mx:Text fontWeight="bold" width="170"   text="@Resource(bundle='myResources', key='scoreImpact')"/>
+			</mx:VBox>	
+			<mx:HBox width="80%">
+				<mx:Spacer width="1%"/>
+				<mx:HSlider slideDuration="300" width="88%" labelOffset="1" value="25" useHandCursor="true" buttonMode="true" id="hsldrCritrionPart" showDataTip="true" snapInterval="5" showTrackHighlight="true" labels="[0,10,20,30,40,50,60,70,80,90,100]" minimum="0" maximum="100"/>
+			</mx:HBox>	
+		</mx:HBox>
+		
+		<!--<mx:Spacer height="10"/>
+		<mx:Spacer/>-->
+		<mx:HBox width="0" height="0" horizontalAlign="center" horizontalGap="0">
+			<mx:VBox width="20%" horizontalAlign="right">
+				<mx:Text fontWeight="bold" width="170" text="@Resource(bundle='myResources', key='ease')"/>
+			</mx:VBox>	
+			<mx:HBox width="80%">
+				<mx:Spacer width="1%"/>
+				<mx:HSlider slideDuration="300" width="88%" labelOffset="1" value="25" useHandCursor="true" buttonMode="true" id="hsldrEase" showDataTip="true" snapInterval="5" showTrackHighlight="true" labels="[0,10,20,30,40,50,60,70,80,90,100]" minimum="0" maximum="100"/>
+			</mx:HBox>	
+		</mx:HBox>
+		
+		<mx:HBox width="100%" height="3%">
+			<mx:Spacer width="100%" height="100%"/>
+		</mx:HBox>
+		
+		<mx:HBox width="82%" height="8%" horizontalAlign="right" verticalAlign="bottom" horizontalGap="0">
+			<mx:HBox width="100%" height="100%" horizontalAlign="right">
+				<mx:Button id="btnUpdate" fontWeight="bold" label="@Resource(bundle='myResources', key='update')" useHandCursor="true" buttonMode="true" />
+				<mx:Button id="btnCancel" fontWeight="bold" label="@Resource(bundle='myResources', key='cancel')" useHandCursor="true" buttonMode="true" />
+			</mx:HBox>
+		</mx:HBox>
+		<mx:Spacer width="1%"/>
+	</mx:VBox>
+
+<mx:Label id="lblProjectID" width="0" height="0"/>
+</mx:Canvas>

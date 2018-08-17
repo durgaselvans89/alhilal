@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Panel borderStyle="none" xmlns:mx="http://www.adobe.com/2006/mxml"
+	 width="100%" height="100%" creationComplete="init()"
+	  xmlns:com="src.com.selfassessment.view.*" verticalAlign="middle" horizontalAlign="center">
+	
+	<mx:Script>
+		<![CDATA[
+			public var txtBuilder:Login = new Login();
+			public function init():void{
+			}
+			
+		]]>
+	</mx:Script>
+	
+	<mx:VBox id="vbox2" width="100%"  backgroundColor="White" height="100%" color="black" verticalAlign="middle" horizontalAlign="center" fontSize="10" fontFamily="Verdana">
+	
+		<mx:HBox verticalGap="0" width="100%">
+			<mx:Spacer width="2%"/>
+			<mx:Text text="What is Excellence Builder ?" textDecoration="underline" fontWeight="bold" fontSize="12"/>
+		</mx:HBox>
+		
+		<mx:HBox verticalGap="0" height="30%" width="100%">
+			<mx:Spacer width="2%"/>
+			<mx:TextArea fontSize="11" editable="false" borderStyle="none" width="98%" height="100%" wordWrap="true" text="An Internet application tool for self-assessment developed over years of experience and from interacting with award-winning organisations across the region. The application is aimed at helping organisations to work as a team to conduct self-assessment against the EFQM Excellence Model. This computer-aided self-assessment tool facilitates the habit of making senior management in control of improvement projects throughout the organisation."/>
+		</mx:HBox>
+		
+		
+		<mx:HBox verticalGap="0" width="100%">
+			<mx:Spacer width="2%"/>
+			<mx:Text selectable="false" fontSize="11" width="98%" height="100%" text="This application is built around the following principles:"/>
+		</mx:HBox>
+		
+		<mx:HBox verticalGap="0" height="10%" width="100%">
+			<mx:Spacer width="2%"/>
+			<mx:TextArea editable="false" wordWrap="true" borderStyle="none" fontSize="11" width="98%" height="100%" text="A)	Excellence is a habit which can only be embedded into an organisation if encapsulated into a system that allows the entire organisation to work as one team with common objectives but sharing the effort spent on improvement activities between them."/>
+		</mx:HBox>
+		
+		<mx:HBox verticalGap="0" width="100%">
+			<mx:Spacer width="2%"/>
+			<mx:TextArea fontSize="11" editable="false" borderStyle="none" width="98%" height="100%" wordWrap="true" text="B)	Creating a culture of excellence by allowing senior management to be in control of all the improvement projects throughout the organisation in line with the organisational needs and strategies."/>
+		</mx:HBox>
+		
+		<mx:HBox verticalGap="0" width="100%">
+			<mx:Spacer width="2%"/>
+			<mx:Text selectable="false" fontSize="11" width="98%" height="100%" text="C)	Enabling people in the organisation to share their work and knowledge."/>
+		</mx:HBox>
+		
+		
+	</mx:VBox>
+</mx:Panel>

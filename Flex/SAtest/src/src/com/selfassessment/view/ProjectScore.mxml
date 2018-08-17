@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" 
+	borderStyle="none" width="100%" height="100%" includeInLayout="false" creationComplete="init()"  verticalScrollPolicy="off">
+	
+	<mx:Style source="src/com/selfassessment/view/assets/Styles.css"/>	
+	<mx:Script>
+		<![CDATA[
+			import mx.core.Application;
+			private function init():void{
+				if(Application.application.language=="en_US"){
+					mainVBox.styleName='ApplyFontSizeEn';
+				}
+				else{
+					mainVBox.styleName='ApplyFontSizeAr';
+				}
+			}
+		]]>
+	</mx:Script>
+	
+	<mx:VBox id="mainVBox" width="100%" height="100%" verticalGap="0" verticalAlign="top" horizontalAlign="center">
+		<mx:Spacer/>
+		<mx:Spacer/>
+		<mx:HBox width="100%" horizontalAlign="center" horizontalGap="0">
+			<mx:Spacer width="10%"/>
+			<mx:Form width="50%" horizontalScrollPolicy="off">
+				<mx:FormItem width="100%" fontWeight="bold" label="@Resource(bundle='myResources', key='projName')">
+					<mx:HBox width="100%">
+						<mx:TextInput tabIndex="0" fontWeight="normal"  id="txtprojecttitle" width="80%" />
+					</mx:HBox>
+				</mx:FormItem>
+				<mx:FormItem width="100%" fontWeight="bold"  label="@Resource(bundle='myResources', key='startDate')">
+					<mx:HBox width="100%">
+					<mx:DateField fontWeight="normal"  selectableRange="{{rangeStart : new Date()}}" tabIndex="3" id="dtfStartDate" yearNavigationEnabled="true" formatString="DD-MM-YYYY"/>
+					</mx:HBox>
+				</mx:FormItem>		
+				
+			</mx:Form>
+			<mx:Form width="50%"  horizontalScrollPolicy="off">
+				<mx:FormItem width="100%" fontWeight="bold"  label="@Resource(bundle='myResources', key='responsibility')">
+					<mx:TextInput fontWeight="normal"   tabIndex="1" editable="false" id="txtResp" width="75%" />
+				</mx:FormItem>
+				
+				<mx:FormItem width="100%" fontWeight="bold"  label="@Resource(bundle='myResources', key='endDate')" horizontalAlign="left">
+					<mx:DateField  fontWeight="normal" selectableRange="{{rangeStart : new Date()}}" tabIndex="3" id="dtfEndDate" yearNavigationEnabled="true" formatString="DD-MM-YYYY"/>
+				</mx:FormItem>
+				
+				
+			</mx:Form>
+			
+		</mx:HBox>
+		
+		
+		<mx:HBox width="100%"  horizontalAlign="center" horizontalGap="0">
+			<mx:Spacer width="11.5%"/>
+			<mx:Form width="100%"  horizontalScrollPolicy="off">
+				<mx:FormItem width="100%" fontWeight="bold"  label="@Resource(bundle='myResources', key='description')">
+						<mx:TextArea fontWeight="normal"  tabIndex="2" id="txtDesc" width="90%" height="50" maxChars="1000"/>
+				</mx:FormItem>
+			</mx:Form>
+			</mx:HBox>
+			<mx:HBox width="100%" horizontalAlign="center" horizontalGap="0">
+			<mx:Spacer width="4%"/>
+			<mx:Form width="100%" horizontalScrollPolicy="off">
+				<mx:FormItem width="100%" fontWeight="bold"  label="@Resource(bundle='myResources', key='enterProgressReport')">
+						<mx:TextArea tabIndex="2" fontWeight="normal" id="txtProgressReport" width="90%" height="50" maxChars="1000"/>
+				</mx:FormItem>
+			</mx:Form>
+			</mx:HBox>
+			<mx:Spacer height="10"/>
+		<mx:Spacer/>
+		
+			
+		<mx:HBox width="100%"  horizontalAlign="center" horizontalGap="0">
+			<mx:VBox width="20%" horizontalAlign="right">
+				<mx:Text fontWeight="bold" width="170"   text="@Resource(bundle='myResources', key='impact')"/>
+			</mx:VBox>	
+			<mx:HBox width="80%">
+				<mx:Spacer width="1%"/>
+				<mx:HSlider slideDuration="300" width="88%" labelOffset="1" value="50" useHandCursor="true" buttonMode="true" id="hsldrOrgStrategy" showDataTip="true" snapInterval="5" showTrackHighlight="true" labels="[0,10,20,30,40,50,60,70,80,90,100]" minimum="0" maximum="100"/>
+			</mx:HBox>	
+		</mx:HBox>
+		
+		<mx:Spacer height="10"/>
+		<mx:Spacer/>
+		
+		<mx:HBox width="100%"  horizontalAlign="center" horizontalGap="0">
+			<mx:VBox width="20%" horizontalAlign="right">
+				<mx:Text fontWeight="bold" width="170"   text="@Resource(bundle='myResources', key='scoreImpact')"/>
+			</mx:VBox>	
+			<mx:HBox width="80%">
+				<mx:Spacer width="1%"/>
+				<mx:HSlider slideDuration="300" width="88%" labelOffset="1" value="25" useHandCursor="true" buttonMode="true" id="hsldrCritrionPart" showDataTip="true" snapInterval="5" showTrackHighlight="true" labels="[0,10,20,30,40,50,60,70,80,90,100]" minimum="0" maximum="100"/>
+			</mx:HBox>	
+		</mx:HBox>
+		
+		<mx:Spacer height="10"/>
+		<mx:Spacer/>
+		<mx:HBox width="100%"  horizontalAlign="center" horizontalGap="0">
+			<mx:VBox width="20%" horizontalAlign="right">
+				<mx:Text fontWeight="bold" width="170" text="@Resource(bundle='myResources', key='ease')"/>
+			</mx:VBox>	
+			<mx:HBox width="80%">
+				<mx:Spacer width="1%"/>
+				<mx:HSlider slideDuration="300" width="88%" labelOffset="1" value="25" useHandCursor="true" buttonMode="true" id="hsldrEase" showDataTip="true" snapInterval="5" showTrackHighlight="true" labels="[0,10,20,30,40,50,60,70,80,90,100]" minimum="0" maximum="100"/>
+			</mx:HBox>	
+		</mx:HBox>
+		
+		
+		<mx:Spacer/>
+		<mx:Spacer/>
+		 <mx:HBox width="85%"  horizontalAlign="right">
+				
+			<mx:Button id="btnUpdate" fontWeight="bold"  label="@Resource(bundle='myResources', key='save')" useHandCursor="true" buttonMode="true" />
+			<mx:Button id="btnCancel"  label="@Resource(bundle='myResources', key='btncancel')" fontWeight="bold"  useHandCursor="true" buttonMode="true" />
+		</mx:HBox>
+			
+			
+	</mx:VBox>
+
+
+</mx:Panel>

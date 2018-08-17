@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml"  xmlns:goldhold="goldhold.controls.*"   xmlns:s="library://ns.adobe.com/flex/spark"
+	   y="{(Application.application.height/2)-(this.height/2)}" 
+	 x="{(Application.application.width/2)-(this.width/2)}"
+	  horizontalScrollPolicy="off" width="800" height="600" creationComplete="init()">
+	<mx:Script>
+		<![CDATA[
+		
+			import mx.managers.PopUpManager;
+			import mx.core.Application;
+			
+			private function init():void{
+				clearAll();
+				if(Application.application.language=="en_US"){
+					mainVBox.styleName='ApplyFontSizeEn';
+				}
+				else{
+					mainVBox.styleName='ApplyFontSizeAr';
+				}
+			}
+			public function clearAll():void{
+				txtProjTitle.text="";
+				rolename.selectedIndex=0;
+				dtfStartDate.text="";
+				dtfEndDate.text="";
+				txtDesc.text="";
+    			hsldrOrgStrategy.value=50;
+    			hsldrCritrionPart.value=25;
+    			hsldrEase.value=25;
+    			txtFinancial.text="";
+    			txtResource.text="";
+			}
+		]]>
+	</mx:Script>
+	
+	<mx:VBox  id="mainVBox" borderStyle="solid" width="100%" height="100%" borderThickness="3" shadowDistance="8" shadowDirection="right" dropShadowEnabled="true" dropShadowColor="#000000" borderColor="#636e83" horizontalAlign="center" verticalAlign="top" backgroundColor="white">
+		
+		<mx:Canvas width="100%" useHandCursor="true" buttonMode="true" mouseDown="{this.startDrag()}" mouseUp="{this.stopDrag()}" height="25" styleName="panel1filled"  borderSides="left,right,top" cornerRadius="3" borderStyle="none">
+			<mx:Label left="10" fontWeight="bold"  id="lblTitle" text="@Resource(bundle='myResources', key='createProj')" color="#FFFFFF" fontSize="14"/>
+			<mx:Image toolTip="Close" click="{PopUpManager.removePopUp(this)}" right="2" top="2" source="@Embed('assets/close.png')" useHandCursor="true" buttonMode="true"  id="closepopupLink"/>
+		</mx:Canvas>
+		<mx:VBox width="100%" height="95%" horizontalAlign="center" paddingTop="5">
+			
+		
+			<mx:HBox width="90%" height="5%" >
+				<mx:HBox width="50%">
+					<mx:Label fontWeight="bold" text="@Resource(bundle='myResources', key='projName')" width="40%"/>
+					<s:TextInput fontWeight="normal"  id="txtProjTitle" tabIndex="0" width="60%"  maxChars="25"/>
+				</mx:HBox>
+				<mx:HBox width="50%">
+					<mx:Label fontWeight="bold" text="@Resource(bundle='myResources', key='responsibility')" width="40%"/>
+					<mx:Canvas id="canvasRole" width="60%" resize="{rolename.width=canvasRole.width}" >
+						<mx:ComboBox fontWeight="normal"  width="100%" dropdownWidth="175" tabIndex="2" id="rolename" labelField="userName" data="userID"/>
+					</mx:Canvas>
+				</mx:HBox>
+			</mx:HBox>	
+			<mx:HBox width="90%" height="5%">
+				<mx:HBox width="50%">
+					<mx:Label id="lblstartDate" fontWeight="bold" text="@Resource(bundle='myResources', key='expectedStartDate')" width="40%"/>
+					<mx:DateField width="60%" selectableRange="{{rangeStart : new Date()}}" tabIndex="3" id="dtfStartDate" yearNavigationEnabled="true" formatString="DD-MM-YYYY"/>
+				</mx:HBox>
+				<mx:HBox width="50%">
+					<mx:Label fontWeight="bold" text="@Resource(bundle='myResources', key='expectedEndDate')" width="40%"/>
+					<mx:DateField width="60%"  selectableRange="{{rangeStart : new Date()}}" tabIndex="3" id="dtfEndDate" yearNavigationEnabled="true" formatString="DD-MM-YYYY"/>
+				</mx:HBox>
+			</mx:HBox>			
+				
+					
+			
+				
+			<mx:HBox id="descBox" width="90%" height="10%">
+				<mx:HBox width="19.5%" height="100%">
+					<mx:Label id="lblDesc" text="@Resource(bundle='myResources', key='description')" styleName="ApplyFontSize" fontWeight="bold"/>
+				</mx:HBox>
+				<mx:HBox width="79.5%" height="100%">
+					<s:TextArea id="txtDesc" height="100%" width="100%"/>
+				</mx:HBox>
+			</mx:HBox>
+			
+			<mx:Spacer width="100%" height="2%"/>
+			
+			<mx:HBox width="90%" height="20%">
+				<mx:HBox width="19.5%" height="100%">
+					<mx:Label text="Selected Strengths" styleName="ApplyFontSize" fontWeight="bold"/>
+				</mx:HBox>
+					
+				<mx:HBox width="79.5%" height="100%">
+					<mx:DataGrid id="myDataGrid" draggableColumns="false" variableRowHeight="true" width="100%" height="100%" wordWrap="true">
+						<mx:columns>
+							<mx:DataGridColumn width="75" headerText="Criterion" dataField="approachID">
+							</mx:DataGridColumn>
+							<mx:DataGridColumn width="200" dataField="strength" headerText="Strength">
+							</mx:DataGridColumn>
+						</mx:columns>
+					</mx:DataGrid>
+				</mx:HBox>
+			</mx:HBox>
+			
+			<mx:Spacer width="100%" height="2%"/>
+			
+			<mx:HBox width="90%" height="20%">
+				<mx:HBox width="19.5%" height="100%">
+					<mx:Label id="lblAFI" text="Selected AFI" styleName="ApplyFontSize" fontWeight="bold" textAlign="right"/>
+				</mx:HBox>
+					
+				<mx:HBox width="79.5%" height="100%">
+					<mx:DataGrid id="myDataGrid1" draggableColumns="false" variableRowHeight="true" width="100%" height="100%" wordWrap="true">
+						<mx:columns>
+							<mx:DataGridColumn width="75" headerText="Criterion" dataField="criteriaID">
+							</mx:DataGridColumn>
+							<mx:DataGridColumn width="200" headerText="AFI" dataField="areaforimprovement">
+							</mx:DataGridColumn>
+						</mx:columns>
+					</mx:DataGrid>
+				</mx:HBox>
+			</mx:HBox>
+			
+				
+			<mx:Spacer width="100%" height="2%"/>
+			
+			<mx:HBox width="90%" height="20%">
+				<mx:HBox width="19.5%" height="100%">
+					<mx:Text selectable="false" width="100%" height="100%" text="Expected Benefits (Financial/ Non-financial)" styleName="ApplyFontSize" fontWeight="bold"/>
+				</mx:HBox>
+				<mx:HBox width="79.5%" height="100%">
+					<s:TextArea id="txtFinancial" height="100%" width="100%"/>
+				</mx:HBox>
+			</mx:HBox>
+			
+			<mx:Spacer width="100%" height="2%"/>
+			
+			<mx:HBox width="90%" height="20%">
+				<mx:HBox width="19.5%" height="100%">
+					<mx:Text selectable="false" width="100%" height="100%" text="Resources Required (Capital/ Expense/ Manpower)" styleName="ApplyFontSize" fontWeight="bold"/>
+				</mx:HBox>
+				<mx:HBox width="79.5%" height="100%">
+					<s:TextArea id="txtResource" height="100%" width="100%"/>
+				</mx:HBox>
+			</mx:HBox>
+			
+			<mx:Spacer width="100%" height="2%"/>
+			
+			<mx:HBox width="90%" height="5%">
+				<mx:Spacer width="19.5%"/>
+				<mx:HBox width="79.5%" horizontalAlign="right">
+					<mx:Button id="btnAdd" name="btncreate" label="@Resource(bundle='myResources', key='btncreate')" tabIndex="10" useHandCursor="true" buttonMode="true"/>	
+					<mx:Button name="btncancel" label="@Resource(bundle='myResources', key='clear')" tabIndex="11" useHandCursor="true" buttonMode="true" click="clearAll()"/>
+				</mx:HBox>
+					
+			</mx:HBox>
+				
+			<!--<mx:HBox width="100%" height="10%">
+				<mx:Spacer width="100%" height="100%"/>
+			</mx:HBox>-->
+			
+			<!-- Old code -->
+	
+			<mx:HBox width="0" height="0"  horizontalAlign="center" horizontalGap="0">
+				<mx:Spacer width="1%"/>
+				<mx:VBox width="20%" horizontalAlign="right">
+					<mx:Text fontWeight="bold" width="170"   text="@Resource(bundle='myResources', key='impact')"/>
+				</mx:VBox>	
+				<mx:HBox width="72%">
+					<!--<mx:Spacer width="1%"/>-->
+					<mx:HSlider slideDuration="300" width="100%" labelOffset="1" value="50" useHandCursor="true" buttonMode="true" id="hsldrOrgStrategy" showDataTip="true" snapInterval="5" showTrackHighlight="true" labels="[0,10,20,30,40,50,60,70,80,90,100]" minimum="0" maximum="100"/>
+				</mx:HBox>
+			</mx:HBox>
+		
+			<mx:HBox width="0%" height="0" horizontalAlign="center" horizontalGap="0">
+				<mx:Spacer width="1%"/>
+				<mx:VBox width="20%" horizontalAlign="right">
+					<mx:Text fontWeight="bold" width="170"   text="@Resource(bundle='myResources', key='scoreImpact')"/>
+				</mx:VBox>	
+				<mx:HBox width="72%">
+					<mx:HSlider slideDuration="300" width="100%" labelOffset="1" value="25" useHandCursor="true" buttonMode="true" id="hsldrCritrionPart" showDataTip="true" snapInterval="5" showTrackHighlight="true" labels="[0,10,20,30,40,50,60,70,80,90,100]" minimum="0" maximum="100"/>
+				</mx:HBox>	
+			</mx:HBox>
+			
+			<mx:HBox width="0" height="0" horizontalAlign="center" horizontalGap="0">
+				<mx:Spacer width="1%"/>
+				<mx:VBox width="20%" horizontalAlign="right">
+					<mx:Text fontWeight="bold" width="170" text="@Resource(bundle='myResources', key='ease')"/>
+				</mx:VBox>	
+				<mx:HBox width="72%">
+					<mx:HSlider slideDuration="300" width="100%" labelOffset="1" value="25" useHandCursor="true" buttonMode="true" id="hsldrEase" showDataTip="true" snapInterval="5" showTrackHighlight="true" labels="[0,10,20,30,40,50,60,70,80,90,100]" minimum="0" maximum="100"/>
+				</mx:HBox>	
+			</mx:HBox>
+				
+		</mx:VBox>	
+	</mx:VBox>
+	<!--<mx:StringValidator id="valTxtProjTitle" source="{txtProjTitle}" property="text" minLength="3" maxLength="25" required="true"  requiredFieldError="Project title is required" trigger="{btnAdd}" triggerEvent="click"/>
+	<mx:StringValidator id="valtxtDesc" source="{txtDesc}" property="text" minLength="3" maxLength="250" required="true"  requiredFieldError="Project description is required" trigger="{btnAdd}" triggerEvent="click"/>
+	<mx:DateValidator id="valStartDate" source="dtfStartDate" property="true" required="true"  requiredFieldError="Start date is required" trigger="{btnAdd}" triggerEvent="click"/>
+	<mx:DateValidator id="valEndDate" source="dtfEndDate" property="true" required="true"  requiredFieldError="End date is required" trigger="{btnAdd}" triggerEvent="click"/>
+--></mx:Canvas>
+

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%">
+	<mx:HBox width="100%" height="100%">
+		<mx:VBox width="100%" height="25%">
+			<mx:Spacer width="100%" height="100%"/>
+		</mx:VBox>
+		<mx:Label text="@Resource(bundle='myResources', key='copyright')" color="#0066f1" fontSize="12" textAlign="center" fontWeight="bold"/>
+		<mx:VBox width="100%" height="25%">
+			<mx:Spacer width="100%" height="100%"/>
+		</mx:VBox>
+	</mx:HBox>
+</mx:Canvas>

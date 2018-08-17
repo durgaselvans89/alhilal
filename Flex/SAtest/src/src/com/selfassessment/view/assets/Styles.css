@@ -1,0 +1,378 @@
+/* CSS file */
+
+.Applicationstyle{
+  backgroundColor: #FFFFFF;
+  layout: absolute;
+  backgroundGradientAlphas:1.0, 1.0; 
+  backgroundGradientColors: #FFFFFF, #FFFFFF;
+ 
+}
+
+.Applicationbgstyle {
+   backgroundColor: #FFFFFF;
+   dropShadowEnabled: false;
+   borderStyle: none;
+   paddingLeft: 0;
+   
+}
+
+.TabStyles {
+  /* color: #868E9F;*/
+   tabStyleName: "myTabs";
+   /*background-color: #8C94A5;*/
+ }
+
+.selectedTabStyle {
+	 background-color: #868E9F;
+ }
+ 
+.backButton{
+   fillAlphas: 1.0, 1.0;
+   fillColors: #868E9F, #868E9F;
+   cornerRadius: 6;
+   color: #FFFFFF;
+   /*textSelectedColor: #0b333c;*/
+   background-color: #868E9F;
+}
+
+.myTabs {
+   fillAlphas: 0.6, 0.4,0.6,0.4;
+   fillColors: #868E9F, #868E9F,#868E9F, #868E9F;
+   backgroundAlpha: 1;
+   backgroundColor: #ffffff;
+   borderColor: #4D5769;
+   border-style: solid;
+   color: #000000;
+   fontSize: 12;
+   
+   /*themeColor: #868E9F;*/
+   fontFamily: Verdana;
+
+}
+
+.customBorderBox {
+    borderSkin: ClassReference("src.com.selfassessment.view.assets.GradientContainer");
+	backgroundGradientColors: #FFFFFF, #FF9900;
+	backgroundGradientAlphas: 0,1;
+
+	borderColor: #CCCCCC;
+	borderThickness: 1;
+
+	cornerRadius: 10;
+}
+
+.ReportDataGridHeaderStyle{
+	use-roll-over:true;
+	header-colors:#98a0af,#636e83;
+	alternatingItemColors: #ffffff, #ffffff;
+	header-sort-separator-skin: ClassReference("mx.skins.ProgrammaticSkin");	
+	theme-color:#98a0af,#636e83;
+	
+ }
+.ReportDataGridHeaderStyleEn{
+	use-roll-over:false;
+	header-colors:#98a0af,#636e83;
+	alternatingItemColors: #ffffff, #ffffff;
+	header-sort-separator-skin: ClassReference("mx.skins.ProgrammaticSkin");	
+	theme-color:#98a0af,#636e83;
+	header-style-name:reportHeaderStyleEn;
+ }
+ .ReportDataGridHeaderStyleAr{
+	use-roll-over:false;
+	header-colors:#98a0af,#636e83;
+	alternatingItemColors: #ffffff, #ffffff;
+	header-sort-separator-skin: ClassReference("mx.skins.ProgrammaticSkin");	
+	theme-color:#98a0af,#636e83;
+	header-style-name:reportHeaderStyleAr;
+ }
+ .reportHeaderStyleEn{
+ 	text-align:left;
+ }
+ 
+ .reportHeaderStyleAr{
+ 	text-align:right;
+ }
+ .headerStyle{
+ 	color:#ffffff;
+ }
+ .panel1filled
+{
+    border-style: solid;
+    border-thickness: 0;
+    border-skin: ClassReference("border.SimpleGradientBorder");
+    fill-colors: #98a0af,#636e83;
+    corner-radius: 0;
+    drop-shadow-enabled: false;
+    color:#ffffff;
+    
+}
+.reportHeader{
+	 /*border-skin: ClassReference("border.SimpleGradientBorder");*/
+      fill-colors: #98a0af,#636e83;
+      color:#ffffff;
+}
+.maincontentstyle {
+   borderStyle: solid;
+   borderThicknessLeft: 1;
+   borderThicknessTop: 1;
+   borderThicknessBottom: 1;
+   borderThicknessRight: 1;
+   roundedBottomCorners: true;
+   cornerRadius: 10;
+   headerHeight:0;
+   borderColor: #626D82;
+   backgroundColor: #d8dce4;
+   horizontalAlign:center;
+   dropShadowEnabled: false;
+  
+}
+
+.ApplyFontSize{
+	horizontal-align:left;
+	/*fontSize:13;
+	font-family:Helvetica;
+	*/
+	fontSize:11;
+	
+}
+
+.ApplyFontSizeEn{
+	text-align:left;
+	horizontal-align:left;
+	
+	fontSize:11;
+	
+	/*fontSize:13;
+	font-family:Helvetica;*/
+}
+
+
+.ApplyFontSizeAr{
+	text-align:right;
+	horizontal-align:left;
+	
+	fontSize:11;
+	
+	/*fontSize:13;
+	font-family:Helvetica;*/
+}
+
+
+.ContentStyle {
+   borderStyle: solid;
+   cornerRadius: 7;
+   headerHeight:0;
+   dropShadowEnabled: false;
+   borderThicknessLeft: 1;
+   borderThicknessTop: 1;
+   borderThicknessBottom: 1;
+   borderThicknessRight: 1;
+   roundedBottomCorners: true;
+   roundedTopCorners: false;
+   backgroundColor: #d8dce4;
+   borderColor: #000000;
+   horizontalAlign:center;
+}
+
+.HeaderBGstyle {
+   fillAlphas: 1, 1;   
+   fillColors:  #727d92,#626D82;    
+   borderStyle: applicationControlBar; 
+   backgroundColor: #626D82;
+   dropShadowEnabled: false;
+   roundedBottomCorners: true;
+   cornerRadius: 7;
+ 
+
+}
+
+.LoginBGStyle{
+   backgroundColor: #FFFFFF;
+   dropShadowEnabled: false;
+   borderStyle: none;
+   paddingLeft: 0;
+   cornerRadius: 0;
+   headerHeight: 0;
+   borderThicknessLeft: 0;
+   borderThicknessTop: 0;
+   borderThicknessBottom: 0;
+   borderThicknessRight: 0;
+   
+}
+
+.LoginStyle {
+  /* fillAlphas: 1, 1;   
+   fillColors:  #FFFFFF,#8C98B0;    
+   borderStyle: applicationControlBar; */
+   borderStyle: solid;
+   backgroundColor: #272d32;
+   dropShadowEnabled: false;
+   roundedBottomCorners: true;
+   cornerRadius: 0;
+   headerHeight:25;
+   
+}
+
+
+.LoginChildstyle {
+   borderStyle: solid;
+   backgroundColor: #EBEBEB;
+   dropShadowEnabled: true;
+   roundedBottomCorners: true;	
+   cornerradius:25; 
+   headerHeight:10;
+   borderThickness:1;
+   borderColor: #000000;
+   dropShadowColor: #000000;
+}
+
+.Loginvboxstyle {
+   fillAlphas: 1, 1;   
+   fillColors:  #FCFCFC,#EBEBEB;    
+   borderStyle: applicationControlBar; 
+   backgroundColor: #EBEBEB;
+   dropShadowEnabled: false;
+   roundedBottomCorners: true;	
+   cornerradius:10; 
+   headerHeight:5;
+   borderThickness:1;
+   borderColor: #EBEBEB;
+   
+}
+
+
+
+.userHeaderstyle{
+ backgroundColor: #f2f5f7;
+ verticalAlign:middle;
+ roundedBottomCorners: false;
+ cornerRadius:7;
+ borderColor: #f2f5f7;
+ borderStyle: solid;   
+}
+
+
+.userContentstyle{
+ backgroundColor: #C4D7ED;
+ verticalAlign:middle;
+ roundedBottomCorners: true;
+ cornerRadius:7;
+ borderThickness:0;
+ borderColor: #626D82	;
+ borderStyle: solid;
+}
+
+.ListmenuContainer {
+   borderStyle: solid;
+   dropShadowEnabled: false;
+   borderThicknessLeft: 1;
+   borderThicknessTop: 0;
+   borderThicknessBottom: 0;
+   borderThicknessRight: 0;
+   roundedBottomCorners: true;
+   cornerRadius:7;
+   headerHeight:0;
+   backgroundColor: #d8dce4;
+   layout:absolute; 
+ }
+
+.ListMenustyle {
+   backgroundColor: #d8dce4;
+   dropShadowEnabled: false;
+  /* fillAlphas: 1, 1;   
+   fillColors:  #FFFFFF,#83A9C1;    
+   borderStyle: applicationControlBar; */
+ 	borderThickness:0;
+ 	cornerRadius:7;
+   	borderColor: #d8dce4;
+ 	borderStyle: solid;
+   	horizontalAlignment: middle;
+   	rollOverColor: #aeb0b5;
+   	selectionColor: #8797BB;
+   	textIndent: 4;
+   	fontSize:11;
+}
+
+
+.GeneralStyle {
+   borderStyle: solid;
+   borderThickness:0;
+}
+
+
+.GeneralPanelStyle {
+   borderStyle: none;
+   borderThickness:0;
+   headerHeight: 5;
+}
+
+.Panelstyle {
+   borderStyle: solid;
+   roundedBottomCorners: true;
+   cornerRadius: 7;
+   paddingLeft: 0;
+}
+
+.Childpanelstyle {
+   borderStyle: solid;
+   dropShadowEnabled: false;
+   layout: absolute;
+   cornerradius:7; 
+   borderThickness:0;
+   headerHeight:7;
+   backgroundColor: #fFffff;
+   borderColor: #fFffff;
+   roundedBottomCorners: true;
+}
+
+  
+.Button {
+   fillAlphas: 1, 0.25, 0.75, 0.65;
+   fillColors: #ededeb, #b5b3b3, #ffffff, #eeeeee;
+   color: #000000;
+   fontFamily: Verdana;
+   fontSize: 10;
+}
+
+.gridStyle{
+	padding-right : 10;
+	header-style-name : gridHeaderStyle;
+}
+
+.gridHeaderStyle{
+	padding-right : 10;
+}
+
+
+ .AlertAr{
+	font-size : 14;
+}
+.AlertEn{
+	font-size : 12;
+}
+.dataGrid{
+	rollOverColor: #ada7a7;
+   textRollOverColor: #ffffff;
+}
+.nulldataGrid{
+	rollOverColor: #ffffff;
+   textRollOverColor: #ffffff;
+   horizontal-gap:0;
+   horizontal-grid-line-color:#ffffff;
+   vertical-grid-line-color:#ffffff;
+}
+
+.loginHeader{
+	 fillColors: #EEEEEE, #5A5A5A; 
+	 fillAlphas: 0.7, 0.7;
+	 highlightAlphas: 0, 0;
+	/* backgroundColor: #5B9FE0;*/
+	 background-image: Embed(source="header_bg.png");
+}
+.loginSubheader{
+	 fillColors: #EEEEEE, #5A5A5A; 
+	 fillAlphas: 0.7, 0.7;
+	 highlightAlphas: 0, 0;
+	 /*backgroundColor: #4577A5;*/
+	 background-image: Embed(source="sub_header_bg.png");
+}

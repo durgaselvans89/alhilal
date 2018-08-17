@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:com="src.com.selfassessment.view.*" width="100%" height="100%" creationComplete="init()">
+	<mx:Style source="src/com/selfassessment/view/assets/Styles.css"/>	
+
+	<mx:Script>
+		<![CDATA[
+			import mx.controls.Alert;
+			import mx.core.Application;
+			//import src.com.selfassessment.events.TextBuilderEvent; 
+
+			//public var loginPage:Login = new Login();
+			
+			public function init():void{
+			}
+			
+			public function initalTab():void{
+				if(Application.application.flagValue == 1){
+					tabNagivator.selectedIndex = 0;
+				}
+				else if(Application.application.flagValue == 2){
+					tabNagivator.selectedIndex = 1;
+				}
+				else{
+					tabNagivator.selectedIndex = 2;					
+				} 
+			}
+			
+			
+		]]>
+	</mx:Script>
+	<mx:states>
+		<mx:State name="loginPage">
+			<mx:RemoveChild	target="{mainVBox}"/>
+			<mx:AddChild relativeTo="{this}">
+				<com:Login id="login" width="100%" height="100%"/>
+			</mx:AddChild>
+		</mx:State>
+	</mx:states>
+	
+	<mx:Box id="boxValue" width="100%" backgroundColor="White" height="100%" color="black" verticalAlign="middle" horizontalAlign="center" fontSize="10" fontFamily="Verdana">
+	
+	
+		<mx:Panel id="panelOne" width="940" height="560" borderColor="#EAEAEA" borderAlpha="1" cornerRadius="10" >
+	
+			<mx:VBox id="mainVBox" width="100%" height="100%">
+				
+				<mx:TabNavigator id="tabNagivator" width="100%" height="100%" styleName="TabStyles">
+					
+					<mx:Canvas width="100%" height="100%" id="excellence" label="Excellence">
+						<com:TextExcellence id="txtExcellence" width="100%" height="100%"/>
+					</mx:Canvas>
+					
+					<mx:Canvas width="100%" height="100%" id="excellencebuilder" label="Excellence Builder">
+						<com:TextExcellenceBuilder id="txtExcellenceBuilder" width="100%" height="100%"/>
+					</mx:Canvas>
+					
+					<mx:Canvas width="100%" height="100%" id="benefits" label="Benefits of Excellence">
+						<com:TextBenefitsExcellence id="txtBenefitsExcellence" width="100%" height="100%"/>
+					</mx:Canvas>
+				
+				</mx:TabNavigator>
+				
+				<mx:HBox horizontalAlign="right" verticalGap="0" width="98%">
+					<mx:Button id="btnBack" styleName="backButton" label="Back" useHandCursor="true" buttonMode="true" color="black"/> 
+				</mx:HBox>
+				<mx:Spacer />
+			
+			</mx:VBox>
+			
+		</mx:Panel>
+	
+	</mx:Box>
+	
+</mx:Canvas>

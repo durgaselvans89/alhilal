@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml"  xmlns:goldhold="goldhold.controls.*" 
+	   y="{(Application.application.height/2)-(this.height/2)}"
+	 x="{(Application.application.width/2)-(this.width/2)}" horizontalScrollPolicy="off" width="800" height="400" creationComplete="init()">
+
+
+	<mx:Script>
+		<![CDATA[
+			import com.boyzoid.PagableArrayCollection.PagableArrayCollection;
+			import mx.managers.CursorManager;
+			import mx.core.Application;
+			import mx.managers.PopUpManager;
+			import mx.controls.*;
+			import src.com.selfassessment.controller.TeamController;
+			
+			[Bindable]
+			public var txtFromOutSide:String;
+			[Bindable]
+			public var txtvalue:int;
+			
+			[Bindable]
+        	public var CriteriaService:TeamController = new TeamController();
+			
+			[Bindable]
+			public var criteriaArray:Array = new Array();
+			
+			public function init():void {
+				if(Application.application.language=="en_US"){
+					myDataGrid.setStyle('textAlign','left');
+				}
+				else{
+					myDataGrid.setStyle('textAlign','right');
+				}
+			}
+			[Bindable]
+        	public var myPageableArrCol:PagableArrayCollection = new PagableArrayCollection();
+			private function onClose():void {
+				PopUpManager.removePopUp(this);
+			}
+			
+			private function JumptoPage():void{
+	        	if(jumpPage.text != ""  && Number(jumpPage.text) != 0  && jumpPage.enabled){
+				 	if(Number(jumpPage.text)>myPageableArrCol.pages){
+				 		//Alert.show("No Records Available");
+				 		Alert.show(resourceManager.getString('myResources','pageNotFound'));
+						jumpPage.text=myPageableArrCol.currentPage.toString();
+				 	}
+				 	else{
+		        		myPageableArrCol.currentPage = Number(jumpPage.text);
+		    		}
+	    		}
+	    		else{
+	    			//Alert.show(resourceManager.getString('myResources','validNum'));
+	    			if(jumpPage.enabled)
+    				Alert.show(resourceManager.getString('myResources','validNum'));
+	    		}
+	    		chkPage();
+	        }
+	         private function pageUP():void{
+		 	myPageableArrCol.pageUp();
+        	if(myPageableArrCol.currentPage==myPageableArrCol.pages){
+        		btnPageUp.enabled=false;
+        	}
+        	else{
+        		btnPageUp.enabled=true;
+        	}
+        	if(myPageableArrCol.currentPage>1){
+        		btnPageDown.enabled=true;
+        	}
+        	else{
+        		btnPageDown.enabled=false;
+        	}
+        }
+        private function pageDown():void{
+        	myPageableArrCol.pageDown();
+        	if(myPageableArrCol.currentPage==1){
+        		btnPageDown.enabled=false;
+        	}
+        	else{
+        		btnPageDown.enabled=true;
+        	}
+        	if(myPageableArrCol.currentPage==myPageableArrCol.pages){
+        		btnPageUp.enabled=false;
+        	}
+        	else{
+    			btnPageUp.enabled=true;
+        	}
+        }
+        public function chkPage():void{
+        	if(myPageableArrCol.currentPage==1){
+        		btnPageDown.enabled=false;
+        	}
+        	else{
+        		btnPageDown.enabled=true;
+        	}
+        	if(myPageableArrCol.currentPage==myPageableArrCol.pages){
+        		btnPageUp.enabled=false;
+        	}
+        	else{
+    			btnPageUp.enabled=true;
+        	}
+        	if(myPageableArrCol.currentPage==myPageableArrCol.pages){
+        		btnPageUp.enabled=false;
+        	}
+        	else{
+        		btnPageUp.enabled=true;
+        	}
+        	if(myPageableArrCol.currentPage>1){
+        		btnPageDown.enabled=true;
+        	}
+        	else{
+        		btnPageDown.enabled=false;
+        	}
+        	if(btnPageDown.enabled==false && btnPageUp.enabled==false){
+        		jumpPage.editable=false;
+        		jumpPage.enabled=false;
+        	}
+        	else{
+        		jumpPage.editable=true;
+        		jumpPage.enabled=true;
+        	}
+        }
+			
+		]]>
+	</mx:Script>
+	
+	<mx:VBox borderStyle="solid" height="100%" verticalGap="0" borderThickness="3" shadowDistance="8" shadowDirection="right" dropShadowEnabled="true" dropShadowColor="#000000" borderColor="#636e83" width="100%" horizontalAlign="center" verticalAlign="top" styleName="ApplyFontSize" backgroundColor="white">
+		<mx:Canvas width="100%" useHandCursor="true" buttonMode="true" mouseDown="{this.startDrag()}" mouseUp="{this.stopDrag()}" height="25" styleName="panel1filled"  borderSides="left,right,top" cornerRadius="3" borderStyle="none">
+			<mx:Label left="10" fontWeight="bold"  id="lblTitle" text="@Resource(bundle='myResources', key='assignExeTeam')" color="#FFFFFF" fontSize="14"/>
+			<mx:Image toolTip="Close" right="2" top="2" source="@Embed('assets/close.png')" useHandCursor="true" buttonMode="true" id="btnClose"  />
+		</mx:Canvas>
+		
+		<mx:VBox horizontalAlign="center" width="95%" height="90%"> 
+			<mx:Spacer/>	
+			<mx:HBox width="0%" height="0" horizontalAlign="center">
+				<mx:Label text="@Resource(bundle='myResources', key='location')" fontWeight="bold"/>
+				<mx:ComboBox id="cmbLocation" labelField="Location" data="LocationID" />
+			</mx:HBox>
+			
+			
+   			<goldhold:CheckboxDataGrid wordWrap="true" variableRowHeight="true" id="myDataGrid" width="100%" height="98%" allowMultipleSelection="true" draggableColumns="false">
+				<goldhold:columns>
+				        <mx:DataGridColumn headerText="@Resource(bundle='myResources', key='fname')" dataField="userName" width="120">
+							<mx:itemRenderer>
+								<mx:Component>
+					            	<mx:Label paddingLeft="5" text="{data.userName}"/>
+								</mx:Component> 
+							</mx:itemRenderer>				        
+						</mx:DataGridColumn>
+						
+				        
+						
+				        <mx:DataGridColumn headerText="@Resource(bundle='myResources', key='role')" dataField="roleName" width="120">
+				        <mx:itemRenderer>
+							<mx:Component>
+								<mx:Label paddingLeft="5" text="{data.roleName}"/>
+							</mx:Component> 
+						</mx:itemRenderer>
+						</mx:DataGridColumn>
+						
+						<mx:DataGridColumn headerText="@Resource(bundle='myResources', key='designation')" dataField="designation" width="150">
+						<mx:itemRenderer>
+							<mx:Component>
+								<mx:Label paddingLeft="5" text="{data.designation}"/>
+							</mx:Component> 
+						</mx:itemRenderer>
+						</mx:DataGridColumn>
+						
+						<!--<mx:DataGridColumn headerText="@Resource(bundle='myResources', key='location')" dataField="location" width="150">
+						<mx:itemRenderer>
+							<mx:Component>
+								<mx:Label paddingLeft="5" text="{data.location}"/>
+							</mx:Component> 
+						</mx:itemRenderer>
+						</mx:DataGridColumn>-->
+					</goldhold:columns>
+		    </goldhold:CheckboxDataGrid>
+
+			<mx:HBox name="hboxedit" width="100%" horizontalAlign="right">
+				<mx:Button id="btnAssign" label="@Resource(bundle='myResources', key='assign')" useHandCursor="true" buttonMode="true" />
+				<mx:Text x="532" y="28" text="Page {myPageableArrCol.currentPage} of {myPageableArrCol.pages}"/>
+       			<mx:Label text="@Resource(bundle='myResources',key='jumpToPage')"/>
+       			<mx:TextInput restrict="0-9" id="jumpPage" width="40" maxChars="2" />
+       			<mx:Button skin="@Embed('assets/go.png')" click="JumptoPage()" useHandCursor="true" buttonMode="true"/>
+				<mx:Button skin="@Embed('assets/left arrow.png')" useHandCursor="true" buttonMode="true" id="btnPageDown" click="pageDown()" disabledSkin="@Embed('assets/disabledRight.png')"/>
+				<mx:Button skin="@Embed('assets/right arrow.png')" useHandCursor="true" buttonMode="true" id="btnPageUp" click="pageUP()" disabledSkin="@Embed('assets/disabledLeft.png')"/>	
+
+			
+			</mx:HBox>
+			<mx:Spacer/>
+		</mx:VBox>
+		
+		
+	</mx:VBox>
+
+</mx:Canvas>
+
+

@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml" styleName="ListmenuContainer"
+	xmlns:controller="com.selfassessment.controller.*" xmlns:ui="flex.utils.ui.*" creationComplete="init()">
+
+	<mx:Style source="src/com/selfassessment/view/assets/Styles.css"/>	
+
+	<mx:Metadata>
+		[Event("MeetingView",type="com.selfassessment.events.MeetingView")]
+		[Event("MeetingSet",type="com.selfassessment.events.MeetingSet")]
+	</mx:Metadata>
+	
+    <mx:XMLList id="exeTreeData">
+    	<node label="Meeting Planner"></node>
+		<node label="Create meetings"></node>
+    </mx:XMLList>
+    
+  	<mx:XMLList id="exeTreeArabicData">
+    	<node label="Meeting Planner"></node>
+		<node label="Create meetings"></node>
+    </mx:XMLList>
+    
+    <mx:XMLList id="nonExeTreeData">
+    	<node label="Meeting Planner"></node>
+	</mx:XMLList>
+    
+  	<mx:XMLList id="nonExeTreeArabicData">
+    	<node label="Meeting Planner"></node>
+	</mx:XMLList>
+    
+    <mx:Script>
+    	<![CDATA[
+    	
+    		import mx.collections.ArrayCollection;
+    		import mx.core.Application;
+    		import mx.events.ListEvent;
+    		import src.com.selfassessment.events.*;
+	    	import src.com.selfassessment.controller.*;
+	    	import src.com.selfassessment.view.*;
+	    	import mx.controls.Alert;
+    	
+			private function init():void{
+				if(Application.application.IsExecutiveMember==1){
+					if(Application.application.language=="en_US"){
+						myTree.dataProvider = exeTreeData;
+					}
+					else{
+						myTree.dataProvider = exeTreeArabicData;
+					}
+				}
+				else{
+					if(Application.application.language=="en_US"){
+						myTree.dataProvider = nonExeTreeData;
+					}
+					else{
+						myTree.dataProvider = nonExeTreeArabicData;
+					}
+				}
+				myTree.selectedIndex=0;
+			}
+			
+			public function treeChanged(event:Event):void{
+				//Alert.show(resourceManager.getString('myResources','meetingview'));
+				var selectedNode:XML = List(event.target).selectedItem as XML;
+				
+				if(selectedNode.@label == resourceManager.getString('myResources','meetingview')){
+					//Alert.show("Working");
+					dispatchEvent(new MeetingView(MeetingView.meetingview_select));
+					//Alert.show(MeetingView.meetingview_select);
+	        	}
+	        	else if(selectedNode.@label == resourceManager.getString('myResources','meetingset')){
+	        		//Alert.show("Invoking");
+	        		dispatchEvent(new MeetingSet(MeetingSet.meetingset_select));
+	        		//Alert.show(MeetingSet.meetingset_select);
+	        	}
+			}
+    		
+    	]]>
+    </mx:Script>
+    
+	<mx:List fontWeight="bold" fontSize="11" id="myTree" width="100%" height="100%" labelField="@label"
+		 styleName="ListMenustyle" itemClick="treeChanged(event)" click="treeChanged(event)"  selectedIndex="0">
+		<mx:itemRenderer>
+        	<mx:Component>
+        		<mx:Label/>
+        	</mx:Component>
+        </mx:itemRenderer>
+	</mx:List>
+    
+    
+</mx:Panel>
+

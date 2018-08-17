@@ -1,0 +1,359 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:VBox styleName="Childpanelstyle"  horizontalAlign="center" verticalAlign="middle"   xmlns:mx="http://www.adobe.com/2006/mxml"  backgroundColor="white" dropShadowEnabled="false" dropShadowColor="black" shadowDirection="right" shadowDistance="-20" 
+	 borderStyle="none" height="100%" width="100%" horizontalScrollPolicy="off" verticalScrollPolicy="auto" creationComplete="init()">
+<mx:Script>
+	<![CDATA[
+		import mx.core.Application;
+		import mx.controls.Alert;
+		[Bindable]
+            [Embed("assets/bullet_black.jpg")]
+            public var myBulletStarIcon:Class;
+            
+        [Bindable]
+            [Embed("assets/CloseIcon.png")]
+            public var myCloseIcon:Class;
+            
+        [Bindable]
+            [Embed("assets/OpenIcon.png")]
+            public var myOpenIcon:Class;
+        
+         [Bindable]
+            [Embed("assets/EmptyIcon.png")]
+            public var myEmptyIcon:Class;
+            
+            private function init():void{
+            	if(Application.application.language=="en_US"){
+            		mainHBox.setStyle('layoutDirection','ltr');
+            		criteriaTreeView.setStyle('layoutDirection','ltr');
+            		criteriaTreeView.setStyle('textAlign','left');
+            	}
+            	else{
+            		mainHBox.setStyle('layoutDirection','rtl');
+            		criteriaTreeView.setStyle('layoutDirection','rtl');
+            		criteriaTreeView.setStyle('textAlign','right');
+            	}
+            }
+            
+            private function setFontStyle():void {
+            	
+            	/* criteriaTreeView.setItemIcon(criteriaTreeView.dataProvider.getItemAt(0),myBulletStarIcon, myBulletStarIcon);
+	            criteriaTreeView.setItemIcon(criteriaTreeView.dataProvider.getItemAt(1),myBulletStarIcon, myBulletStarIcon);
+	            */
+	            
+	           if(criteriaTreeView.hasRoot==true){
+	           	Alert.show("Has root");
+	           }
+            }
+
+
+	]]>
+</mx:Script>
+
+	
+
+	<mx:HBox width="100%" id="mainHBox" height="100%" verticalScrollPolicy="auto" paddingLeft="10" borderStyle="none" paddingBottom="5" paddingTop="10">
+		<mx:Tree id="criteriaTreeView"  fontSize="13" width="100%" height="100%" 
+			labelField="@label" useRollOver="false"  
+         	iconField="@icon" folderOpenIcon="{null}" folderClosedIcon="{null}" 
+        	wordWrap="true" borderStyle="none" selectionColor="white" variableRowHeight="true">
+				<mx:XMLListCollection id="MailBox">
+				<mx:XMLList id="CriteriaData" >
+		        <node label="Enabler" fontWeight="bold">
+		            <node label="1. Leadership">
+		            	 <node label="1a. Leaders develop the mission, vision, values and ethics and act as role models." icon="myBulletStarIcon">
+		            	 	<node label="Set and communicate a clear direction and strategic focus; they unite their people in sharing and achieving the organisation’s core purpose and objectives." icon="myBulletStarIcon"/>
+		            	 	<node label="Secure the future of the organisation by defining and communicating a core purpose that provides the basis for their overall Vision, values, ethics and corporate behaviour." icon="myBulletStarIcon"/>
+		            	 	<node label="Champion the organisation’s values and are role models for integrity, social responsibility and ethical behaviour, both internally and externally." icon="myBulletStarIcon"/>
+		            	 	<node label="Foster organisational development through shared values, accountability, ethics and a culture of trust and openness." icon="myBulletStarIcon"/>
+		            	 	<node label="Ensure their people act with integrity and adopt the highest standards of ethical behaviour." icon="myBulletStarIcon"/>
+		            	 	<node label="Develop a shared leadership culture for the organisation and review and improve the effectiveness of personal leadership behaviours." icon="myBulletStarIcon"/>
+		            	 </node>
+		            	 <node label="1b. Leaders define, monitor, review and drive the improvement of the organisation’s management system and performance.">
+		            	 	<node label="Use a balanced set of results to review their progress, providing a view of long and short term priorities for the key stakeholders, with clearly defined “cause and effect” relationships." icon="myBulletStarIcon"/>
+		            	 	<node label="Develop and improve the organisation’s management system, including evaluating the set of results in order to improve future performance and provide sustainable benefits to stakeholders." icon="myBulletStarIcon"/>
+		            	 	<node label="Base decisions on factually reliable information and use all available knowledge to interpret current and predicted performance of the relevant processes." icon="myBulletStarIcon"/>
+		            	 	<node label="Are transparent and accountable to stakeholders and society at large for their performance and actively support the desire to go beyond regulatory compliance." icon="myBulletStarIcon"/>
+		            	 	<node label="Deliver high levels of stakeholder confidence by ensuring risks are identified and appropriately managed across all their processes." icon="myBulletStarIcon"/>
+		            	 	<node label="Understand and develop the underlying capabilities of the organisation." icon="myBulletStarIcon"/>
+		            	 </node>
+		            	 <node label="1c. Leaders engage with external stakeholders.">
+		            	 	<node label="Know who their different external stakeholder groups are and develop approaches to understand, anticipate and respond to their different needs and expectations." icon="myBulletStarIcon"/>
+		            	 	<node label="Establish approaches to engage partners, customers and society in generating ideas and innovation." icon="myBulletStarIcon"/>
+		            	 	<node label="Use innovation to enhance their organisation’s reputation and image and attract new customers, partners and talent." icon="myBulletStarIcon"/>
+		            	 	<node label="Identify strategic and operational partnerships based on organisational and strategic needs, complementary strengths and capabilities." icon="myBulletStarIcon"/>
+		            	 	<node label="Ensure transparency of reporting to key stakeholders, including appropriate governance bodies, in line with their expectations." icon="myBulletStarIcon"/>
+		        	 	 </node>
+		            	 <node label="1d. Leaders reinforce a culture of excellence with the organisation’s people.">
+		            	 	<node label="Inspire people and create a culture of involvement, ownership, empowerment, entrepreneurship, improvement and accountability, at all levels." icon="myBulletStarIcon"/>
+		            	 	<node label="Promote a culture which supports the generation and development of new ideas and new ways of thinking to encourage innovation and organisational development." icon="myBulletStarIcon"/>
+		            	 	<node label="Ensure that their people can contribute to their own, and the organisation’s ongoing success by realising their full potential in a spirit of true partnership." icon="myBulletStarIcon"/>
+		            	 	<node label="Support people throughout the organisation to achieve their plans, objectives and targets, recognising efforts in a timely and appropriate manner." icon="myBulletStarIcon"/>
+		            	 	<node label="Promote and encourage equal opportunities and diversity." icon="myBulletStarIcon"/>
+		            	 	
+		            	 </node>
+		            	 <node label="1e. Leaders ensure that the organisation is flexible and manages change effectively.">
+		            	 	<node label="Understand the internal and external drivers of organisational change." icon="myBulletStarIcon"/>
+		            	 	<node label="Demonstrate their ability to make sound and timely decisions, based on available information, previous experience and consideration of the impact of their decisions." icon="myBulletStarIcon"/>
+		            	 	<node label="Are flexible; they review, adapt and realign the direction of their organisation when necessary, inspiring trust at all times." icon="myBulletStarIcon"/>
+		            	 	<node label="Involve and seek commitment of all relevant stakeholders for their contribution to the sustainable success of the organisation and any changes necessary to ensure this success." icon="myBulletStarIcon"/>
+		            	 	<node label="Demonstrate their ability to maintain sustainable advantage through their capability to learn quickly and respond rapidly with new ways of working." icon="myBulletStarIcon"/>
+		            	 	<node label="Allocate resources to provide for long-range needs rather than just short-term profitability and, where relevant, become and remain competitive." icon="myBulletStarIcon"/>
+		            	 </node>
+		            </node>
+		            <node label="2. Strategy">
+		            	<node label="2a. Strategy is based on understanding the needs and expectations of both stakeholders and the external environment.">
+		            		<node label="Gather stakeholder's needs and expectations for input to the development and review of their strategy and supporting policies, remaining constantly alert to any changes." icon="myBulletStarIcon"/>
+		            		<node label="Identify, understand and anticipate developments within the organisation’s external environment." icon="myBulletStarIcon"/>
+		            		<node label="Identify, analyse and understand external indicators, such as economic, market and societal trends, which may affect the organisation." icon="myBulletStarIcon"/>
+		            		<node label="Understand and anticipate the long and short term impact of changes to relevant political, legal, regulatory and compliance requirements." icon="myBulletStarIcon"/>
+		            		<node label="Identify, understand and anticipate opportunities and threats, based on feedback from stakeholders and other external information and analyses." icon="myBulletStarIcon"/>
+		            	</node>
+		            	<node label="2b. Strategy is based on understanding internal performance and capabilities">
+		            		<node label="Analyse operational performance trends, core competencies and outcomes to understand current and potential organisational capabilities." icon="myBulletStarIcon"/>
+		            		<node label="Analyse data and information regarding existing and potential partner's core competencies and capabilities to understand how they complement the organisation’s capabilities." icon="myBulletStarIcon"/>
+		            		<node label="Analyse data and information to determine the impact of new technologies and business models on the performance of the organisation." icon="myBulletStarIcon"/>
+		            		<node label="Compare their performance with relevant benchmarks to understand their relative strengths and weaknesses." icon="myBulletStarIcon"/>
+	            		</node>
+		            	<node label="2c. Strategy and supporting policies are developed, reviewed and updated">
+		            		<node label="Create and maintain a clear strategy and supporting policies to achieve the mission and vision of the organisation." icon="myBulletStarIcon"/>
+		            		<node label="Identify and understand the Key Results required to achieve the mission and evaluate progress towards the vision and strategic goals." icon="myBulletStarIcon"/>
+		            		<node label="Use core competencies to generate benefit for all stakeholders, including the wider society." icon="myBulletStarIcon"/>
+		            		<node label="Adopt effective mechanisms to understand future scenarios and manage strategic risks." icon="myBulletStarIcon"/>
+		            		<node label="Understand the key business drivers: they balance the needs of the organisation and its stakeholders in planning for the achievement of present and future objectives." icon="myBulletStarIcon"/>
+		            		<node label="Ensure economic, societal and ecological sustainability." icon="myBulletStarIcon"/>
+		            	</node>
+		            	<node label="2d. Strategy and supporting policies are communicated, implemented and monitored.">
+		            		<node label="Define the required outcomes and related performance indicators and establish targets based on comparisons of their performance with other organisations and the Mission and Vision." icon="myBulletStarIcon"/>
+		            		<node label="Deploy strategy and supporting policies in a systematic manner to achieve the desired set of results, balancing short and long term objectives." icon="myBulletStarIcon"/>
+		            		<node label="Maintain and align an organisational structure and a framework of key processes to deliver their strategy in a way that adds real value for their stakeholders, achieving the optimum balance of efficiency and effectiveness." icon="myBulletStarIcon"/>
+		            		<node label="Align individual and team objectives with the organisation’s strategic goals and ensure they are empowered to maximise their contribution." icon="myBulletStarIcon"/>
+		            		<node label="Communicate strategy and supporting policies with stakeholders, in an appropriate way." icon="myBulletStarIcon"/>
+		            		<node label="Set clear goals and objectives for innovation and refine their strategy in line with innovation achievements." icon="myBulletStarIcon"/>
+		            	</node>
+		            </node>
+		            <node label="3. People">
+		            	<node label="3a. People plans support the organisation’s strategy.">
+		            		<node label="Have clearly defined the people performance levels required to achieve the strategic goals." icon="myBulletStarIcon"/>
+		            		<node label="Align people plans with their strategy, the organisational structure, new technologies and key processes." icon="myBulletStarIcon"/>
+		            		<node label="Involve employees, and their representatives, in developing and reviewing the people strategy, policies and plans, adopting creative and innovative approaches when appropriate." icon="myBulletStarIcon"/>
+		            		<node label="Manage recruitment, career development, mobility and succession planning, supported by appropriate policies, to ensure fairness and equal opportunities." icon="myBulletStarIcon"/>
+		            		<node label="Use people surveys and other forms of employee feedback to improve people strategies, policies and plans." icon="myBulletStarIcon"/>
+		            	</node>
+		            	<node label="3b. People’s knowledge and capabilities are developed.">
+		            		<node label="Understand the skills and competencies required to achieve the Mission, Vision and strategic goals." icon="myBulletStarIcon"/>
+		            		<node label="Ensure training and development plans help people match the skills and future capability needs of the organisation." icon="myBulletStarIcon"/>
+		            		<node label="Align individual and team objectives with the organisation’s targets, reviewing and updating them in a timely manner." icon="myBulletStarIcon"/>
+		            		<node label="Appraise and help people improve their performance to improve and maintain their mobility and employability." icon="myBulletStarIcon"/>
+		            		<node label="Ensure their people have the necessary tools, competencies, information and empowerment to be able to maximise their contribution." icon="myBulletStarIcon"/>
+		            	</node>
+		            	<node label="3c. People are aligned, involved and empowered.">
+		            		<node label="Ensure their people, at the individual and team level, are fully aligned with the organisation’s mission, vision and strategic goals." icon="myBulletStarIcon"/>
+		            		<node label="Create a culture where people’s dedication, skills, talents and creativity are developed and valued." icon="myBulletStarIcon"/>
+		            		<node label="Encourage their people to be the creators and ambassadors of the organisation’s ongoing success." icon="myBulletStarIcon"/>
+		            		<node label="Ensure that people have an open mindset and use creativity and innovation to respond quickly to challenges they face." icon="myBulletStarIcon"/>
+		            		<node label="Create a culture of entrepreneurship to enable innovation across all aspects of the organisation." icon="myBulletStarIcon"/>
+		            		<node label="Involve their people in continually reviewing, improving and optimising the effectiveness and efficiency of their processes." icon="myBulletStarIcon"/>
+		            	</node>
+		            	<node label="3d. People communicate effectively throughout the organisation.">
+		            		<node label="Understand the communication needs and expectations of their people." icon="myBulletStarIcon"/>
+		            		<node label="Develop communications strategy, policies, plans and channels based on communications needs and expectations." icon="myBulletStarIcon"/>
+		            		<node label="Communicate a clear direction and strategic focus ensuring their people understand the organisation’s mission, vision, values and objectives." icon="myBulletStarIcon"/>
+		            		<node label="Ensure that their people understand and can demonstrate their contribution to the organisation’s ongoing success." icon="myBulletStarIcon"/>
+		            		<node label="Enable and encourage the sharing of information, knowledge and best practices, achieving a dialogue throughout the organisation." icon="myBulletStarIcon"/>
+		            	</node>
+		            	<node label="3e. People are rewarded, recognised and cared for.">
+		            		<node label="Align remuneration, benefits, redeployment, redundancy and other terms of employment with strategy and policies and, to promote and sustain the involvement and empowerment of their people." icon="myBulletStarIcon"/>
+		            		<node label="Adopt approaches that ensure a responsible work / life balance for their people." icon="myBulletStarIcon"/>
+		            		<node label="Ensure and embrace the diversity of their people." icon="myBulletStarIcon"/>
+		            		<node label="Ensure a safe and healthy working environment for their people." icon="myBulletStarIcon"/>
+		            		<node label="Encourage their people, along with other stakeholders, to participate in activities that contribute to wider society." icon="myBulletStarIcon"/>
+		            		<node label="Promote a culture of mutual support, recognition and care between individuals and between teams." icon="myBulletStarIcon"/>
+		            	</node>
+		            </node>
+		            <node label="4. Partnerships and Resources">
+		            	<node label="4a. Partners and suppliers are managed for sustainable benefit.">
+		            		<node label="Segment and differentiate partners and suppliers, in line with the organisation’s strategy, and adopt appropriate policies and processes for effectively managing them." icon="myBulletStarIcon"/>
+		            		<node label="Build a sustainable relationship with partners and suppliers based on mutual trust, respect and openness." icon="myBulletStarIcon"/>
+		            		<node label="Establish extensive networks to enable them to identify potential partnership opportunities." icon="myBulletStarIcon"/>
+		            		<node label="Understand partnerships include working together for long-term, sustainable value enhancement. They know what their core purpose is and seek partners to enhance their capabilities and ability to generate stakeholder value." icon="myBulletStarIcon"/>
+		            		<node label="Develop partnerships that systematically enable the delivery of enhanced value to their respective stakeholders through competencies, synergies and seamless processes." icon="myBulletStarIcon"/>
+		            		<node label="Work together with partners to achieve mutual benefit, supporting one another with expertise, resources and knowledge to achieve shared goals." icon="myBulletStarIcon"/>
+		            	</node>
+		            	<node label="4b. Finances are managed to secure sustained success.">
+		            		<node label="Develop and implement financial strategies, policies and processes to support the overall strategy of the organisation." icon="myBulletStarIcon"/>
+		            		<node label="Design the financial planning, control, reporting and review processes to optimise the efficient and effective use of resources." icon="myBulletStarIcon"/>
+		            		<node label="Establish and implement financial governance processes, tailored to all appropriate levels in the organisation." icon="myBulletStarIcon"/>
+		            		<node label="Evaluate, select and validate investment in, and divestment of, both tangible and non tangible assets, taking into account their long term economic, societal and ecological effects." icon="myBulletStarIcon"/>
+		            		<node label="Deliver high levels of stakeholder confidence by ensuring financial risks are identified and appropriately managed." icon="myBulletStarIcon"/>
+		            		<node label="Ensure alignment between the delivery of long term goals and short term financial planning cycles." icon="myBulletStarIcon"/>
+		            	</node>
+		            	<node label="4c. Buildings, equipment, materials and natural resources are managed in a sustainable way.">
+		            		<node label="Develop and implement a strategy and supporting policies for managing buildings, equipment and materials that supports the organisation’s overall strategy." icon="myBulletStarIcon"/>
+		            		<node label="Optimise the use and effectively manage the lifecycle and physical security of their tangible assets, including buildings, equipment and materials." icon="myBulletStarIcon"/>
+		            		<node label="Demonstrate they actively manage the impact of their operations on public health, safety and the environment." icon="myBulletStarIcon"/>
+		            		<node label="Measure and manage any adverse effects of the organisation’s operations on the community and their people." icon="myBulletStarIcon"/>
+		            		<node label="Adopt and implement appropriate policies and approaches to minimise their local and global environmental impact, including setting challenging goals for meeting and exceeding legal standards and requirements." icon="myBulletStarIcon"/>
+		            	</node>
+		            	<node label="4d. Technology is managed to support the delivery of strategy.">
+		            		<node label="Develop a strategy and supporting policies for managing the technology portfolio that supports the organisation’s overall strategy." icon="myBulletStarIcon"/>
+		            		<node label="Use technology, including IT-enabled processes, to support and improve the effective operation of the organisation." icon="myBulletStarIcon"/>
+		            		<node label="Manage their technology portfolio, including optimising the use of existing technology as well as replacing their out-dated technology." icon="myBulletStarIcon"/>
+		            		<node label="Involve their people and other relevant stakeholders in the development and deployment of new technologies to maximise the benefits generated." icon="myBulletStarIcon"/>
+		            		<node label="Identify and evaluate alternative and emerging technologies in the light of their impact on organisational performance and capabilities and the environment." icon="myBulletStarIcon"/>
+		            		<node label="Use technology to support innovation and creativity." icon="myBulletStarIcon"/>
+	            		</node>
+		            	<node label="4e. Information and knowledge are managed to support effective decision making and to build the organisational capability.">
+		            		<node label="Ensure that their leaders are provided with accurate and sufficient information to support them in effective and timely decision making, enabling them to effectively predict the future performance of the organisation." icon="myBulletStarIcon"/>
+		            		<node label="Transform data into information and, where relevant, into knowledge that can be shared and effectively used." icon="myBulletStarIcon"/>
+		            		<node label="Provide and monitor access to relevant information and knowledge for their people and external users, whilst ensuring both security and the organisation’s intellectual property is protected." icon="myBulletStarIcon"/>
+		            		<node label="Establish and manage networks to identify opportunities for innovation from signals within the internal and external environment." icon="myBulletStarIcon"/>
+		            		<node label="Use innovation in a way that goes well beyond technical change and reveals new ways of offering value to customers, new ways of working and new ways of building on partnerships, resources and competencies." icon="myBulletStarIcon"/>
+		            		<node label="Use data and information on the current performance and capabilities of processes to identify opportunities for, and generate, innovation." icon="myBulletStarIcon"/>
+		            	</node>
+		            </node>
+		            <node label="5. Processes, Products and Services">
+		            	<node label="5a. Processes are designed and managed to optimise stakeholder value.">
+		            		<node label="Analyse, categorise and prioritise their end to end processes as part of the overall management system and adopt appropriate approaches to effectively manage and improve them, including those processes that extend beyond the boundaries of the organisation." icon="myBulletStarIcon"/>
+		            		<node label="Clearly define process ownership and their role and responsibility in developing, maintaining and improving the framework of key processes." icon="myBulletStarIcon"/>
+		            		<node label="Develop meaningful process performance indicators and outcome measures, clearly linked to the strategic goals." icon="myBulletStarIcon"/>
+		            		<node label="Turn new ideas into reality through innovation-enabling processes that fit the nature and importance of the changes they will make." icon="myBulletStarIcon"/>
+		            		<node label="Assess the impact and the added value of innovations and improvements to processes." icon="myBulletStarIcon"/>
+	            		</node>
+		            	<node label="5b. Products and Services are developed to create optimum value for customers.">
+		            		<node label="Strive to innovate and create value for their customers." icon="myBulletStarIcon"/>
+		            		<node label="Use market research, customer surveys and other forms of feedback to anticipate and identify improvements aimed at enhancing the product and service portfolio." icon="myBulletStarIcon"/>
+		            		<node label="Involve their people, customers, partners and suppliers in the development of new and innovative products, services and experiences for both existing and new customer groups." icon="myBulletStarIcon"/>
+		            		<node label="Understand and anticipate the impact and potential of new technologies on products and services." icon="myBulletStarIcon"/>
+		            		<node label="Use creativity to design and develop new and innovative products and services together with customers, partners or other stakeholders." icon="myBulletStarIcon"/>
+		            		<node label="Take into account any impact of the product and service lifecycle on economic, societal and ecological sustainability." icon="myBulletStarIcon"/>
+		            	</node>
+		            	<node label="5c. Products and Services are effectively promoted and marketed.">
+		            		<node label="Clearly define their value propositions, ensuring sustainability by balancing the needs of all relevant stakeholders." icon="myBulletStarIcon"/>
+		            		<node label="Define the business model in terms of core capabilities, processes, partners and value proposition." icon="myBulletStarIcon"/>
+		            		<node label="Implement the business model and value proposition by defining their 'unique selling points', market positioning, target customer groups and distribution channels." icon="myBulletStarIcon"/>
+		            		<node label="Develop marketing strategies to effectively promote their products and services to target customers and user groups." icon="myBulletStarIcon"/>
+		            		<node label="Effectively market their product and service portfolio to existing and potential customers." icon="myBulletStarIcon"/>
+		            		<node label="Ensure that they have the capability to fulfill their promises." icon="myBulletStarIcon"/>
+		            	</node>
+		            	<node label="5d. Products and Services are produced, delivered and managed.">
+		            		<node label="Produce and deliver products and services to meet, or exceed, customer needs and expectations, in line with the offered value proposition." icon="myBulletStarIcon"/>
+		            		<node label="Ensure their people have the necessary tools, competencies, information and empowerment to be able to maximise the customer experience." icon="myBulletStarIcon"/>
+		            		<node label="Manage products and services throughout their entire lifecycle, including reusing and recycling where appropriate, considering any impact on public health, safety and the environment." icon="myBulletStarIcon"/>
+		            		<node label="Compare their product and service delivery performance with relevant benchmarks and understand their strengths in order to maximise the value generated for customers." icon="myBulletStarIcon"/>
+		            		<node label="Involve their people, customers, partners and suppliers in optimising the effectiveness and efficiency of their value chain." icon="myBulletStarIcon"/>
+	            		</node>
+		            	<node label="5e. Customer relationships are managed and enhanced.">
+		            		<node label="Know who their different customer groups are and respond to, and anticipate, their different needs and expectations." icon="myBulletStarIcon"/>
+		            		<node label="Determine and meet customers’ day-to-day and long-term contact requirements." icon="myBulletStarIcon"/>
+		            		<node label="Build and maintain a dialogue with all their customers, based on openness, transparency and trust." icon="myBulletStarIcon"/>
+		            		<node label="Continually monitor and review the experiences and perceptions of customers and respond quickly and effectively to any feedback." icon="myBulletStarIcon"/>
+		            		<node label="Advise customers on the responsible use of products and services." icon="myBulletStarIcon"/>
+	            		</node>
+		            </node>
+		        </node>  
+		        <node label="Result" >
+		        	<node label="6. Customer Results">
+		        		<node label="6a. Customers' Perceptions.">
+		        			<node label="These are the customers’ perceptions of the organisation. They may be obtained from a number of sources, including customer surveys, focus groups, vendor ratings, compliments and complaints." icon="myBulletStarIcon"/>
+		        			<node label="These perceptions should give a clear understanding of the effectiveness, from the customer’s perspective, of the deployment and execution of the organisation’s customer strategy and supporting policies and processes." icon="myBulletStarIcon"/>
+		        			<node label="Depending on the purpose of the organisation, measures may focus on:" icon="myBulletStarIcon"/>
+		        			<node label="    (a) Reputation and image" icon="myEmptyIcon"/>
+		        			<node label="    (b) Product and service value" icon="myEmptyIcon"/>
+		        			<node label="    (c) Product and service delivery" icon="myEmptyIcon"/>
+		        			<node label="    (d) Customer service, relationship and support" icon="myEmptyIcon"/>
+		        			<node label="    (e) Customer loyalty and engagement" icon="myEmptyIcon"/>
+	        			</node>
+		        		<node label="6b. Performance Indicators.">
+		        			<node label="These are the internal measures used by the organisation in order to monitor, understand, predict and improve the performance of the organisation and to predict their impact on the perceptions of its external customers." icon="myBulletStarIcon"/>
+		        			<node label="These indicators should give a clear understanding of the efficiency and effectiveness of the deployment and execution of the organisation’s customer strategy and supporting policies and processes." icon="myBulletStarIcon"/>
+		        			<node label="Depending on the purpose of the organisation, measures may focus on:" icon="myBulletStarIcon"/>
+		        			<node label="    (a) Products and services delivery" icon="myEmptyIcon"/>
+		        			<node label="    (b) Customer service, relationships and support" icon="myEmptyIcon"/>
+		        			<node label="    (c) Complaints and compliments" icon="myEmptyIcon"/>
+		        			<node label="    (d) External recognition" icon="myEmptyIcon"/>
+		        		</node>
+		        	</node>
+		        	<node label="7. People Results">
+		        		<node label="7a. Peoples' Perceptions.">
+		        			<node label="These are the people’s perception of the organisation. They may be obtained from a number of sources, including surveys, focus groups, interviews and structured appraisals." icon="myBulletStarIcon"/>
+		        			<node label="These perceptions should give a clear understanding of the effectiveness, from the people’s perspective, of the deployment and execution of the organisation’s people strategy and supporting policies and processes." icon="myBulletStarIcon"/>
+		        			<node label="Depending on the purpose of the organisation, measures may focus on:" icon="myBulletStarIcon"/>
+		        			<node label="    (a) Satisfaction, involvement and engagement" icon="myEmptyIcon"/>
+		        			<node label="    (b) Pride and fulfilment" icon="myEmptyIcon"/>
+		        			<node label="    (c) Leadership and management" icon="myEmptyIcon"/>
+		        			<node label="    (d) Target setting, competency and performance management" icon="myEmptyIcon"/>
+		        			<node label="    (e) Competency, training and career development" icon="myEmptyIcon"/>
+		        			<node label="    (f) Effective communications" icon="myEmptyIcon"/>
+		        			<node label="    (g) Working conditions" icon="myEmptyIcon"/>
+		        		</node>
+		        		<node label="7b. Performance Indicators.">
+		        			<node label="These are the internal measures used by the organisation in order to monitor, understand, predict and improve the performance of the organisation’s people and to predict their impact on perceptions." icon="myBulletStarIcon"/>
+		        			<node label="These indicators should give a clear understanding of the efficiency and effectiveness of the deployment and execution of the organisation’s human resources strategy and supporting policies and processes." icon="myBulletStarIcon"/>
+		        			<node label="Depending on the purpose of the organisation, measures may focus on:" icon="myBulletStarIcon"/>
+		        			<node label="    (a) Involvement and engagement" icon="myEmptyIcon"/>
+		        			<node label="    (b) Target setting, competency and performance management" icon="myEmptyIcon"/>
+		        			<node label="    (c) Leadership performance" icon="myEmptyIcon"/>
+		        			<node label="    (d) Training and career development" icon="myEmptyIcon"/>
+		        			<node label="    (e) Internal communications" icon="myEmptyIcon"/>
+	        			</node>
+		        	</node>
+		        	
+		        	
+		        	
+		        	
+		        	<node label="8. Society Results">
+		        		<node label="8a. Society Perceptions.">
+		        			<node label="This is society’s perception of the organisation. This may be obtained from a number of sources, including surveys, reports, press articles, public meetings, NGOs, public representatives and governmental authorities." icon="myBulletStarIcon"/>
+		        			<node label="These perceptions should give a clear understanding of the effectiveness, from society’s perspective of the deployment and execution of the organisation’s societal and environmental strategy and supporting policies and processes." icon="myBulletStarIcon"/>
+		        			<node label="Depending on the purpose of the organisation, measures may focus on:" icon="myBulletStarIcon"/>
+		        			<node label="    (a) Environmental impact" icon="myEmptyIcon"/>
+		        			<node label="    (b) Image and reputation" icon="myEmptyIcon"/>
+		        			<node label="    (c) Societal impact" icon="myEmptyIcon"/>
+		        			<node label="    (d) Workplace impact" icon="myEmptyIcon"/>
+		        			<node label="    (e) Awards and media coverage" icon="myEmptyIcon"/>
+		        			
+		        		</node>
+		        		<node label="8b. Performance Indicators.">
+		        			<node label="These are the internal measures used by the organisation in order to monitor, understand, predict and improve the performance of the organisation and to predict the impact on the perceptions of society." icon="myBulletStarIcon"/>
+		        			<node label="These indicators should give a clear understanding of the effectiveness and efficiency of the approaches adopted to manage the organisation’s societal and environmental responsibilities." icon="myBulletStarIcon"/>
+		        			<node label="Depending on the purpose of the organisation, measures may focus on:" icon="myBulletStarIcon"/>
+		        			<node label="    (a) Environmental performance" icon="myEmptyIcon"/>
+		        			<node label="    (b) Regulatory and governance compliance" icon="myEmptyIcon"/>
+		        			<node label="    (c) Societal performance" icon="myEmptyIcon"/>
+		        			<node label="    (d) Health and safety performance" icon="myEmptyIcon"/>
+		        			<node label="    (e) Responsible sourcing and procurement performance" icon="myEmptyIcon"/>
+	        			</node>
+		        	</node>
+		        	
+		        	
+		        	<node label="9. Key Results">
+		        		<node label="9a. Key Strategic Outcomes.">
+		        			<node label="These are the key financial and non-financial outcomes which demonstrate the success of the organisation’s deployment of their strategy. The set of measures and relevant targets will be defined and agreed with key stakeholders." icon="myBulletStarIcon"/>
+		        			<node label="Depending on the purpose of the organisation, measures may focus on:" icon="myBulletStarIcon"/>
+		        			<node label="    (a) Financial outcomes" icon="myEmptyIcon"/>
+		        			<node label="    (b) Performance against budget" icon="myEmptyIcon"/>
+		        			<node label="    (c) Volume of key products or services delivered" icon="myEmptyIcon"/>
+		        			<node label="    (d) Key process outcomes" icon="myEmptyIcon"/>
+		        		
+		        		</node>
+		        		<node label="9b. Key Performance Indicators.">
+		        			<node label="These are the key financial and non-financial indicators that are used to measure the organisation’s operational performance. They help monitor, understand, predict and improve the organisation’s likely key performance outcomes." icon="myBulletStarIcon"/>
+		        			<node label="Depending on the purpose of the organisation, measures may focus on:" icon="myBulletStarIcon"/>
+		        			<node label="    (a) Financial performance indicators" icon="myEmptyIcon"/>
+		        			<node label="    (b) Project costs" icon="myEmptyIcon"/>
+		        			<node label="    (c) Key process performance indicators" icon="myEmptyIcon"/>
+		        			<node label="    (d) Partner and supplier performance" icon="myEmptyIcon"/>
+		        			<node label="    (e) Technology, information and knowledge" icon="myEmptyIcon"/>
+	        			</node>
+		        	</node>
+		        	
+		        	
+		        	
+		        </node>  
+		    </mx:XMLList>
+		    </mx:XMLListCollection>
+		</mx:Tree>
+       
+	</mx:HBox>
+</mx:VBox>
+

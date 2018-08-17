@@ -1,0 +1,453 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<mx:Panel styleName="Childpanelstyle" xmlns:s="library://ns.adobe.com/flex/spark" xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:events="src.com.selfassessment.events.*"
+	verticalScrollPolicy="off" horizontalScrollPolicy="off" width="100%" creationComplete="init()" includeInLayout="false">
+
+	<mx:Style source="src/com/selfassessment/view/assets/Styles.css"/>	
+
+	<mx:Script>
+    	<![CDATA[
+    		import mx.printing.FlexPrintJob;
+    
+    	import src.com.selfassessment.model.ProjectDo;
+    	import mx.core.Application;
+    	import com.boyzoid.PagableArrayCollection.PagableArrayCollection;
+    	import src.com.selfassessment.controller.TeamController;
+        import flash.events.TextEvent;
+        import mx.controls.Alert;
+        import src.com.selfassessment.events.GuideLinesEvent;
+        import src.com.selfassessment.events.CriteriaEvent;
+        
+        import mx.collections.ArrayCollection;
+        import mx.controls.*;
+        import src.com.selfassessment.view.*;
+		import src.com.selfassessment.events.UserEventConstants;
+		import flash.events.Event;
+ 		import flash.net.URLLoader;
+        import flash.net.URLRequest;
+        import flash.events.MouseEvent;
+		import flash.events.TextEvent;
+		import src.com.selfassessment.controller.Components;
+		import src.com.selfassessment.controller.Controller;
+		import src.com.selfassessment.controller.CustomerController;
+        import mx.controls.Alert;
+        import mx.managers.CursorManager;
+        import mx.managers.PopUpManager;
+        
+        [Bindable]
+        public var CriteriaService:TeamController = new TeamController();
+        
+        [Bindable]
+        public var myPageableArrCol:PagableArrayCollection = new PagableArrayCollection();
+        
+        [Bindable]
+		public var criteriadesc:String;
+		
+    	public var criteriadata:Array;
+    	private var numChild:Number = 5;
+		public var alerttext:int;
+    	
+    	/* [Bindable]
+    	public var pageArrayLocation:PagableArrayCollection = new PagableArrayCollection(); */
+    	
+    	[Bindable]
+        private var products:ArrayCollection;
+        
+        public var projectDo:ProjectDo=new ProjectDo();
+        public var criteriaService:TeamController=new TeamController();
+        
+        
+        
+         private function JumptoPage():void{
+        	if(jumpPage.text != ""  && Number(jumpPage.text) != 0 && jumpPage.enabled){
+			 	if(Number(jumpPage.text)>myPageableArrCol.pages){
+			 		//Alert.show("No Records Available");
+			 		Alert.show(resourceManager.getString('myResources','pageNotFound'));
+					jumpPage.text=myPageableArrCol.currentPage.toString();
+			 	}
+			 	else{
+	        		myPageableArrCol.currentPage = Number(jumpPage.text);
+	    		}
+    		}
+    		else{
+    			if(jumpPage.enabled)
+    				Alert.show(resourceManager.getString('myResources','validNum'));
+    		}
+    		chkPage();
+    		
+    		
+        }
+        
+        public var popUpCreateProj:CreateProject;
+        public var selectedArr:Array=new Array();
+        private function createProject():void{
+        	selectedArr=new Array();
+        	var projectFlag:int=0;
+        	for(var i:int=0;i<myPageableArrCol.length;i++){
+        		if(myPageableArrCol[i]["strengthFlag"] == true || myPageableArrCol[i]["afiFlag"] == true){
+        			projectFlag=1;
+        			if(myPageableArrCol[i]["strengthFlag"] == true && myPageableArrCol[i]["afiFlag"] == false){
+        				selectedArr.push({strength:myPageableArrCol[i]["strength"],areaforimprovement:""});
+        			}
+        			else if(myPageableArrCol[i]["strengthFlag"] == false && myPageableArrCol[i]["afiFlag"] == true){
+        				selectedArr.push({strength:"",areaforimprovement:myPageableArrCol[i]["areaforimprovement"]});
+        			}
+        			else{
+        				selectedArr.push({strength:myPageableArrCol[i]["strength"],areaforimprovement:myPageableArrCol[i]["areaforimprovement"]});
+        			}
+        			
+        		}
+        	}
+        	if(projectFlag==1){
+        		//if(myDataGrid.selectedItem.strength!="" && myDataGrid.selectedItem.areaforimprovement!=""){
+        			popUpCreateProj = CreateProject(PopUpManager.createPopUp(this,CreateProject,true));
+		        	criteriaService=new TeamController();
+		        	criteriaService.SelectResponsibilityPersons(function(responsibilityArr:Array):void{
+		        		if(responsibilityArr.length!=0){
+		        			popUpCreateProj.rolename.dataProvider=responsibilityArr;
+		        		}
+		        	});
+		        	popUpCreateProj.btnAdd.addEventListener(MouseEvent.CLICK,saveProject);
+		        	//Alert.show(selectedArr.length.toString());
+		        	popUpCreateProj.myDataGrid.dataProvider=selectedArr;
+        		/* }
+        		else{
+        			Alert.show("Strength and Area for improvements should not be empty for the selected approach");
+        		} */
+	        	
+	        }
+        	else{
+        		//Alert.show("Select atleast one approach to create a project");
+        		Alert.show(resourceManager.getString('myResources','selectAtleastaProj'));
+        	}
+        }
+        
+        private function saveProject(event:MouseEvent):void{
+        	if(popUpCreateProj.txtProjTitle.text!="" && popUpCreateProj.dtfStartDate.text!="" &&
+	    		popUpCreateProj.dtfEndDate.text!="" && popUpCreateProj.txtDesc.text!=""){
+	    			var calculation:int=popUpCreateProj.hsldrOrgStrategy.value+popUpCreateProj.hsldrCritrionPart.value+popUpCreateProj.hsldrEase.value;
+	    			if(calculation==100){
+	    				if(popUpCreateProj.dtfEndDate.selectedDate>=popUpCreateProj.dtfStartDate.selectedDate){
+	    					projectDo=new ProjectDo();
+				        	projectDo.projectTitle=popUpCreateProj.txtProjTitle.text;
+				    		projectDo.responsibility=parseInt(popUpCreateProj.rolename.selectedItem.userID);
+				    		projectDo.startDate=popUpCreateProj.dtfStartDate.selectedDate.getFullYear()+"-"+(popUpCreateProj.dtfStartDate.selectedDate.getMonth()+1)+"-"+popUpCreateProj.dtfStartDate.selectedDate.getDate();
+				    		projectDo.endDate=popUpCreateProj.dtfEndDate.selectedDate.getFullYear()+"-"+(popUpCreateProj.dtfEndDate.selectedDate.getMonth()+1)+"-"+popUpCreateProj.dtfEndDate.selectedDate.getDate();
+				    		projectDo.description=popUpCreateProj.txtDesc.text;
+				    		projectDo.orgStrategy=popUpCreateProj.hsldrOrgStrategy.value;
+				    		projectDo.criterionPart=popUpCreateProj.hsldrCritrionPart.value;
+				    		projectDo.implementation=popUpCreateProj.hsldrEase.value;
+				    		projectDo.status="Waiting for approval";
+				    		//projectDo.teamName=popUpCreateProj.txtTeamName.text;
+				    		//projectDo.score=(popUpCreateProj.hsldrOrgStrategy.value*popUpCreateProj.hsldrCritrionPart.value*popUpCreateProj.hsldrEase.value);
+				    		projectDo.score=0;
+				    		criteriaService=new TeamController();
+				    		criteriaService.AddProject(projectDo,function(result:Number):void{
+				    			if(result>=0){
+				    				saveProjectApproachLink(result);
+				    			}
+				    			else if(result<0){
+				    				//Alert.show("Selected user already assigned for some other project");
+				    				Alert.show(resourceManager.getString('myResources','selectedUserAlreadyAssigned'));
+				    			}
+				    			else{
+				    				//Alert.show("Project title already exists");
+				    				Alert.show(resourceManager.getString('myResources','projTitleAlreadyExists'));
+				    			}
+				    		});
+	    				}
+	    				else{
+	    					//Alert.show("Start date must be less than end date");
+	    					Alert.show(resourceManager.getString('myResources','startDateErrMsg'));
+	    				}
+	    				
+	    			}
+	    			else{
+	    			//	Alert.show("Score total must be equal to 100");
+	    				Alert.show(resourceManager.getString('myResources','scoreTotErrMsg'));
+	    			}
+		        	
+	    		}
+	    		else{
+	    			//Alert.show("Enter all details");
+	    			Alert.show(resourceManager.getString('myResources','enterAllDet'));
+	    		}
+	        	
+    	}
+        private function saveProjectApproachLink(projectID:int):void{
+        	var projectArray:Array=new Array();
+	    	
+	    	 for(var i:int=0;i<myPageableArrCol.length;i++){
+	    	 	if(myPageableArrCol[i]["strengthFlag"] == true && myPageableArrCol[i]["afiFlag"] == false){
+		    		projectDo = new ProjectDo();
+		    		projectDo.projectID=projectID;
+		    		projectDo.approachID=parseInt(myPageableArrCol[i]["approachID"].toString());
+		    		projectDo.criteriaID=parseInt(lblCritID.text);
+		    		projectDo.approachTitle=myPageableArrCol[i]["criteriaID"].toString();
+		    		projectDo.type="Strength";
+		    		projectArray.push(projectDo);
+	    	 	}
+	    	 	else if(myPageableArrCol[i]["strengthFlag"] == false && myPageableArrCol[i]["afiFlag"] == true){
+		    		projectDo = new ProjectDo();
+		    		projectDo.projectID=projectID;
+		    		projectDo.approachID=parseInt(myPageableArrCol[i]["approachID"].toString());
+		    		projectDo.criteriaID=parseInt(lblCritID.text);
+		    		projectDo.approachTitle=myPageableArrCol[i]["criteriaID"].toString();
+		    		projectDo.type="AFI";
+		    		projectArray.push(projectDo);
+	    	 	}
+	    	 	else if(myPageableArrCol[i]["strengthFlag"] == true && myPageableArrCol[i]["afiFlag"] == true){
+		    		projectDo = new ProjectDo();
+		    		projectDo.projectID=projectID;
+		    		projectDo.approachID=parseInt(myPageableArrCol[i]["approachID"].toString());
+		    		projectDo.criteriaID=parseInt(lblCritID.text);
+		    		projectDo.approachTitle=myPageableArrCol[i]["criteriaID"].toString();
+		    		projectDo.type="AFI";
+		    		projectArray.push(projectDo);
+		    		projectDo = new ProjectDo();
+		    		projectDo.projectID=projectID;
+		    		projectDo.approachID=parseInt(myPageableArrCol[i]["approachID"].toString());
+		    		projectDo.criteriaID=parseInt(lblCritID.text);
+		    		projectDo.approachTitle=myPageableArrCol[i]["criteriaID"].toString();
+		    		projectDo.type="Strength";
+		    		projectArray.push(projectDo);
+	    	 	}
+	    	}
+	    	criteriaService=new TeamController();
+	    	criteriaService.AddProjectApproachLinkDetails(projectArray,function(resultNum:Number):void{
+	    		if(resultNum!=0){
+	    		//	Alert.show("Project Added successfully");
+	    			Alert.show(resourceManager.getString('myResources','projAddedSucc'));
+	    			popUpCreateProj.clearAll();
+	    			PopUpManager.removePopUp(popUpCreateProj);
+	    			CursorManager.removeBusyCursor();
+	    		}
+	    	});
+        }
+        public function init():void{
+        	/* if(myPageableArrCol.length==0){
+        		actionPlanVBox.width=0;
+        		actionPlanVBox.height=0;
+        		
+        		
+        	}
+        	else{
+        		emptyVBox.width=0;
+        		emptyVBox.height=0; */
+        		
+        		
+        		if(Application.application.language=="en_US"){
+	        		actionPlanVBox.styleName="ApplyFontSizeEn";
+	        		myDataGrid.setStyle('textAlign','left');
+	        	}
+	        	else{
+	        		actionPlanVBox.styleName="ApplyFontSizeAr";
+	        		myDataGrid.setStyle('textAlign','right');
+	        	}
+	        	
+        	//}
+        }
+        
+        private function calcRowColor(item:Object, rowIndex:int, dataIndex:int, color:uint):uint{
+        	myDataGrid.setStyle("themeColor",item.color);
+   			return item.color;
+  		}
+  		 private function handleUpdateComplete(e:Event):void
+        {
+            var currLen:uint = myDataGrid.dataProvider.length;
+           //dg.scrollToIndex(currLen);
+           myDataGrid.scrollToIndex(currLen);
+        }
+         private function pageUP():void{
+		 	myPageableArrCol.pageUp();
+        	if(myPageableArrCol.currentPage==myPageableArrCol.pages){
+        		btnPageUp.enabled=false;
+        	}
+        	else{
+        		btnPageUp.enabled=true;
+        	}
+        	if(myPageableArrCol.currentPage>1){
+        		btnPageDown.enabled=true;
+        	}
+        	else{
+        		btnPageDown.enabled=false;
+        	}
+        }
+        private function pageDown():void{
+        	myPageableArrCol.pageDown();
+        	if(myPageableArrCol.currentPage==1){
+        		btnPageDown.enabled=false;
+        	}
+        	else{
+        		btnPageDown.enabled=true;
+        	}
+        	if(myPageableArrCol.currentPage==myPageableArrCol.pages){
+        		btnPageUp.enabled=false;
+        	}
+        	else{
+    			btnPageUp.enabled=true;
+        	}
+        }
+        public function chkPage():void{
+        	if(myPageableArrCol.currentPage==1){
+        		btnPageDown.enabled=false;
+        	}
+        	else{
+        		btnPageDown.enabled=true;
+        	}
+        	if(myPageableArrCol.currentPage==myPageableArrCol.pages){
+        		btnPageUp.enabled=false;
+        	}
+        	else{
+    			btnPageUp.enabled=true;
+        	}
+        	if(myPageableArrCol.currentPage==myPageableArrCol.pages){
+        		btnPageUp.enabled=false;
+        	}
+        	else{
+        		btnPageUp.enabled=true;
+        	}
+        	if(myPageableArrCol.currentPage>1){
+        		btnPageDown.enabled=true;
+        	}
+        	else{
+        		btnPageDown.enabled=false;
+        	}
+        	if(btnPageDown.enabled==false && btnPageUp.enabled==false){
+        		jumpPage.editable=false;
+        		jumpPage.enabled=false;
+        	}
+        	else{
+        		jumpPage.editable=true;
+        		jumpPage.enabled=true;
+        	}
+        }
+      
+        
+    ]]>
+	</mx:Script>
+	
+	<mx:Style>
+		.ReportDataGrid{
+			header-style-name:"Header";
+		}
+		.Header{
+			font-weight:bold;
+			font-size:10;
+		}
+	</mx:Style>
+	
+         
+<mx:VBox id="actionPlanVBox" name="projectplan" width="100%" height="100%" verticalScrollPolicy="off">
+
+	<mx:HBox width="100%" height="7%">
+		<mx:Label text="Criterion part" fontSize="11" fontWeight="bold"/>
+		<!--<mx:Label id="lblcriteriadesc" text="{criteriadesc}"/>-->
+		<mx:TextArea borderStyle="none" width="80%" editable="false" id="lblcriteriadesc" text="{criteriadesc}"/>
+		
+	</mx:HBox>
+
+	<mx:HBox width="100%" height="2%">
+		<mx:Spacer width="100%" height="100%"/>
+	</mx:HBox>		
+		
+		<!--<events:RowColorDataGrid useRollOver="false" rowColorFunction="calcRowColor" dataProvider="{myReadingArr}" id="ReadingGrid" width="100%" height="100%" textAlign="center" draggableColumns="false" >-->
+		<mx:HBox width="100%" height="75%">
+			<events:RowColorDataGrid variableRowHeight="true" updateComplete="handleUpdateComplete(event)" useRollOver="false" styleName="ReportDataGrid" dataProvider="{}" rowColorFunction="calcRowColor" id="myDataGrid" width="100%" height="100%" draggableColumns="false">
+		
+		<!--<mx:DataGrid styleName="ReportDataGrid" variableRowHeight="true" wordWrap="true" horizontalGridLines="true" verticalGridLines="true" id="myDataGrid" width="100%" height="90%" draggableColumns="false">-->		
+			<events:columns>
+				<!--<mx:DataGridColumn dataField="flag" headerText="" width="10">
+					<mx:itemRenderer>
+						<mx:Component>
+			            	<mx:CheckBox textAlign="center" click="{data.flag=!data.flag}" selected="{data.flag}"/>
+						</mx:Component> 
+					</mx:itemRenderer>				        
+				</mx:DataGridColumn>-->
+			
+				<mx:DataGridColumn headerWordWrap="true" headerText="@Resource(bundle='myResources', key='part')" dataField="criteriaID" width="70">
+					<mx:itemRenderer>
+		        		<mx:Component>
+		        			<mx:Text width="100%"  text="{data.criteriaID}" paddingLeft="5"/>
+		        		</mx:Component>
+		        	</mx:itemRenderer>
+		        </mx:DataGridColumn>
+		        
+		       <mx:DataGridColumn id="dgcTitle" headerWordWrap="true" headerText="@Resource(bundle='myResources', key='title')" dataField="approachTitle" width="180">
+		        	<mx:itemRenderer>
+		        		<mx:Component>
+		        			<mx:Text width="100%"  text="{data.approachTitle}" paddingLeft="5"/>
+		        		</mx:Component>
+		        	</mx:itemRenderer>
+		        </mx:DataGridColumn>
+		        
+		       <!-- <mx:DataGridColumn headerWordWrap="true" headerText="@Resource(bundle='myResources', key='type')" dataField="type" width="80">
+		        	<mx:itemRenderer>
+		        		<mx:Component>
+		        			<mx:Text width="100%"  text="{data.type}" paddingLeft="5"/>
+		        		</mx:Component>
+		        	</mx:itemRenderer>
+		        </mx:DataGridColumn>-->
+		        
+		        <!--<mx:DataGridColumn headerWordWrap="true" headerText="" dataField="strength" width="180">
+	        		<mx:itemRenderer>
+		        		<mx:Component>
+		        			<mx:Text width="100%"  text="{data.strength}" paddingLeft="5"/>
+		        		</mx:Component>
+		        	</mx:itemRenderer>
+		        </mx:DataGridColumn>-->
+		        <mx:DataGridColumn dataField="strengthFlag" headerText="@Resource(bundle='myResources', key='strength')"  width="180">
+					<mx:itemRenderer>
+						<mx:Component>
+			            	<mx:CheckBox  label="{data.strength}" paddingLeft="5" textAlign="left" click="{data.strengthFlag=!data.strengthFlag}" selected="{data.strengthFlag}"/>
+			            	
+						</mx:Component> 
+						
+					</mx:itemRenderer>	
+							        
+				</mx:DataGridColumn>
+				
+				<!--<mx:DataGridColumn headerWordWrap="true" headerText="@Resource(bundle='myResources', key='areaImprovement')" dataField="areaforimprovement" width="180">
+					<mx:itemRenderer>
+		        		<mx:Component>
+		        			<mx:Text width="100%" text="{data.areaforimprovement}" paddingLeft="5"/>
+		        		</mx:Component>
+		        	</mx:itemRenderer>
+				</mx:DataGridColumn>-->
+				<mx:DataGridColumn dataField="afiFlag" wordWrap="true" headerText="@Resource(bundle='myResources', key='areaImprovement')"  width="180">
+					<mx:itemRenderer>
+						<mx:Component>
+			            	<mx:CheckBox paddingLeft="5" label="{data.areaforimprovement}" textAlign="left" click="{data.afiFlag=!data.afiFlag}" selected="{data.afiFlag}"/>
+						</mx:Component> 
+					</mx:itemRenderer>				        
+				</mx:DataGridColumn>
+			</events:columns>
+		</events:RowColorDataGrid>
+		</mx:HBox>
+		
+	
+	<mx:HBox width="100%">
+		<mx:HBox width="50%" horizontalAlign="left">
+			<mx:Button useHandCursor="true" buttonMode="true" label="@Resource(bundle='myResources', key='createProj')" click="createProject()"/>
+		</mx:HBox>
+		
+		<mx:HBox width="50%" horizontalAlign="right">
+			<mx:Text x="532" y="28" text="Page {myPageableArrCol.currentPage} of {myPageableArrCol.pages}"/>
+	   		<mx:Label text="@Resource(bundle='myResources',key='jumpToPage')"/>
+	   		<mx:TextInput restrict="0-9" id="jumpPage" width="40" maxChars="2" />
+	   		<mx:Button skin="@Embed('assets/go.png')" click="JumptoPage()" useHandCursor="true" buttonMode="true"/>
+			<mx:Button skin="@Embed('assets/left arrow.png')" useHandCursor="true" buttonMode="true" id="btnPageDown" click="pageDown()" disabledSkin="@Embed('assets/disabledRight.png')"/>
+    		<mx:Button skin="@Embed('assets/right arrow.png')" useHandCursor="true" buttonMode="true" id="btnPageUp" click="pageUP()" disabledSkin="@Embed('assets/disabledLeft.png')"/>	
+
+		</mx:HBox>
+		
+	</mx:HBox>
+	<mx:HBox width="100%" horizontalAlign="right">
+		
+	</mx:HBox>
+	
+	<mx:Label id="lblCritID" width="0" height="0" visible="false"/>
+	
+</mx:VBox>
+
+</mx:Panel>

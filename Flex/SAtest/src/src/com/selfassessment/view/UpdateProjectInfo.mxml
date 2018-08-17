@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<mx:Panel styleName="PanelStyle" xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute"
+	 borderAlpha="1" width="100%" height="100%" xmlns:com="com.selfassessment.view.*" horizontalScrollPolicy="off"
+	 verticalScrollPolicy="auto">
+
+		<mx:VBox name="horizontalview" width="100%" height="100%">
+			
+			<mx:HBox height="1%" width="1%">
+				<mx:Spacer height="100%" width="100%"/>
+			</mx:HBox>
+			
+			<mx:HBox width="100%" height="10%">
+				<mx:Label text="Project Information" styleName="ApplyFontSize"/>
+			</mx:HBox>
+			
+			<mx:HBox height="1%" width="1%">
+				<mx:Spacer height="100%" width="100%"/>
+			</mx:HBox> 
+		
+			<mx:HBox width="100%" height="4%" fontSize="11" fontWeight="bold" color="#000000">
+			
+				<mx:Spacer width="5%"/>
+				
+				<mx:VBox width="20%" height="100%" horizontalAlign="left">
+					<mx:Label text="Organisation name" styleName="labelalignment"/>
+				</mx:VBox>
+				
+				<mx:VBox width="70%" height="100%" horizontalAlign="left">
+					<mx:TextArea width="75%" height="5%"/>
+				</mx:VBox>
+				
+			</mx:HBox>
+		 
+			<mx:HBox height="1%" width="1%">
+				<mx:Spacer height="100%" width="100%"/> 
+			</mx:HBox>	
+			
+			<mx:HBox width="100%" height="5%" fontSize="11" fontWeight="bold" color="#000000">
+			
+				<mx:Spacer width="6%"/>
+				
+				<mx:VBox width="27%" height="100%" horizontalAlign="left">
+					<mx:Label text="Organisation's "/>
+				</mx:VBox>
+				
+				<mx:VBox width="100%" height="100%" horizontalAlign="left">
+					<mx:TextArea width="70%" height="35%"/>
+				</mx:VBox>
+				
+			</mx:HBox>
+		
+			<mx:HBox height="1%" width="1%">
+				<mx:Spacer height="100%" width="100%"/>
+			</mx:HBox> 		
+	
+			<mx:HBox width="100%" height="5%" fontSize="11" fontWeight="bold" color="#000000">
+				<mx:Spacer width="5%"/>
+				
+				<mx:VBox width="28%" height="5%" horizontalAlign="left">
+				<mx:Label text="Total number of " height="100%" width="100%"/>
+				</mx:VBox>
+				
+				<mx:VBox width="100%" height="100%" horizontalAlign="left">
+				<mx:TextInput width="5%"/>
+				</mx:VBox>
+				
+			</mx:HBox>
+		
+			<mx:HBox height="1%" width="1%">
+				<mx:Spacer height="100%" width="100%"/>
+			</mx:HBox>
+			
+			<mx:HBox width="100%" height="5%" fontSize="11" fontWeight="bold" color="#000000">
+				<mx:Spacer width="5%"/>
+				
+				<mx:VBox width="28%" height="5%" horizontalAlign="left">
+				<mx:Label text="Scope of application" height="100%" width="100%"/>
+				</mx:VBox>
+				
+				<mx:VBox width="100%" height="100%" horizontalAlign="left">
+				<mx:TextArea width="70%" height="35%"/>
+				</mx:VBox>
+				
+			</mx:HBox>
+			
+			<mx:HBox height="1%" width="1%">
+				<mx:Spacer height="100%" width="100%"/>
+			</mx:HBox>
+
+			<mx:HBox width="100%" height="5%" fontSize="11" fontWeight="bold" color="#000000">
+				<mx:Spacer width="5%"/>
+				
+				<mx:VBox width="28%" height="5%" horizontalAlign="left">
+				<mx:Label text="Reasons for " height="100%" width="100%"/>
+				</mx:VBox>
+				
+				<mx:VBox width="100%" height="100%" horizontalAlign="left">
+				<mx:TextArea width="70%" height="35%"/>
+				</mx:VBox>
+				
+			</mx:HBox>
+			
+			<mx:HBox height="1%" width="1%">
+				<mx:Spacer height="100%" width="100%"/>
+			</mx:HBox>
+			
+			<mx:HBox width="100%" height="5%" fontSize="11" fontWeight="bold" color="#000000">
+				<mx:Spacer width="5%"/>
+				
+				<mx:VBox width="28%" height="5%" horizontalAlign="left">
+				<mx:Label text="The main stakeholders " height="100%" width="100%"/>
+				</mx:VBox>
+				
+				<mx:VBox width="100%" height="100%" horizontalAlign="left">
+				<mx:TextArea width="70%" height="35%"/>
+				</mx:VBox>
+				
+			</mx:HBox>
+			
+			<mx:HBox height="1%" width="1%">
+				<mx:Spacer height="100%" width="100%"/>
+			</mx:HBox>
+			
+			<mx:HBox width="100%" height="5%" fontSize="11" fontWeight="bold" color="#000000">
+				<mx:Spacer width="5%"/>
+				
+				<mx:VBox width="28%" height="5%" horizontalAlign="left">
+				<mx:Label text="Our excellence policy " height="100%" width="100%"/>
+				</mx:VBox>
+				
+				<mx:VBox width="100%" height="100%" horizontalAlign="left">
+				<mx:TextArea width="70%" height="35%"/>
+				</mx:VBox>
+				
+			</mx:HBox>
+			
+			<mx:HBox height="1%" width="1%">
+				<mx:Spacer height="100%" width="100%"/>
+			</mx:HBox>
+			
+			<mx:HBox width="100%" height="5%">
+				<mx:Spacer width="4%"/>
+				<mx:Label width="43%" height="5%" text="Possible risk or constraints that prevent the completion of this project"/>
+				<mx:Button label="Example"/>	
+			</mx:HBox>
+			
+			<mx:HBox height="2%" width="1%">
+				<mx:Spacer height="100%" width="100%"/>
+			</mx:HBox>
+			
+			<mx:HBox width="100%" height="10%">
+				<mx:Spacer width="4%"/>
+				<mx:DataGrid id="myDataGrid" textAlign="center" width="85%" height="100%" allowMultipleSelection="true">
+					<mx:columns>
+					
+				        <mx:DataGridColumn headerText="S.No" dataField="sno" width="10">
+				        </mx:DataGridColumn>
+				        
+				        <mx:DataGridColumn headerText="Possible risks or constraints of the project" dataField="name" width="30">
+				        </mx:DataGridColumn>
+				        
+				        <mx:DataGridColumn headerText="Actions necessary to prevent, avoid or reduce this risk" dataField="role" width="30">
+				        </mx:DataGridColumn>
+				        
+					</mx:columns>
+				</mx:DataGrid>
+				
+			</mx:HBox>
+			
+	</mx:VBox>		
+
+</mx:Panel>	

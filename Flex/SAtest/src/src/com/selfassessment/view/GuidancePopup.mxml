@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" 
+	   y="{(Application.application.height/2)-(this.height/2)}"
+	 x="{(Application.application.width/2)-(this.width/2)}" horizontalScrollPolicy="off" 
+	 width="700" height="700" >
+
+
+	<mx:Script>
+		<![CDATA[
+			import mx.managers.CursorManager;
+			import mx.core.Application;
+			import mx.managers.PopUpManager;
+			import mx.controls.*;
+			import src.com.selfassessment.controller.TeamController;
+			
+			[Bindable]
+			public var txtFromOutSide:String;
+			[Bindable]
+			public var txtvalue:int;
+			
+			[Bindable]
+            [Embed("assets/bullet_black.jpg")]
+            public var myBulletStarIcon:Class;
+
+			
+			[Bindable]
+        	public var CriteriaService:TeamController = new TeamController();
+			
+			[Bindable]
+			public var criteriaArray:Array = new Array();
+			
+			public function init():void {
+				/* CriteriaService.getGuidance(txtvalue,function(guidanceArray:Array):void{
+					criteriaArray = guidanceArray;
+					//myDataGrid.dataProvider = criteriaArray;
+					sourceOne.dataProvider = criteriaArray;
+					
+				}); */
+			}
+			private function myiconfunction(item:Object):Class{
+           		 return myBulletStarIcon;       
+        	 }
+
+			private function onClose():void {
+				PopUpManager.removePopUp(this);
+			}
+			
+		]]>
+	</mx:Script>
+	
+	<mx:VBox width="100%" height="350" borderStyle="solid" verticalGap="0" borderThickness="3" shadowDistance="8" shadowDirection="right" 
+		dropShadowEnabled="true" dropShadowColor="#000000" borderColor="#636e83"  
+		horizontalAlign="left" verticalAlign="top" styleName="ApplyFontSize" backgroundColor="white">
+		
+		<mx:Canvas width="100%" height="25" useHandCursor="true" buttonMode="true" mouseDown="{this.startDrag()}" 
+			mouseUp="{this.stopDrag()}" styleName="panel1filled"  borderSides="left,right,top" 
+			cornerRadius="3" borderStyle="none">
+			<mx:Label left="10" fontWeight="bold"  id="lblTitle" text="@Resource(bundle='myResources', key='guidanceNotes')" color="#FFFFFF" fontSize="12"/>
+			<mx:Image toolTip="Close" right="13" top="2" source="@Embed('assets/close.png')" useHandCursor="true" buttonMode="true"  click="{PopUpManager.removePopUp(this);CursorManager.removeBusyCursor();}"/>
+		</mx:Canvas>
+		
+		<mx:VBox width="95%" horizontalAlign="left" id="listvbox" verticalScrollPolicy="auto" horizontalScrollPolicy="off"> 
+			
+			<mx:HBox width="100%" horizontalAlign="left" height="60"> 
+				<mx:Label id="lblCritID" visible="false" fontWeight="bold"/>
+				<mx:TextArea width="100%" height="100%" selectable="false" editable="false" borderStyle="none" 
+					 wordWrap="true" id="txtCriterionDesc" fontSize="13"/>
+			</mx:HBox>	
+			
+			<mx:HBox width="100%" id="listhbox" horizontalScrollPolicy="off"> 
+				<mx:List width="100%" height="100%" useRollOver="false" selectable="false" 
+					iconFunction="myiconfunction" selectionColor="#FFFFFF" borderStyle="none" 
+					variableRowHeight="true" wordWrap="true" id="sourceOne" rollOverColor="white" 
+					themeColor="white" color="0x0050AA" dataProvider="{txtvalue}" />
+			</mx:HBox>
+		</mx:VBox>
+		
+		<mx:Spacer/>
+		
+	</mx:VBox>
+
+</mx:Canvas>
+
+

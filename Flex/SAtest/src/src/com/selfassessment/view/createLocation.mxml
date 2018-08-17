@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml"  xmlns:s="library://ns.adobe.com/flex/spark" y="{(Application.application.height/2)-(this.height/2)}" x="{(Application.application.width/2)-(this.width/2)}"
+	creationComplete="init()">
+	<mx:Script>
+		<![CDATA[
+			import src.com.selfassessment.controller.TeamController;
+			import mx.events.CloseEvent;
+			import mx.events.ListEvent;
+			import mx.managers.CursorManager;
+			import src.com.selfassessment.controller.Controller;
+			import mx.core.Application;
+			import mx.managers.PopUpManager;
+			import mx.utils.StringUtil;
+			import mx.controls.Alert;
+			private var LoginService:TeamController=new TeamController();
+			private var loginController:Controller;
+			public var popUpAlert:ShowAlert;
+			
+			private function init():void{
+				if(Application.application.language=="en_US"){
+					myDataGrid.setStyle('textAlign','left');
+				}
+				else{
+					myDataGrid.setStyle('textAlign','right');
+				}
+			}
+			
+			
+            private function addLocation():void{
+            	if(StringUtil.trim(txtLocation.text)!=""){
+            		loginController=new Controller();
+            		loginController.insertLocationDetails(txtLocation.text,function(resultStatus:Number):void{
+            			CursorManager.removeBusyCursor();
+            			if(resultStatus!=0){
+            				//Alert.show("Location added successfully");
+            				Alert.show(resourceManager.getString('myResources','locAddedSucc'));
+            				showLocation();
+            				txtLocation.text="";
+            			}
+            			else{
+            				//Alert.show("Location already exists");
+            				Alert.show(resourceManager.getString('myResources','locAlreadyExists'));
+            			}
+            		});
+            	}
+            	else{
+            		//Alert.show("Enter the location");
+            		Alert.show(resourceManager.getString('myResources','enterLocation'));
+            	}
+            	CursorManager.removeBusyCursor();
+            	
+            }
+            
+            private function showLocation():void{
+            	loginController=new Controller();
+    			CursorManager.setBusyCursor();
+    			loginController.GetLocationDetails(function (resultLocArray:Array):void{
+    				myDataGrid.dataProvider =  resultLocArray;
+    				CursorManager.removeAllCursors();
+    			});
+            }
+            
+            
+            
+            	public function DeleteLocation(event:ListEvent):void{
+        		if(event.columnIndex == 1){
+        			//Alert.show("Are you sure you want to delete the location?","",Alert.YES|Alert.NO,this,DeleteAddLister);
+        			popUpAlert = ShowAlert(PopUpManager.createPopUp(this,ShowAlert,true));
+					var vbox:VBox=new VBox();
+					popUpAlert.mainBox.addChild(vbox);
+					var alert:Alert=new Alert();
+					vbox.layoutDirection="ltr";
+					alert.layoutDirection="ltr";
+					alert=Alert.show(resourceManager.getString('myResources','deleteLocConfirm'),"",Alert.YES|Alert.NO,this,DeleteAddLister);
+					vbox.addChild(alert);
+        		}
+        	}
+        	
+        	public function DeleteAddLister(event:CloseEvent):void{
+        		if(event.detail == Alert.YES){
+        			LoginService = new TeamController();
+					CursorManager.setBusyCursor();
+				 	LoginService.deleteLocation(parseInt(myDataGrid.selectedItem.LocationID.toString()),function(resultArray:Number): void {
+					 	if(resultArray!=0){
+					 		Alert.show(resourceManager.getString('myResources','locaDelSucc'));
+					 		 showLocation();
+					 	}
+					 	else{
+					 		//Alert.show("Users exists under this location.So,deletion cannot be possible");
+					 		Alert.show(resourceManager.getString('myResources','userExistsUnderLoc'));
+					 	}
+					 	CursorManager.removeAllCursors();
+					});
+        		}
+        		PopUpManager.removePopUp(popUpAlert);
+        	}
+        
+			
+		]]>
+	</mx:Script>
+	<mx:VBox borderStyle="solid" borderThickness="3" shadowDistance="8" shadowDirection="right" dropShadowEnabled="true" dropShadowColor="#000000" borderColor="#636e83" width="100%" horizontalAlign="center" verticalAlign="middle" height="100%" styleName="ApplyFontSize" backgroundColor="white">
+		<mx:Canvas width="100%" useHandCursor="true" buttonMode="true" mouseDown="{this.startDrag()}" mouseUp="{this.stopDrag()}" height="25" styleName="panel1filled" borderSides="left,right,top" cornerRadius="3" borderStyle="none">
+			<mx:Label left="10" fontWeight="bold"  id="lblTitle" text="@Resource(bundle='myResources', key='createLoc')" color="#000506" fontSize="12"/>
+			<mx:Image id="btnClose" right="2" top="2" source="@Embed('assets/close.png')" useHandCursor="true" buttonMode="true"  />
+		</mx:Canvas>
+		<mx:Spacer/>
+		<mx:HBox paddingLeft="10">
+			<mx:Label text="@Resource(bundle='myResources', key='loc')" fontWeight="bold"/>
+			<s:TextInput id="txtLocation" maxChars="50"/>
+			<mx:Spacer/>
+		</mx:HBox>
+		<mx:Spacer/>
+		
+		<mx:Spacer/>
+		<mx:HBox>
+			<mx:Spacer width="60"/>
+			<mx:Button label="@Resource(bundle='myResources', key='createLoc')" id="btncreate" click="addLocation()" useHandCursor="true" buttonMode="true"/>
+		</mx:HBox>
+		<mx:Spacer/>
+		<mx:Spacer/>
+		<mx:HBox>
+			<mx:Spacer/>
+			<mx:Spacer/>
+			<mx:DataGrid id="myDataGrid" itemClick="DeleteLocation(event)" wordWrap="true" resizableColumns="true" width="350" height="240"  allowMultipleSelection="false" draggableColumns="false">
+				<mx:columns>
+				
+		        	<mx:DataGridColumn headerWordWrap="true" dataField="Location" wordWrap="true" headerText="@Resource(bundle='myResources', key='location')" width="120">
+		        		<mx:itemRenderer>
+		        			<mx:Component>
+		        				<mx:Label paddingLeft="5" text="{data.Location}"/>
+		        			</mx:Component>
+		        		</mx:itemRenderer>
+					</mx:DataGridColumn>
+		        	
+			       <mx:DataGridColumn headerText="@Resource(bundle='myResources', key='delete')" dataField="delete" width="40">
+						<mx:itemRenderer>
+	                		<mx:Component> 
+		                        <mx:Image scaleContent="false" horizontalAlign="center" source="@Embed('assets/newdeleteicon.png')" useHandCursor="true" buttonMode="true"/> 
+	                		</mx:Component> 
+	            		</mx:itemRenderer> 
+					</mx:DataGridColumn>
+					
+				</mx:columns>
+		    </mx:DataGrid>
+		    <mx:Spacer/>
+		    <mx:Spacer/>
+		</mx:HBox>
+		
+		
+		<mx:Spacer/>
+		<mx:Spacer/>
+		
+		
+	</mx:VBox>
+</mx:Canvas>

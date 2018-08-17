@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" 
+	   y="{(Application.application.height/2)-(this.height/2)}"
+	 x="{(Application.application.width/2)-(this.width/2)}" horizontalScrollPolicy="off"
+	 verticalScrollPolicy="off" width="{screen.width}" height="{screen.height}">
+	<mx:Script>
+		<![CDATA[
+			import mx.core.Application;
+			import mx.managers.PopUpManager;
+		]]>
+	</mx:Script>
+
+
+	
+	
+	<mx:VBox height="100%" borderStyle="solid" verticalGap="0" borderThickness="3" shadowDistance="8" 
+		shadowDirection="right" dropShadowEnabled="true" dropShadowColor="#000000" borderColor="#636e83" 
+		width="100%" horizontalAlign="center" verticalAlign="top" styleName="ApplyFontSize" 
+		backgroundColor="white" verticalScrollPolicy="off">
+		<mx:Canvas width="100%" useHandCursor="true" buttonMode="true" mouseDown="{this.startDrag()}" mouseUp="{this.stopDrag()}" height="25" styleName="panel1filled"  borderSides="left,right,top" cornerRadius="3" borderStyle="none">
+			<mx:Label left="10" fontWeight="bold"  id="lblTitle" text="@Resource(bundle='myResources', key='radar')" color="#FFFFFF" fontSize="12"/>
+			<mx:Image toolTip="Close" right="2" top="2" source="@Embed('assets/close.png')" useHandCursor="true" buttonMode="true"  click="{PopUpManager.removePopUp(this);cursorManager.removeBusyCursor();}"/>
+		</mx:Canvas>
+		
+		<mx:VBox verticalAlign="middle" horizontalAlign="center" height="{screen.height-80}" width="{screen.width-100}"> 
+			<mx:HBox width="100%" horizontalAlign="center" height="100%">
+				<mx:Image source="@Embed('assets/Results.png')"/>
+			</mx:HBox>
+		</mx:VBox>
+		
+		<mx:Spacer/>
+		
+	</mx:VBox>
+
+</mx:Canvas>
+
+

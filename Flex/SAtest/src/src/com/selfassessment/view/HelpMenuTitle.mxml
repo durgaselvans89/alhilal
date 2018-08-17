@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Panel creationComplete="init()" xmlns:mx="http://www.adobe.com/2006/mxml" styleName="ListmenuContainer" 
+	xmlns:controller="com.selfassessment.controller.*" xmlns:ui="flex.utils.ui.*">
+
+<mx:Style source="src/com/selfassessment/view/assets/Styles.css"/>	
+ 	
+<mx:Metadata>
+		[Event("Criteria", type="com.selfassessment.events.EventCriteriaConstants")]
+		[Event("AboutSelfAssessment", type="com.selfassessment.events.EventCriteriaConstants")]
+		[Event("AboutUS", type="com.selfassessment.events.EventCriteriaConstants")]
+		[Event("ProcessDescription", type="com.selfassessment.events.EventCriteriaConstants")]
+		[Event("RelationshipFC", type="com.selfassessment.events.EventCriteriaConstants")]
+		
+		
+</mx:Metadata>	
+	
+<mx:Script>
+    <![CDATA[
+    	import mx.core.Application;
+    
+    	import src.com.selfassessment.events.*;
+    	import src.com.selfassessment.controller.*;
+    	import src.com.selfassessment.view.*;
+    	import mx.controls.Alert;
+    	
+        [Bindable]
+		public var selectedNode:XML;
+		
+		public var loadControllerView:Controller = new Controller();
+		private function init():void{
+			if(Application.application.language=="en_US"){
+				myTree.dataProvider=treeData;
+			}
+			else{
+				myTree.dataProvider=treeArabicData;
+			}
+			myTree.selectedIndex=0;
+		}
+		
+		public function treeChanged(event:Event):void {
+     
+			selectedNode = List(event.target).selectedItem as XML;
+			
+			if(selectedNode.@label==resourceManager.getString('myResources','criteriaReport')){
+				dispatchEvent(new EventCriteriaConstants(EventCriteriaConstants.help_criteria_select));
+        	}
+    	
+        	else if(selectedNode.@label==resourceManager.getString('myResources','aboutSA')){
+				dispatchEvent(new EventCriteriaConstants(EventCriteriaConstants.help_abtSA_select));
+        	}
+        	else if(selectedNode.@label == resourceManager.getString('myResources','aboutUs')){
+        		dispatchEvent(new EventCriteriaConstants(EventCriteriaConstants.help_abtus_select));
+        	}
+        	else if(selectedNode.@label == resourceManager.getString('myResources','processDescRep')){
+        		dispatchEvent(new EventCriteriaConstants(EventCriteriaConstants.help_Proces_select));
+        	}
+        	else if(selectedNode.@label == resourceManager.getString('myResources','relationFC')){
+        		dispatchEvent(new EventCriteriaConstants(EventCriteriaConstants.help_FC_select));
+        	}
+        	else{
+				dispatchEvent(new EventCriteriaConstants(EventCriteriaConstants.executive_select));
+        	}
+		}
+		
+		public function clickEvent(event:Event):void{
+			
+			selectedNode = List(event.target).selectedItem as XML;
+			
+			if(selectedNode.@label==resourceManager.getString('myResources','criteriaReport')){
+				dispatchEvent(new EventCriteriaConstants(EventCriteriaConstants.help_criteria_select));
+        	}
+    	
+        	else if(selectedNode.@label==resourceManager.getString('myResources','aboutSA')){
+				dispatchEvent(new EventCriteriaConstants(EventCriteriaConstants.help_abtSA_select));
+        	}
+        	else if(selectedNode.@label == resourceManager.getString('myResources','aboutUs')){
+        		dispatchEvent(new EventCriteriaConstants(EventCriteriaConstants.help_abtus_select));
+        	}
+        	else if(selectedNode.@label == resourceManager.getString('myResources','processDescRep')){
+        		dispatchEvent(new EventCriteriaConstants(EventCriteriaConstants.help_Proces_select));
+        	}
+        	else if(selectedNode.@label == resourceManager.getString('myResources','relationFC')){
+        		dispatchEvent(new EventCriteriaConstants(EventCriteriaConstants.help_FC_select));
+        	}
+        	
+        	else{
+				dispatchEvent(new EventCriteriaConstants(EventCriteriaConstants.executive_select));
+        	}
+		}
+		
+    ]]>
+</mx:Script>
+    
+<mx:XMLList id="treeData">
+	<node label="Process Description"></node>
+	<node label="Criteria"></node>
+	<node label="About Self Assessment"></node>
+    <node label="About Us"></node>
+    <node label="Relationship with FC"></node>
+</mx:XMLList>
+<mx:XMLList id="treeArabicData">
+	<node label="وصف العملية"></node>
+	<node label="معايير"></node>
+	<node label="حول التقييم الذاتي"></node>
+    <node label="حول بنا"></node>
+    <node label="لعلاقة مع نادي"></node>
+</mx:XMLList>
+	
+<mx:List fontWeight="bold" id="myTree" width="100%" height="100%" labelField="@label"
+            dataProvider="{treeData}" change="treeChanged(event)" click="clickEvent(event)" 
+            styleName="ListMenustyle" selectedIndex="0">
+            <mx:itemRenderer>
+            	<mx:Component>
+            		<mx:Label/>
+            	</mx:Component>
+            </mx:itemRenderer>
+		
+</mx:List>
+</mx:Panel>
+

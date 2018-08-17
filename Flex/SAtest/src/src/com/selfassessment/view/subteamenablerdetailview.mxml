@@ -1,0 +1,358 @@
+
+<mx:Panel styleName="PanelStyle" xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:s="library://ns.adobe.com/flex/spark" layout="absolute"
+	 borderAlpha="1" width="100%" height="100%" xmlns:com="com.selfassessment.view.*" verticalScrollPolicy="on"
+	 horizontalScrollPolicy="off">
+
+		<mx:VBox name="horizontalview" width="100%" height="100%">
+			
+			<mx:HBox width="100%" height="5%">
+				
+				<mx:Spacer width="5%"/>
+				
+				<mx:VBox width="5%" height="5%" horizontalAlign="left" styleName="ApplyFontSize">
+					<mx:Label text="Guidance notes" textDecoration="underline"/>	
+				</mx:VBox>
+				
+				<mx:Spacer width="20%"/>
+				
+				<mx:VBox width="10%" height="10%" horizontalAlign="right" styleName="ApplyFontSize">
+					<mx:Label text="RADAR" textDecoration="underline"/>	
+				</mx:VBox>
+			
+			</mx:HBox>
+	
+			<mx:HBox height="1%" width="1%">
+				<mx:Spacer height="100%" width="100%"/>
+			</mx:HBox>
+		
+			<mx:HBox width="100%" height="4%" fontSize="11" fontWeight="bold" color="#000000">
+			
+				<mx:Spacer width="5%"/>
+				
+				<mx:VBox width="24%" height="5%" horizontalAlign="left">
+				<mx:Label text="Criterion part" textAlign="left"/>
+				</mx:VBox>
+				
+				<mx:VBox width="80%" height="80%" horizontalAlign="left">
+				<mx:Text width="100%" text="(1a) How leaders develop the mission, vission, values and ethics and are role models of culture of excellence [20 points]" textAlign="left"/>
+				</mx:VBox>
+				
+			</mx:HBox>
+
+			<mx:HBox height="1%" width="1%">
+				<mx:Spacer height="100%" width="100%"/>
+			</mx:HBox>
+	
+			<mx:HBox width="100%" height="4%" fontSize="11" fontWeight="bold" color="#000000">
+			
+				<mx:Spacer width="5%"/>
+				
+				<mx:VBox width="80%" height="5%" horizontalAlign="left">
+					<mx:Text width="25%" text="Other criterion parts linking to (1a) "/>
+					<mx:Spacer width="100%"/>
+				</mx:VBox>
+				
+			</mx:HBox>
+
+			<mx:HBox height="1%" width="1%">
+				<mx:Spacer height="100%" width="100%"/>
+			</mx:HBox> 
+		
+			<mx:HBox width="100%" height="4%" fontSize="11" fontWeight="bold" color="#000000">
+			
+				<mx:Spacer width="5%"/>
+				
+				<mx:VBox width="19%" height="5%" horizontalAlign="left">
+					<mx:Text width="100%" text="Title of approach / parts for (1a) " fontSize="11"/>
+				</mx:VBox>
+				
+				<mx:VBox width="5%" height="5%">
+					<mx:Spacer width="100%" height="100%"/>
+				</mx:VBox>
+				
+				<mx:VBox width="80%" height="100%" horizontalAlign="left">
+					<s:TextArea width="80%" height="5%"/>
+				</mx:VBox>
+				
+			</mx:HBox>
+
+			<mx:HBox height="1%" width="1%">
+				<mx:Spacer height="100%" width="100%"/>
+			</mx:HBox> 		
+	
+			<mx:HBox width="100%" height="5%" fontSize="11" fontWeight="bold" color="#000000">
+			
+				<mx:Spacer width="5%"/>
+				
+				<mx:VBox width="22%" height="5%" horizontalAlign="left">
+					<mx:Label text="Missing ? "/>
+				</mx:VBox>
+				
+				<mx:VBox width="30%" height="100%" horizontalAlign="left">
+					<mx:HBox width="100%" height="100%">
+						<mx:RadioButton label="Yes" name="chkyes" selected="true"/>
+						<mx:RadioButton label="No" name="chkno"/>
+					</mx:HBox>	
+				</mx:VBox>
+				
+			</mx:HBox>
+
+			<mx:HBox height="1%" width="1%">
+				<mx:Spacer height="100%" width="100%"/> 
+			</mx:HBox>	
+			
+			<mx:HBox width="100%" height="20%" fontSize="11" fontWeight="bold" color="#000000">
+			
+				<mx:Spacer width="5%"/>
+				
+				<mx:VBox width="25%" height="5%" horizontalAlign="left">
+					<mx:Text width="70%" text="Evidence of sound and integrated approach / part? see "/>
+					<mx:Text text="(RADAR)" color="#2a37373"/>
+				</mx:VBox>
+				
+				<mx:VBox width="80%" height="95%" horizontalAlign="left">
+					<s:TextArea width="80%" height="50%"/>
+				</mx:VBox>
+				
+			</mx:HBox>
+		
+			<mx:HBox height="1%" width="1%">
+				<mx:Spacer height="100%" width="100%"/>
+			</mx:HBox> 		
+	
+			<mx:HBox width="100%" height="5%" fontSize="11" fontWeight="bold" color="#000000">
+				<mx:Spacer width="5%"/>
+				
+				<mx:VBox width="25%" height="5%" horizontalAlign="left">
+				<mx:Text width="75%" text="Evidence of how this Approach/ part is deployed and implemented in a systematic manner ? See"/>
+				<mx:Text text="(RADAR)" color="#2a37373"/>
+				</mx:VBox>
+				
+				<mx:VBox width="80%" height="100%" horizontalAlign="left">
+				<s:TextArea width="80%" height="35%"/>
+				</mx:VBox>
+				
+			</mx:HBox>
+		
+			<mx:HBox height="1%" width="1%">
+				<mx:Spacer height="100%" width="100%"/>
+			</mx:HBox>
+			
+			<mx:HBox width="100%" height="5%" fontSize="11" fontWeight="bold" color="#000000">
+				<mx:Spacer width="5%"/>
+				
+				<mx:VBox width="25%" height="5%" horizontalAlign="left">
+				<mx:Text width="80%" text="Evidence of approach/ part and deployment effectiveness to show how improvements are introduced based on "/>
+				</mx:VBox>
+				
+				<mx:VBox width="80%" height="100%" horizontalAlign="left">
+				<s:TextArea width="80%" height="35%"/>
+				</mx:VBox>
+				
+			</mx:HBox>
+			
+			<mx:HBox height="1%" width="1%">
+				<mx:Spacer height="100%" width="100%"/>
+			</mx:HBox>
+
+			<mx:HBox width="100%" height="5%" fontSize="11" fontWeight="bold" color="#000000">
+				<mx:Spacer width="5%"/>
+				
+				<mx:VBox width="24%" height="5%" horizontalAlign="left">
+				<mx:Label text="Source of Information" height="100%" width="100%"/>
+				</mx:VBox>
+				
+				<mx:VBox width="76%" height="100%" horizontalAlign="left">
+				<s:TextArea width="80%" height="35%"/>
+				</mx:VBox>
+				
+			</mx:HBox>
+			
+			<mx:HBox height="1%" width="1%">
+				<mx:Spacer height="100%" width="100%"/>
+			</mx:HBox>
+
+			<mx:HBox width="100%" height="40%" fontSize="11" fontWeight="bold" color="#000000">
+				<mx:Spacer width="5%"/>
+				
+				<mx:VBox width="23%" height="5%" horizontalAlign="left">
+				<mx:Text width="80%" text="Relevance to this criterion part"/>
+				</mx:VBox>
+				
+				<mx:VBox width="15%" height="95%" horizontalAlign="left">
+					<mx:ComboBox> 
+						<mx:ArrayCollection>
+						<mx:String>Low</mx:String>
+						<mx:String>Medium</mx:String>
+						<mx:String>High</mx:String>
+						<mx:String>None</mx:String>
+						<mx:String>Missing</mx:String>
+						</mx:ArrayCollection>
+					</mx:ComboBox>
+				</mx:VBox>
+			
+				<mx:VBox width="28%" height="5%" horizontalAlign="left">
+					<mx:Text width="80%" text="Relevance to delivering the org. critical success factors "/>
+				</mx:VBox>
+						
+				<mx:VBox width="15%" height="95%" horizontalAlign="left">
+					<mx:ComboBox> 
+						<mx:ArrayCollection>
+						<mx:String>Low</mx:String>
+						<mx:String>Medium</mx:String>
+						<mx:String>High</mx:String>
+						<mx:String>None</mx:String>
+						<mx:String>Missing</mx:String>
+						</mx:ArrayCollection>
+					</mx:ComboBox>
+				</mx:VBox>
+				
+		</mx:HBox>
+		
+		<mx:HBox height="1%" width="1%">
+			<mx:Spacer height="100%" width="100%"/>
+		</mx:HBox>
+		
+		<mx:HBox width="100%" height="40%" styleName="ApplyFontSize">
+			<mx:Label text="RADAR Assessment"/>
+		</mx:HBox>
+		
+		<mx:HBox height="1%" width="1%">
+			<mx:Spacer height="100%" width="100%"/>
+		</mx:HBox>
+
+		<mx:HBox width="100%" height="5%" fontSize="11" fontWeight="bold" color="#000000">
+			<mx:Spacer width="5%"/>
+			
+			<mx:VBox width="22%" height="5%" horizontalAlign="left">
+				<mx:Label text="Approach "/>
+			</mx:VBox>
+			
+			<mx:HBox width="20%" height="5%" horizontalAlign="left">
+				<mx:RadioButton label="NE" name="chkne" selected="true"/>
+				<mx:RadioButton label="LE" name="chkle"/>
+				<mx:RadioButton label="E" name="chke"/>
+				<mx:RadioButton label="ClrE" name="chkctre"/>
+				<mx:RadioButton label="CompE" name="chkcompe"/>
+			</mx:HBox>
+			
+			<mx:HBox width="20%" height="5%" horizontalAlign="left">				
+				<mx:RadioButton label="NE" name="chkne" selected="true"/>
+				<mx:RadioButton label="LE" name="chkle"/>
+				<mx:RadioButton label="E" name="chke"/>
+				<mx:RadioButton label="ClrE" name="chkctre"/>
+				<mx:RadioButton label="CompE" name="chkcompe"/>
+			</mx:HBox>
+			
+		</mx:HBox>
+
+		<mx:HBox height="1%" width="1%">
+			<mx:Spacer height="100%" width="100%"/>
+		</mx:HBox>
+
+		<mx:HBox width="100%" height="5%" fontSize="11" fontWeight="bold" color="#000000">
+			<mx:Spacer width="5%"/>
+			
+			<mx:VBox width="22%" height="5%" horizontalAlign="left">
+			<mx:Label text="Deployment "/>
+			</mx:VBox>
+			
+			<mx:HBox width="20%" height="5%" horizontalAlign="left">
+				<mx:RadioButton label="NE" name="chkne" selected="true"/>
+				<mx:RadioButton label="LE" name="chkle"/>
+				<mx:RadioButton label="E" name="chke"/>
+				<mx:RadioButton label="ClrE" name="chkctre"/>
+				<mx:RadioButton label="CompE" name="chkcompe"/>
+			</mx:HBox>
+			
+			<mx:HBox width="20%" height="5%" horizontalAlign="left">				
+				<mx:RadioButton label="NE" name="chkne" selected="true"/>
+				<mx:RadioButton label="LE" name="chkle"/>
+				<mx:RadioButton label="E" name="chke"/>
+				<mx:RadioButton label="ClrE" name="chkctre"/>
+				<mx:RadioButton label="CompE" name="chkcompe"/>
+			</mx:HBox>
+			
+		</mx:HBox>
+
+		<mx:HBox width="100%" height="5%" fontSize="11" fontWeight="bold" color="#000000">
+		
+			<mx:Spacer width="5%"/>
+		
+			<mx:VBox width="22%" height="5%" horizontalAlign="left">
+			<mx:Label text="Assessment and "/>
+			</mx:VBox>
+				
+			<mx:VBox width="70%" height="20%">
+			
+				<mx:HBox width="100%" height="5%" horizontalAlign="left">
+					<mx:RadioButton label="NE" name="chkne" selected="true"/>
+					<mx:RadioButton label="LE" name="chkle"/>
+					<mx:RadioButton label="E" name="chke"/>
+					<mx:RadioButton label="ClrE" name="chkctre"/>
+					<mx:RadioButton label="CompE" name="chkcompe"/>
+				</mx:HBox>
+				
+				<mx:HBox width="100%" height="5%" horizontalAlign="left">				
+					<mx:RadioButton label="NE" name="chkne" selected="true"/>
+					<mx:RadioButton label="LE" name="chkle"/>
+					<mx:RadioButton label="E" name="chke"/>
+					<mx:RadioButton label="ClrE" name="chkctre"/>
+					<mx:RadioButton label="CompE" name="chkcompe"/>
+				</mx:HBox>
+				
+				<mx:HBox width="20%" height="5%" horizontalAlign="left">				
+					<mx:RadioButton label="NE" name="chkne"/>
+					<mx:RadioButton label="LE" name="chkle"/>
+					<mx:RadioButton label="E" name="chke"/>
+					<mx:RadioButton label="ClrE" name="chkctre"/>
+					<mx:RadioButton label="CompE" name="chkcompe"/>
+				</mx:HBox> 
+				
+			</mx:VBox>
+
+		</mx:HBox>
+
+		<mx:HBox height="1%" width="1%">
+			<mx:Spacer height="100%" width="100%"/>
+		</mx:HBox>		
+		
+		<mx:HBox width="100%" height="5%" fontSize="11" fontWeight="bold" color="#000000">
+		
+			<mx:Spacer width="5%"/>
+			
+			<mx:VBox width="23%" height="5%" horizontalAlign="left">
+			<mx:Label text="Strengths "/>
+			</mx:VBox>
+			
+			<mx:VBox width="75%" height="100%" horizontalAlign="left">
+				<mx:TextArea width="80%" height="35%"/>
+			</mx:VBox>
+			
+		</mx:HBox>
+		
+		<mx:HBox width="1%" height="1%">
+			<mx:Spacer width="100%" height="100%"/>
+		</mx:HBox>	
+	
+		<mx:HBox width="100%" height="5%" fontSize="11" fontWeight="bold" color="#000000">
+			
+			<mx:Spacer width="5%"/>
+			
+			<mx:VBox width="25%" height="5%" horizontalAlign="left">
+			<mx:Label text="Areas for Improvement "/>
+			</mx:VBox>
+			
+			<mx:VBox width="80%" height="100%" horizontalAlign="left">
+				<mx:TextArea width="80%" height="35%"/>
+			</mx:VBox>
+			
+		</mx:HBox> 
+		
+		<mx:HBox width="1%" height="1%">
+			<mx:Spacer width="100%" height="100%"/>
+		</mx:HBox>
+		
+	</mx:VBox>		
+
+</mx:Panel>

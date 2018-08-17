@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Panel styleName="ListmenuContainer" xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute"
+	 width="100%" height="100%" xmlns:com="src.com.selfassessment.view.*" 
+	 borderStyle="none">
+	<mx:VBox name="topvbox" width="100%" height="100%">
+	<mx:HBox name="hbox1" width="30%" height="100%"/>
+	<mx:Text text="Under Construction " width="40%" height="100%"/> 
+	<mx:HBox name="hbox1" width="30%" height="100%"/> 
+	</mx:VBox>
+</mx:Panel>

@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas styleName="Childpanelstyle" creationComplete="init()" xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" horizontalScrollPolicy="off">
+
+<mx:Style source="src/com/selfassessment/view/assets/Styles.css"/>	
+
+<mx:Script>
+	<![CDATA[
+		import mx.printing.FlexPrintJobScaleType;
+		import mx.printing.FlexPrintJob;
+		import mx.events.ListEvent;
+		import mx.core.Application;
+		import mx.controls.Alert;
+		import src.com.selfassessment.controller.TeamController;
+		public function viewDoc(event:ListEvent):void{
+			if(event.columnIndex == 3){
+				
+					//To Open
+					
+					var documentPath:URLRequest;
+					var fileRetrievePath:String=Application.application.serverPath;
+					if(myDataGrid.selectedItem.type == "Enabler"){
+						documentPath = new URLRequest(fileRetrievePath +"/Document/Enabler/" + myDataGrid.selectedItem.enablerdocument.toString());
+					}
+					else{
+						documentPath = new URLRequest(fileRetrievePath + "/Document/Result/" + myDataGrid.selectedItem.resultdocument.toString());
+					}
+        			navigateToURL(documentPath,"_blank");
+        			
+        			//To Download 
+        			
+        			/* var downloadFile:FileReference =  new FileReference;
+					var documentPath:URLRequest;
+					var fileRetrievePath:String=Application.application.serverPath;
+					if(myDataGrid.selectedItem.type == "Enabler"){
+						var filename:String = fileRetrievePath +"/Document/Enabler/" + myDataGrid.selectedItem.enablerdocument.toString();
+					}
+					else{
+						var filename:String = fileRetrievePath + "/Document/Result/" + myDataGrid.selectedItem.resultdocument.toString();
+					}
+				    documentPath = new URLRequest(filename);
+				    downloadFile.download(documentPath); */
+				}
+		}
+		private function search():void{
+			var CriteriaService:TeamController = new TeamController();
+			CriteriaService.SelectAttachedDocReport(txtWord.text,function(resultArr:Array):void{
+				if(resultArr.length==0){
+					Alert.show("No records found");
+					
+				}
+				myDataGrid.dataProvider=resultArr;
+				myDataGrid.rowCount=resultArr.length+1;
+			});
+		}
+		private function init():void{
+			if(Application.application.language=="en_US"){
+				myDataGrid.setStyle('textAlign','left');
+			}
+			else{
+				myDataGrid.setStyle('textAlign','right');	
+			}
+		}
+		private function resizeImg():void{
+			this.width=16;
+			this.height = 16;
+			this.setStyle('horizontalAlign','center');
+			this.setStyle('verticalAlign','middle');
+		}
+		private function exportToExcel():void{
+			if(myDataGrid.rowCount==0){
+				Alert.show("No Records found to export");
+				return;
+			}
+			var excelString:String=DataGridUtil.exportDGToClipboard(myDataGrid,false,false);
+			var fileRef:FileReference=new FileReference();
+			fileRef.save(excelString,"Attachment_Document.xls");
+		}
+		private function printAttachedDocReport():void{
+			var printJob:FlexPrintJob=new FlexPrintJob();
+			if(!printJob.start())return;
+			printVBox.width=printJob.pageWidth;
+			printVBox.height=printJob.pageHeight;
+			myPrintDataGrid.height = printVBox.height-((printVBox.height/10)*2);
+			printJob.addObject(printVBox,FlexPrintJobScaleType.SHOW_ALL);
+			while(myPrintDataGrid.validNextPage){
+				myPrintDataGrid.nextPage();
+				printJob.addObject(printVBox,FlexPrintJobScaleType.SHOW_ALL);
+			} 
+			printJob.send();
+			printVBox.width=0;
+			printVBox.height=0;  
+			 
+		}
+	]]>
+</mx:Script>
+
+		
+		<mx:VBox id="mainVBox" fontSize="13"  width="100%" height="100%" horizontalAlign="center" horizontalScrollPolicy="off"> 
+			<mx:Spacer/>	
+			<mx:Spacer/>
+			<mx:HBox width="95%" horizontalAlign="center">
+			<mx:Spacer width="20%"/>
+				<mx:Label text="Search by a word"/>
+				<mx:TextInput id="txtWord" width="20%"/>
+				<mx:Button label="@Resource(bundle='myResources', key='search')" click="search()"/>
+			</mx:HBox>
+			<mx:Spacer/>
+			<mx:VBox width="95%" height="80%" fontSize="12" verticalGap="0">
+				<mx:DataGrid id="myDataGrid" styleName="ReportDataGridHeaderStyle" wordWrap="true" itemClick="viewDoc(event)" resizableColumns="true" width="100%" height="100%"  allowMultipleSelection="false" variableRowHeight="true" draggableColumns="false">
+					<mx:columns>
+						<mx:DataGridColumn headerText="Criterion Part" dataField="criterionPartShortDescription" width="120">
+							<mx:itemRenderer>
+								<mx:Component>
+									<mx:Text text="{data.criterionPartShortDescription}" paddingLeft="5"/>
+								</mx:Component>
+							</mx:itemRenderer>
+						</mx:DataGridColumn>
+						<mx:DataGridColumn headerText="Title" dataField="title" width="200">
+							<mx:itemRenderer>
+								<mx:Component>
+									<mx:Text text="{data.title}" paddingLeft="5"/>
+								</mx:Component>
+							</mx:itemRenderer>
+						</mx:DataGridColumn>
+						<mx:DataGridColumn headerWordWrap="true" id="doc" wordWrap="true" headerText="@Resource(bundle='myResources', key='document')" dataField="enablerdocument">
+							
+							<mx:itemRenderer>
+								<mx:Component>
+									<mx:Text text="{data.enablerdocument}"  paddingLeft="5"/>
+								</mx:Component>
+							</mx:itemRenderer>
+						
+						</mx:DataGridColumn>
+						
+						<mx:DataGridColumn headerText="Download" dataField="delete" width="80">
+							<mx:itemRenderer>
+	                    		<mx:Component> 
+			                        <mx:Image scaleContent="false" horizontalAlign="center" verticalAlign="middle" source="@Embed('assets/Download_file.png')"/> 
+	                    		</mx:Component> 
+	                		</mx:itemRenderer> 
+						</mx:DataGridColumn>
+						
+		        	</mx:columns>
+			    </mx:DataGrid>
+			 <mx:Spacer/>
+			 <mx:HBox width="{myDataGrid.width}" verticalAlign="middle" height="10%" horizontalAlign="right">
+			 	<mx:Button id="btnExportToExcel" label="Export To Excel" click="exportToExcel()"/>
+			 	<mx:Button id="btnPrint" label="Print" click="printAttachedDocReport()"/>
+			</mx:HBox>
+		</mx:VBox>
+		<mx:VBox id="printVBox" paddingLeft="10" paddingTop="10" paddingRight="10" paddingBottom="10" horizontalAlign="center">
+			<mx:Label text="Attached Document Report"/>
+			<mx:PrintDataGrid id="myPrintDataGrid" wordWrap="true" variableRowHeight="true" draggableColumns="false">
+				<mx:columns>
+					<mx:DataGridColumn headerText="Criterion Part" dataField="criterionPartShortDescription" width="120"/>
+					<mx:DataGridColumn headerText="Title" dataField="title" width="200"/>
+					<mx:DataGridColumn headerText="Document" dataField="enablerdocument"/>
+				</mx:columns>
+		    </mx:PrintDataGrid>
+		</mx:VBox>
+		</mx:VBox>
+	
+</mx:Canvas>

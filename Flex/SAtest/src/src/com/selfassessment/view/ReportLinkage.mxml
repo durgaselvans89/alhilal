@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas styleName="Childpanelstyle" xmlns:mx="http://www.adobe.com/2006/mxml" height="100%" creationComplete="init()" width="100%" horizontalScrollPolicy="off">
+
+<mx:Style source="src/com/selfassessment/view/assets/Styles.css"/>	
+
+<mx:Script>
+	<![CDATA[
+		
+		import src.com.selfassessment.model.EnablerDocumentDO;
+		import mx.core.ByteArrayAsset;
+		import com.as3xls.xls.ExcelFile;
+		import com.as3xls.xls.Sheet;
+		import com.as3xls.xls.Cell;
+		import mx.controls.dataGridClasses.DataGridColumn;
+		import mx.core.Application;
+		import mx.printing.FlexPrintJobScaleType;
+		import mx.printing.FlexPrintJob;
+		import mx.controls.Alert;
+		import mx.printing.*;
+        import mx.collections.ArrayCollection;
+        import mx.printing.PrintAdvancedDataGrid;
+		import com.boyzoid.PagableArrayCollection.PagableArrayCollection;
+		import src.com.selfassessment.view.*;
+		//import flash.errors.EOFError
+		
+		
+            [Bindable]
+            private var fields:Array = new Array(); 
+           	private var sheet:Sheet;
+       		
+				
+		public var myPageableArrCol:PagableArrayCollection=new PagableArrayCollection();
+		
+//		 	private function doPrint():void {
+//                var printJob:FlexPrintJob = new FlexPrintJob();
+//                var linkageReport:LinkageReportPrint=new LinkageReportPrint();
+//                addChild(linkageReport);
+//                linkageReport.myDataGrid.dataProvider=myDataGrid.dataProvider;
+//                linkageReport.myDataGridResult.dataProvider=myDataGridResult.dataProvider; 
+//                if (printJob.start() == false) {                
+//                   removeChild(linkageReport);
+//                   return;
+//                }
+//                printJob.addObject(linkageReport,"ShowAll");
+//              	printJob.send();
+//			}
+                    
+          /*  private function doPrint():void {
+                var printJob:FlexPrintJob = new FlexPrintJob();
+                var printADG:PrintAdvancedDataGrid = new PrintAdvancedDataGrid();
+                //printADG.setStyle("horizontalCenter","true");
+                printADG.includeInLayout = false;
+                printADG.source = myDataGrid;
+				addChild(printADG);
+               var printADGResult:PrintAdvancedDataGrid = new PrintAdvancedDataGrid();
+                printADGResult.includeInLayout = false;
+                printADGResult.source = myDataGridResult;
+				addChild(printADGResult);
+				 if (printJob.start() == false) {                
+                   removeChild(printADG);
+                   removeChild(printADGResult);
+                    return;
+                }
+                printJob.addObject(printADG, "ShowAll");
+				printJob.addObject(printADGResult, "ShowAll");
+				printJob.send();
+				removeChild(printADG);
+				removeChild(printADGResult);
+            } */
+            private function init():void{
+            	if(Application.application.language=="en_US"){
+            		mainVBox.styleName='ApplyFontSizeEn';
+            		myDataGrid.setStyle('textAlign','left');
+            		myDataGridResult.setStyle('textAlign','left');
+            	}
+            	else{
+            		mainVBox.styleName='ApplyFontSizeAr';
+            		myDataGrid.setStyle('textAlign','right');
+            		myDataGridResult.setStyle('textAlign','right');
+            	}
+            }
+            
+            public var enablerRowCount:int;
+            
+			private function exportToExcel():void{
+				
+          		var index:int=0;
+				sheet = new Sheet();
+				
+	          	fields = new Array();
+	          	sheet.name="Enabler";
+	          	var dataProviderEnablerCollection:ArrayCollection=new ArrayCollection(); 
+          		var dataProviderResultCollection:ArrayCollection=new ArrayCollection();   
+				
+				var columns:Array=new Array();  
+				
+				var fieldheading:String;
+				
+				dataProviderEnablerCollection=new ArrayCollection();
+	          	dataProviderEnablerCollection = myDataGrid.dataProvider as ArrayCollection;  
+	          	
+	          	dataProviderResultCollection=new ArrayCollection();
+	          	dataProviderResultCollection = myDataGridResult.dataProvider as ArrayCollection;  
+	          	
+	           	enablerRowCount= dataProviderEnablerCollection.length;  
+	           	columns = myDataGrid.columns; 
+	           	
+	           sheet.resize((dataProviderEnablerCollection.length + dataProviderResultCollection.length)+ 2,myDataGrid.columnCount);
+	           	sheet.setCell(0, 0,"Linkage Report - Enabler");
+	           	
+	           	var j:int = 1;  
+	         	for(var i:int=0;i<columns.length;i++){
+	         		if (columns[i]["dataField"].toString() != "prototype"){
+						fields.push(columns[i]["dataField"].toString());  
+	               		sheet.setCell(1, j,columns[i]["headerText"].toString());
+	               		
+					}	
+					j++;
+	         	}
+	         	
+	        	for(var r:int=0; r < enablerRowCount; r++){  
+					var record:Object = dataProviderEnablerCollection.getItemAt(r);  
+	                insertRecordInSheet(r+2,sheet,record);
+				}
+	         
+	          	
+	          	//Next sheet
+	          	columns=new Array();  
+	            var resultRowCount:int;
+	            resultRowCount=dataProviderResultCollection.length;
+	          	 
+				
+	          
+	           columns = myDataGridResult.columns;  
+	      	  
+	  		 	
+	  		 	fields=new Array();
+	  		 	sheet.setCell(enablerRowCount+2, 0,"Linkage Report - Result");
+	  		 	
+	  		 	j=1;
+	         	for(var i:int=0;i<columns.length;i++){
+	         		if (columns[i]["dataField"].toString() != "prototype"){
+						fields.push(columns[i]["dataField"].toString());  
+	               		sheet.setCell(enablerRowCount+3, j,columns[i]["headerText"].toString());
+	               		
+					}	
+					j++;
+	         	}
+	        	
+	         	var rCount:int=enablerRowCount+4;
+	        	for(var r:int=0; r < resultRowCount; r++){  
+					var record:Object = dataProviderResultCollection.getItemAt(r);  
+					
+	                insertRecordInSheet(rCount+r,sheet,record);
+				}
+	     
+	          	var xls:ExcelFile = new ExcelFile(); 
+	          	xls.sheets.addItem(sheet); 
+	 		  	var bytes:ByteArray = xls.saveToByteArray();  
+	          	var fr:FileReference=new FileReference();
+	          	fr.save(bytes,"LinkageReport.xls"); 
+		}
+		
+		
+		
+		  
+		private function insertRecordInSheet(row:int,sheet:Sheet,record:Object):void{  
+         	var i:int = 1;  
+            for each(var field:String in fields){
+            	if (record[field] != null){
+            		sheet.setCell(row,i, record[field]);
+            	}
+            	i++;  
+            }
+            return;   
+		}
+//		private function doPrint():void{
+//				var printJob:FlexPrintJob = new FlexPrintJob();
+//				if (printJob.start() != true) return;
+//				printJob.addObject(this,FlexPrintJobScaleType.SHOW_ALL);
+//				printJob.send();
+//
+//		}
+//		 private function JumptoPage():void{
+//        	if(jumpPage.text != ""  && Number(jumpPage.text) != 0){
+//			 	if(Number(jumpPage.text)>myPageableArrCol.pages){
+//			 		Alert.show("No Records Available");
+//			 	}
+//			 	else{
+//	        		myPageableArrCol.currentPage = Number(jumpPage.text);
+//	    		}
+//    		}
+	]]>
+</mx:Script>
+
+		<mx:VBox styleName="ApplyFontSize" id="mainVBox" width="100%" height="5%">
+		<!--	<mx:HBox width="90%" horizontalAlign="right">
+				<mx:Label text="Print"  fontSize="9" fontWeight="bold"/>
+				
+			</mx:HBox>-->
+		</mx:VBox>
+		<mx:VBox width="100%" horizontalAlign="center" horizontalScrollPolicy="off"> 
+			<mx:Spacer/>
+			<mx:HBox width="95%" horizontalAlign="center">
+				<mx:Label text="@Resource(bundle='myResources', key='linkageReport')"  fontWeight="bold"/>
+			</mx:HBox>
+			
+			<mx:HBox width="95%">
+				<mx:Label text="@Resource(bundle='myResources', key='enablerComTitle')"  fontWeight="bold"/>
+				
+			</mx:HBox>
+			<mx:AdvancedDataGrid wordWrap="true" sortableColumns="false" variableRowHeight="true"  styleName="ReportDataGridHeaderStyle" id="myDataGrid" width="95%">
+				<mx:columns>
+				
+					<mx:AdvancedDataGridColumn width="80" headerText="@Resource(bundle='myResources', key='gridPart')" dataField="criteriaID"/>
+					<mx:AdvancedDataGridColumn width="200" wordWrap="true" headerText="Approach title" dataField="approachTitle" />
+					<mx:AdvancedDataGridColumn width="200" wordWrap="true" headerText="Owner of approach" dataField="owner" />
+					<mx:AdvancedDataGridColumn width="200" wordWrap="true"  headerText="@Resource(bundle='myResources', key='approachlinkEnabler')" dataField="approachtolink"/>
+					<mx:AdvancedDataGridColumn headerWordWrap="true" width="200" wordWrap="true" headerText="@Resource(bundle='myResources', key='otherApproachLinkEnabler')" dataField="otherapproachlinkto"/>
+				</mx:columns>
+			</mx:AdvancedDataGrid>
+			<mx:Spacer/>
+		    
+		   <mx:HBox width="95%">
+				<mx:Label text="@Resource(bundle='myResources', key='resultComTitle')"  fontWeight="bold"/>
+			</mx:HBox>
+			<mx:AdvancedDataGrid wordWrap="true" sortableColumns="false" variableRowHeight="true"  styleName="ReportDataGridHeaderStyle" id="myDataGridResult" width="95%">
+				<mx:columns>
+					<mx:AdvancedDataGridColumn width="80" headerText="@Resource(bundle='myResources', key='gridPart')" dataField="criteriaID"/>
+					<mx:AdvancedDataGridColumn width="200" wordWrap="true" headerText="Approach title" dataField="result_name"/>
+					<mx:AdvancedDataGridColumn width="200" wordWrap="true" headerText="Owner of result" dataField="owner" />
+					<mx:AdvancedDataGridColumn width="200" wordWrap="true"  headerText="@Resource(bundle='myResources', key='approachlinkResult')" dataField="approachtolink"/>
+					<mx:AdvancedDataGridColumn width="200" headerWordWrap="true" wordWrap="true" headerText="@Resource(bundle='myResources', key='otherApproachLinkResult')" dataField="otherapproachlinkto"/>
+				</mx:columns>
+			</mx:AdvancedDataGrid>
+			
+		    <mx:Spacer/>
+		   
+		    <mx:HBox width="95%" horizontalAlign="right">
+				<mx:Button id="btnExportToExcel" label="Export to Excel" click="exportToExcel()"/>
+			</mx:HBox>
+			 <mx:Spacer/>
+		</mx:VBox>
+		 
+</mx:Canvas>
+
+

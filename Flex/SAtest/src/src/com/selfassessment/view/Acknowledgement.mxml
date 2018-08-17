@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml"  xmlns:goldhold="goldhold.controls.*"  xmlns:s="library://ns.adobe.com/flex/spark"
+	   y="{(Application.application.height/2)-(this.height/2)}"
+	 x="{(Application.application.width/2)-(this.width/2)}" horizontalScrollPolicy="off" width="800" height="250">
+	<mx:Script>
+		<![CDATA[
+			import mx.managers.CursorManager;
+			import org.osmf.media.URLResource;
+			import mx.managers.PopUpManager;
+			import mx.core.Application;
+			
+			private function redirectUrl():void{
+				var url:URLRequest = new URLRequest("http://www.efqm.org");
+				navigateToURL(url,"_blank");			
+			}
+			
+		]]>
+	</mx:Script>
+
+
+	
+	
+	<mx:VBox borderStyle="solid" height="100%" verticalGap="0" borderThickness="3" shadowDistance="8" shadowDirection="right" dropShadowEnabled="true" dropShadowColor="#000000" borderColor="#636e83" width="100%" horizontalAlign="center" verticalAlign="top" styleName="ApplyFontSize" backgroundColor="white">
+		<mx:Canvas width="100%" useHandCursor="true" buttonMode="true" mouseDown="{this.startDrag()}" mouseUp="{this.stopDrag()}" height="25" styleName="panel1filled"  borderSides="left,right,top" cornerRadius="3" borderStyle="none">
+			<mx:Label left="10" fontWeight="bold"  id="lblTitle" text="Acknowledgement" color="#FFFFFF" fontSize="14"/>
+			<mx:Image toolTip="Close" right="2" top="2" source="@Embed('assets/close.png')" useHandCursor="true" buttonMode="true"  click="{PopUpManager.removePopUp(this);CursorManager.removeBusyCursor();}"/>
+		</mx:Canvas>
+		
+		<mx:VBox width="100%" fontSize="13" height="100%" horizontalAlign="center" verticalAlign="middle"> 
+			<mx:Spacer/>	
+			<mx:VBox width="95%" height="90%">
+				<mx:Spacer height="5%"/>
+				<mx:VBox width="100%" height="35%">
+					<mx:Text width="100%" height="100%" text="We kindly acknowledge the excellence model used in this application is the sole property of European Foundation Quality model (EFQM) 2010" fontSize="14" fontWeight="bold"/>
+				</mx:VBox>
+				<mx:HBox width="100%" horizontalGap="0" height="30%">
+					<mx:Text text="For more details visit:"/>
+					<mx:Text text="www.efqm.org" color="blue" useHandCursor="true" buttonMode="true" mouseChildren="false" click="redirectUrl()"/>
+				</mx:HBox>
+				
+				<mx:HBox width="100%" horizontalGap="0" height="30%">
+					<mx:Spacer height="5%"/>
+					<mx:Text text="Please note:" fontWeight="bold"/>	
+					<mx:Text text="This application will only be sold with genuine EFQM Criteria documents to all licensed users."/>
+				</mx:HBox>
+				
+			</mx:VBox>
+		</mx:VBox>	
+			
+		
+		
+	</mx:VBox>
+
+</mx:Canvas>
+
+

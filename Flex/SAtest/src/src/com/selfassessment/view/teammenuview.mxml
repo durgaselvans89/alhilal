@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:s="library://ns.adobe.com/flex/spark" xmlns:components="com.selfassessment.view.*" width="100%" height="100%">
+
+     <mx:Script>
+        <![CDATA[
+        
+            import mx.events.ListEvent;
+            import com.selfassessment.view.ContentPage;
+
+			//set image smoothing so image looks better when transformed.
+			private function smoothImage(ev:Event):void{
+                var bmp:Bitmap = ev.target.content as Bitmap;
+                bmp.smoothing = true;
+            }
+            
+        ]]>
+    </mx:Script>
+    
+	<mx:HBox id="search" label="Search" width="100%" height="100%" fontWeight="bold">
+
+	<mx:Image id="embededImage" creationComplete="smoothImage(event);"/>
+	<mx:Label text="" id="lbl_excellence" fontSize="16" fontWeight="bold"  color="0x74012" horizontalCenter="center"/>
+ 	<mx:Spacer width="100%" height="2%"/>
+ 	
+ 	<mx:VBox width="5%" borderColor="0xACACAC" borderThickness="0" borderStyle="solid" horizontalAlign="center">
+	<mx:Image id="embededImage1" source="@Embed('images/help_icon copy.png')" creationComplete="smoothImage(event);" click="dispatchEvent( new Event( Event.CHANGE ) );"/>
+ 	<mx:Text color="0x323232" text="Admin" fontSize="10"/>
+ 	</mx:VBox>
+ 
+	<mx:VBox width="5%" borderColor="0xACACAC" borderThickness="0" borderStyle="solid" horizontalAlign="center">
+ 	<mx:Image id="embededImage2" source="@Embed('images/Repory.png')" creationComplete="smoothImage(event);"/>
+	<mx:Text color="0x323232" text="Excellence" fontSize="10"/>
+	</mx:VBox>
+	
+	<mx:VBox width="5%" borderColor="0xACACAC" borderThickness="0" borderStyle="solid" horizontalAlign="center">
+	<mx:Image id="embededImage3" source="@Embed('images/home_2.png')" creationComplete="smoothImage(event);"/> 
+	<mx:Text color="0x323232" text="Home" fontSize="10"/>
+	</mx:VBox>
+
+</mx:HBox>
+ 
+ </mx:Canvas>
